@@ -1,6 +1,7 @@
 const mqtt = require('mqtt');
 const ldrService = require('../services/ldrService');
 const dht11Service = require('../services/dht11Service');
+const bmp180Service = require('../services/bmp180Service');
 const { broadcast } = require('./webSocket');
 
 //const BROKER_URL = 'mqtt://localhost:1883'; 
@@ -10,6 +11,7 @@ const BROKER_URL = `mqtts://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`;
 const TOPICS = [
     'smartcity/streetlight1',
     'smartcity/dht11',
+    'smartcity/bmp180',
     // add new sensors here later
     // 'sensors/temperature',
     // 'sensors/motion',
@@ -44,6 +46,10 @@ const init = () => {
         if (topic === 'smartcity/dht11') {
             dht11Service.saveReading(data); 
             broadcast('dht11', data);       
+        }
+        if (topic === 'smartcity/bmp180') {
+            bmp180Service.saveReading(data);
+            broadcast('bmp180', data);
         }
     });
 
