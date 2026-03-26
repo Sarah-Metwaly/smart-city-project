@@ -27,13 +27,13 @@ const dht11Schema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    timeStamp : {
+    timestamp : {
         type: Date,
         default: Date.now
     }
 });
 
-dht11Schema.index({ timeStamp: 1 }, { expireAfterSeconds: 172800 });
+dht11Schema.index({ timestamp: 1 }, { expireAfterSeconds: 172800 });
 
 const DHT11 = mongoose.model('DHT11' ,dht11Schema);
 module.exports = DHT11;

@@ -53,12 +53,14 @@ const calculateSensorData = async (model, sensorId, startTime, endTime, costPerK
 
 const loopThroughSensorIds = async (model, startTime, endTime, costPerKwh, save) => {
     const sensorIds = await model.distinct('sensor_id');
+    console.log(`Processing ${model.modelName} for sensors: `, sensorIds);
     let totalActivePower = 0;
     let totalEnergy = 0;
     let totalCost = 0;
     let totalAvgPower = 0;
     for (const sensorId of sensorIds) {
         const sensorData = await calculateSensorData(model, sensorId, startTime, endTime, costPerKwh);
+        console.log(`Sensor: ${sensorId}, Active Power: ${sensorData.activePower}, Avg Power: ${sensorData.avgPower}, Energy: ${sensorData.energy}, Cost: ${sensorData.cost}`);
         if(save){
             await saveSensorSummary(model.modelName, sensorId, startTime, sensorData.avgPower, sensorData.energy, sensorData.cost);
         }
@@ -181,6 +183,8 @@ exports.getTodaySummary = async () =>{
     today.setHours(0, 0, 0, 0);
 
     const liveTime= new Date();
+    console.log("Today: ", today);
+    console.log("Live Time: ", liveTime);
 
     // Get cost per kWh from settings
     const settings = await settingsModel.findOne();
@@ -190,6 +194,10 @@ exports.getTodaySummary = async () =>{
     const dht11Summary = await loopThroughSensorIds(dht11Model, today, liveTime, costPerKwh , false);
     const bmp180Summary = await loopThroughSensorIds(bmp180Model, today, liveTime, costPerKwh , false);
     const mq135Summary = await loopThroughSensorIds(mq135Model, today, liveTime, costPerKwh , false);
+    console.log("LDR Summary: ", ldrSummary);
+    console.log("DHT11 Summary: ", dht11Summary);
+    console.log("BMP180 Summary: ", bmp180Summary);
+    console.log("MQ135 Summary: ", mq135Summary);
 
     return {
         date: liveTime.toISOString().split('T')[0],
