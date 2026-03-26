@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+//changing file name to MQ135Model.js to avoid confusion with the service file and to follow naming conventions for models
 
 const MQ135Schema = new mongoose.Schema({
     sensor_id: {
