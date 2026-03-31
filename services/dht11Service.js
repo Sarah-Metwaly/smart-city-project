@@ -15,7 +15,7 @@ exports.getLatestReadings = async () =>{
     const latestReadings = await DHT11.aggregate([
         {
             $sort : {
-                timeStamp : -1
+                timestamp : -1
             }
         },
         {
@@ -25,7 +25,7 @@ exports.getLatestReadings = async () =>{
                 humidity : { $first : "$humidity" },
                 status : { $first : "$status" },
                 power : { $first : "$power" },
-                timeStamp : { $first : "$timeStamp" }
+                timestamp : { $first : "$timestamp" }
             }
         }
     ]);

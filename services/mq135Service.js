@@ -20,7 +20,7 @@ exports.getLatestReadings = async () =>{
     const latestReadings = await mq135Model.aggregate([
         {
             $sort : {
-                timeStamp : -1      
+                timestamp : -1      
             }
         },
         {

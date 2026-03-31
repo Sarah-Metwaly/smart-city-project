@@ -16,7 +16,7 @@ exports.getLatestReadings = async () =>{
     const latestReadings = await BMP180.aggregate([
         {
             $sort : {
-                timeStamp : -1
+                timestamp : -1
             }
         },
         {
@@ -27,7 +27,7 @@ exports.getLatestReadings = async () =>{
                 altitude : { $first : "$altitude" },
                 status : { $first : "$status" },
                 power : { $first : "$power" },
-                timeStamp : { $first : "$timeStamp" }
+                timestamp : { $first : "$timestamp" }
             }
         }
     ]);
