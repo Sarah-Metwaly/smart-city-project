@@ -25,7 +25,7 @@ exports.getSensorStatus = async () => {
             }
         }
     ]);
-    return {"total": TotalNumber.length , "on" : TotalNumber.filter(sensor => sensor.status === 'ON').length , "off" : TotalNumber.filter(sensor => sensor.status === 'OFF').length , "faulty" : TotalNumber.filter(sensor => sensor.status === 'Faulty').length};
+    return {"total": TotalNumber.length , "on" : TotalNumber.filter(sensor => sensor.status === 'ON').length , "off" : TotalNumber.filter(sensor => sensor.status === 'OFF').length , "FAULTY" : TotalNumber.filter(sensor => sensor.status === 'FAULTY').length};
 }; 
 
 exports.getTotalActiveLoad = async () => {
