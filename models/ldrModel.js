@@ -15,7 +15,7 @@ const ldrSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['ON', 'OFF', 'Faulty']
+        enum: ['ON', 'OFF', 'FAULTY']
     },
     power: {
         type: Number,
