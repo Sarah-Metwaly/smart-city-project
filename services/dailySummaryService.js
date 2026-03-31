@@ -38,12 +38,21 @@ const calculateSensorData = async (model, sensorId, startTime, endTime, costPerK
         {
             $group: {
                 _id: "$sensor_id",
+                status: { $first: "$status" },
                 active_power: { $first: "$power" },
                 avg_power: { $avg: "$power" }
             }
         }
     ]);
-    const activePower = readings[0]?.active_power || 0;
+    let activePower = 0;
+    console.log(`Readings for sensor ${sensorId}: `, readings[0].status);
+    if(readings[0].status == 'OFF'){
+        activePower = 0;
+        
+    }
+    else{
+        activePower = readings[0]?.active_power || 0;
+    }
     const avgPower = readings[0]?.avg_power || 0;
     const hours = (endTime - startTime) / (1000 * 60 * 60);
     const energy = avgPower * hours / 1000;
