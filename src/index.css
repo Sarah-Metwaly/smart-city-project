@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&display=swap');
+
+@theme {
+  --color-aman-dark: #182B31;
+  --color-aman-teal: #1E3A46;
+  --color-aman-blue: #58717D;
+  --color-aman-light: #B4C3CC;
+  --color-aman-black: #0A0E14;
+  --color-aman-white: #F4FEFE;
+
+  --font-inter: "Inter", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+}
+html {
+  scroll-behavior: smooth;
+}

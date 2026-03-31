@@ -1,0 +1,7 @@
+# Placeholder to preserve this directory in Git
+# Domain: Smart Energy Optimization
+# Planned services / logic:
+#   - powerConsumptionCalculator.ts      → Σ (Voltage × Current × Brightness ratio) per LED
+#   - pwmDimmingLogic.ts                 → 80% default at night, 100% on motion/traffic
+#   - dailyAverageAggregator.ts          → calculate & persist daily avg power consumption
+#   - sensorEventProcessor.ts            → LDR + Motion sensor rules
