@@ -58,7 +58,7 @@ const MQ135Schema = new mongoose.Schema({
     }
 });
 
-MQ135Schema.index({ timestamp: 1 }, { expireAfterSeconds: 172800 });
+MQ135Schema.index({ timestamp: 1 }, { expireAfterSeconds: 864000 });
 
 const MQ135 = mongoose.model('MQ135' ,MQ135Schema);
 module.exports = MQ135;

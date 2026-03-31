@@ -37,7 +37,7 @@ const bmp180Schema = new mongoose.Schema({
     }
 });
 
-bmp180Schema.index({ timestamp: 1 }, { expireAfterSeconds: 172800 });
+bmp180Schema.index({ timestamp: 1 }, { expireAfterSeconds: 864000 });
 
 const BMP180 = mongoose.model('BMP180' ,bmp180Schema);
 module.exports = BMP180;

@@ -33,7 +33,7 @@ const dht11Schema = new mongoose.Schema({
     }
 });
 
-dht11Schema.index({ timestamp: 1 }, { expireAfterSeconds: 172800 });
+dht11Schema.index({ timestamp: 1 }, { expireAfterSeconds: 864000 });
 
 const DHT11 = mongoose.model('DHT11' ,dht11Schema);
 module.exports = DHT11;

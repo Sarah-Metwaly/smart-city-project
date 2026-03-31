@@ -28,8 +28,8 @@ const ldrSchema = new mongoose.Schema({
     }
 });
 
-//We set an index on the timestamp , So that any document older than 48 hours will be deleted.
-ldrSchema.index({ timestamp: 1 }, { expireAfterSeconds: 172800 }); 
+//We set an index on the timestamp , So that any document older than 24 hours will be deleted.
+ldrSchema.index({ timestamp: 1 }, { expireAfterSeconds: 864000 }); 
 
 const LDR = mongoose.model('LDR', ldrSchema);
 module.exports = LDR;
