@@ -1,0 +1,7 @@
+# Placeholder to preserve this directory in Git
+# Domain: Fire Safety
+# Planned services:
+#   - fireSmokeDetectionProcessor.ts     → handle AI inference results
+#   - alertSeverityClassifier.ts         → Critical / High based on flame/smoke/temp
+#   - videoClipRetriever.ts              → fetch associated video clip
+#   - incidentMapMarkerGenerator.ts
