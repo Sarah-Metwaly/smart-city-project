@@ -21,14 +21,26 @@ const sendProdError = (err,res)=>{ //In production mode, I want to send only the
     }
 }
 
+// module.exports = (err, req, res, next) => {
+//     err.statusCode = err.statusCode || 500;
+//     err.status = err.status || 'error';
+    
+//     if(process.env.NODE_ENV.trim() === 'development') {
+//         sendDevError(err, res);
+//     }
+//     else{
+//         sendProdError(err, res);
+//     }
+
+// };
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
-    if(process.env.NODE_ENV.trim() === 'development') {
+    const mode = String(process.env.NODE_ENV || 'development').trim();
+
+    if (mode === 'development') {
         sendDevError(err, res);
-    }
-    else{
+    } else {
         sendProdError(err, res);
     }
-
 };
