@@ -1,18 +1,106 @@
+// const { z } = require('zod');
+
+// // 1. تعريف الـ Location Schema المشترك
+// const locationSchema = z.object({
+//   lat: z.number().optional(), // اختياري لأننا ممكن نبعت coordinates مصفوفة
+//   lng: z.number().optional(),
+//   name: z.string({ required_error: "Location name is required" }),
+//   zone: z.string().optional(),
+//   coordinates: z.array(z.number()).length(2).optional() // [lng, lat]
+// });
+
+// // 2. تعريف الـ Schema لكل نوع بلاغ
+// const incidentSchema = z.discriminatedUnion("type", [
+  
+//   // بلاغ الحريق (IOT_FIRE / FIRE_DETECTION)
+//   z.object({
+//     type: z.literal("FIRE_DETECTION"),
+//     sensorId: z.string().optional(),
+//     location: locationSchema,
+//     readings: z.object({
+//       temp: z.number().optional(),
+//       humidity: z.number().optional(),
+//       gasLevel: z.number().optional(),
+//       flameDetected: z.boolean().optional()
+//     }).optional(),
+//     priority: z.string().optional(), // سمحنا بوجودها عشان Postman ميضربش
+//     frameUrl: z.string().url().optional()
+//   }),
+
+//   // بلاغ السلاح (AI_WEAPON / WEAPON_DETECTION)
+//   z.object({
+//     type: z.literal("WEAPON_DETECTION"),
+//     cameraId: z.string(),
+//     location: locationSchema,
+//     confidence: z.number().min(0).max(1),
+//     detections: z.array(z.any()).optional(),
+//     frameUrl: z.string().url().optional(),
+//     priority: z.string().optional()
+//   }),
+
+//   // بلاغ السلوك الغريب
+//   z.object({
+//     type: z.literal("BEHAVIOR_ANOMALY"),
+//     cameraId: z.string(),
+//     location: locationSchema,
+//     behaviorType: z.string().optional(),
+//     confidence: z.number().min(0).max(1),
+//     priority: z.string().optional()
+//   }),
+
+//   // بلاغ المواطن
+//   z.object({
+//     type: z.literal("CITIZEN_CALL"),
+//     location: locationSchema,
+//     transcript: z.string(),
+//     keywords: z.array(z.string()).optional(),
+//     urgency: z.number().min(0).max(1),
+//     priority: z.string().optional()
+//   })
+// ]);
+
+// // 3. الـ Middleware الأساسي مع معالجة الـ Error اللي ظهرلك
+// exports.validateIncident = (req, res, next) => {
+//   // استخدام safeParse عشان السيرفر ميكراشش لو فيه غلطة
+//   const result = incidentSchema.safeParse(req.body);
+  
+//   if (!result.success) {
+//     // حل مشكلة (reading 'map') بالتأكد من الوصول لـ result.error.issues
+//     return res.status(400).json({
+//       status: 'fail',
+//       message: 'Validation failed',
+//       errors: result.error.issues.map(err => ({
+//         field: err.path.join('.'),
+//         message: err.message,
+//         code: err.code
+//       }))
+//     });
+//   }
+  
+//   // لو تمام، بنمرر الداتا "النظيفة" للـ Request اللي بعده
+//   req.body = result.data;
+//   next();
+// };
+
+
+
 const { z } = require('zod');
 
 // 1. تعريف الـ Location Schema المشترك
 const locationSchema = z.object({
-  lat: z.number().optional(), // اختياري لأننا ممكن نبعت coordinates مصفوفة
+
+  
+  lat: z.number().optional(),
   lng: z.number().optional(),
   name: z.string({ required_error: "Location name is required" }),
   zone: z.string().optional(),
-  coordinates: z.array(z.number()).length(2).optional() // [lng, lat]
+  coordinates: z.array(z.number()).length(2).optional() 
 });
 
-// 2. تعريف الـ Schema لكل نوع بلاغ
+// 2. تعريف الـ Schema لكل نوع بلاغ (Zod Discriminated Union)
 const incidentSchema = z.discriminatedUnion("type", [
   
-  // بلاغ الحريق (IOT_FIRE / FIRE_DETECTION)
+  // بلاغ الحريق
   z.object({
     type: z.literal("FIRE_DETECTION"),
     sensorId: z.string().optional(),
@@ -23,11 +111,11 @@ const incidentSchema = z.discriminatedUnion("type", [
       gasLevel: z.number().optional(),
       flameDetected: z.boolean().optional()
     }).optional(),
-    priority: z.string().optional(), // سمحنا بوجودها عشان Postman ميضربش
+    priority: z.string().optional(),
     frameUrl: z.string().url().optional()
   }),
 
-  // بلاغ السلاح (AI_WEAPON / WEAPON_DETECTION)
+  // بلاغ السلاح
   z.object({
     type: z.literal("WEAPON_DETECTION"),
     cameraId: z.string(),
@@ -59,25 +147,49 @@ const incidentSchema = z.discriminatedUnion("type", [
   })
 ]);
 
-// 3. الـ Middleware الأساسي مع معالجة الـ Error اللي ظهرلك
-exports.validateIncident = (req, res, next) => {
-  // استخدام safeParse عشان السيرفر ميكراشش لو فيه غلطة
-  const result = incidentSchema.safeParse(req.body);
+// --- الجزء الجديد المعدل ---
+
+/**
+ * 3. دالة التحقق الأساسية (للاستخدام داخل الـ Service)
+ * @param {Object} data - البيانات المراد فحصها
+ */
+const validateIncident = (data) => {
+  console.log("DEBUG: Data reaching Zod:", data); // 👈 السطر ده هيكشف المستور في الـ Terminal
+  const result = incidentSchema.safeParse(data);
   
   if (!result.success) {
-    // حل مشكلة (reading 'map') بالتأكد من الوصول لـ result.error.issues
-    return res.status(400).json({
-      status: 'fail',
-      message: 'Validation failed',
-      errors: result.error.issues.map(err => ({
-        field: err.path.join('.'),
-        message: err.message,
-        code: err.code
-      }))
-    });
+    const error = new Error('Validation failed');
+    error.statusCode = 400;
+    // تجهيز تفاصيل الأخطاء بشكل منظم
+    error.errors = result.error.issues.map(err => ({
+      field: err.path.join('.'),
+      message: err.message
+    }));
+    throw error; // بنعمل Throw عشان الـ Service يمسكها في الـ catch
   }
   
-  // لو تمام، بنمرر الداتا "النظيفة" للـ Request اللي بعده
-  req.body = result.data;
-  next();
+  return result.data; // بنرجع الداتا الـ Clean
+};
+
+/**
+ * 4. الـ Middleware (للاستخدام داخل الـ Routes)
+ */
+const validateIncidentMiddleware = (req, res, next) => {
+  try {
+    // بننادي الدالة اللي فوق
+    req.body = validateIncident(req.body);
+    next();
+  } catch (err) {
+    return res.status(400).json({
+      status: 'fail',
+      message: err.message,
+      errors: err.errors
+    });
+  }
+};
+
+// 5. التصدير بطريقة الـ Named Exports
+module.exports = {
+  validateIncident,
+  validateIncidentMiddleware
 };

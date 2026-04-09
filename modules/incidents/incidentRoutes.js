@@ -1,15 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const incidentController = require('./incidentController');
-const { validateIncident } = require('../../shared/middlewares/validateIncident');
 
-router.post('/sensor', validateIncident, incidentController.createFromSensor);
+router.post('/sensor',  incidentController.createFromSensor);
 
-router.post('/ai', validateIncident, incidentController.createFromAI);
+router.post('/ai', incidentController.createFromAI);
 
-router.post('/manual', validateIncident, incidentController.createFromManual);
+router.post('/manual', incidentController.createFromManual);
 
-// Update incident (مثلاً تغيير status أو إضافة notes)
 router.put('/:id', incidentController.updateIncident);
+
+router.get('/', incidentController.getAllIncidents);  
+    
+router.get('/:id', incidentController.getIncidentById);    
+
 
 module.exports = router;

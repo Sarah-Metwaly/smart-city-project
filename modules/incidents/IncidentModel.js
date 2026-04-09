@@ -26,11 +26,11 @@ const IncidentSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ['ACTIVE', 'DISPATCHED', 'RESOLVED', 'CLOSED', 'FALSE_ALARM'],
-    default: 'ACTIVE',
+     enum: ['ACTIVE', 'DISPATCHED', 'RESOLVED', 'CLOSED', 'FALSE_ALARM'],
+     default: 'ACTIVE',
     index: true,
   },
-
+cameraId: { type: String, ref: 'Camera', index: true },     // ← Reference to Camera (if applicable)
   source: {
     type: { type: String, enum: ['SENSOR', 'AI', 'MANUAL', 'CITIZEN'], required: true },
     deviceId: String,
@@ -52,7 +52,8 @@ const IncidentSchema = new mongoose.Schema({
     default: {}
   },
 
-  // Sensor Snapshot → Flexible field to store the initial sensor readings at the time of incident creation and for future correlation and analysis 
+  // Sensor Snapshot → Flexible field to store the initial sensor readings at the time of incident creation
+  //  (e.g., temperature, humidity, air quality, etc.)
   sensorData: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
@@ -66,8 +67,7 @@ const IncidentSchema = new mongoose.Schema({
 
   actions: [{
     user: { type: String, default: 'SYSTEM' },
-    action: { type: String, enum: ['CREATE', 'DISPATCH', 'RESOLVE', 'CLOSE', 'FALSE_ALARM'] },
-    note: String,
+  action: { type: String, enum: ['CREATE', 'DISPATCH', 'RESOLVE', 'CLOSE', 'FALSE_ALARM', 'CORRELATE'] },    note: String,
     timestamp: { type: Date, default: Date.now },
   }],
 

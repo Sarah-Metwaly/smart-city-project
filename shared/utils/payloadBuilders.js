@@ -6,7 +6,6 @@ const getPriority = (confidence = 0) => {
 };
 
 const basePayload = (data) => {
-  // 1. تحديد الـ Type بتاع الـ Source تلقائياً بناءً على نوع الـ Incident
   let sourceType = 'MANUAL'; 
   if (data.type.includes('FIRE') || data.type.includes('GAS')) sourceType = 'SENSOR';
   if (data.type.includes('WEAPON') || data.type.includes('BEHAVIOR')) sourceType = 'AI';
@@ -17,7 +16,6 @@ const basePayload = (data) => {
     priority: data.priority || getPriority(data.confidence),
     status: 'ACTIVE',
     
-    //  هنا بنبني الـ Object اللي الموديل مستنيه بالظبط
     source: {
       type: data.source?.type || sourceType, 
       deviceId: data.sensorId || data.source?.deviceId || null,

@@ -1,51 +1,41 @@
-class SensorSnapshotService {
-  // بنمرر السيرفسز الخاصة بالسنسورات هنا
-  async getLatestSnapshot(zone, dht11Service, mq135Service, bmp180Service) {
-    try {
-      console.log(`[SensorService] Collecting real-time data for zone: ${zone}`);
+const dht11Service = require('../../modules/sensors/dht11/dht11Service');
+const mq135Service = require('../../modules/sensors/mq135/mq135Service');
+const bmp180Service = require('../../modules/sensors/bmp180/bmp180Service');
 
-      // ✅ تنفيذ جلب البيانات بالتوازي (Parallel fetching)
-      const [dhtData, mqData, bmpData] = await Promise.all([
-        dht11Service.getLatestReadings(zone),
-        mq135Service.getLatestReadings(zone),
-        bmp180Service.getLatestReadings(zone)
-      ]);
+const getLatestSnapshot = async () => {
+  try {
+    const [dhtData, mqData, bmpData] = await Promise.all([
+      dht11Service.getLatestReadings(),
+      mq135Service.getLatestReadings(),
+      bmp180Service.getLatestReadings()
+    ]);
 
-      // ✅ بناء الـ Snapshot بناءً على الـ Hardware Schema الحقيقي
-      return {
-        zone: zone,
-        timestamp: new Date(),
-        // بناخد أول نتيجة راجعة من كل سنسور في المنطقة دي
-        dht11: dhtData?.[0] ? {
-          sensor_id: dhtData[0].sensor_id,
-          temperature: dhtData[0].temperature,
-          humidity: dhtData[0].humidity,
-          status: dhtData[0].status
-        } : null,
-
-        mq135: mqData?.[0] ? {
-          sensor_id: mqData[0].sensor_id,
-          smoke: mqData[0].smoke,
-          co2: mqData[0].co2,
-          air_quality: mqData[0].air_quality,
-          status: mqData[0].status
-        } : null,
-
-        bmp180: bmpData?.[0] ? {
-          sensor_id: bmpData[0].sensor_id,
-          pressure: bmpData[0].pressure,
-          altitude: bmpData[0].altitude
-        } : null,
-
-        summary: {
-          isAnomalyDetected: (dhtData?.[0]?.temperature > 50 || mqData?.[0]?.smoke > 200)
-        }
-      };
-    } catch (error) {
-      console.error('Snapshot failed:', error);
-      return { zone, error: 'Hardware sync failed' };
-    }
+ return {
+  temperature: dhtData[0]?.temperature,
+  humidity: dhtData[0]?.humidity,
+  pressure: bmpData[0] ?.pressure,
+  airAnalysis: {
+    co2: mqData[0]?.co2,
+    smoke: mqData[0]?.smoke,
+    alcohol: mqData[0]?.alcohol,
+    benzene: mqData[0]?.benzene,
+    status: mqData[0]?.air_quality 
+  },
+  timestamp: new Date()
+};
+  } catch (error) {
+    console.error('[SensorSnapshotService] Error capturing snapshot:', error.message);
+    return {
+      temperature: null,
+      humidity: null,
+      airQuality: null,
+      pressure: null,
+      timestamp: new Date(),
+      error: "Failed to fetch some sensor data"
+    };
   }
-}
+};
 
-module.exports = new SensorSnapshotService();
+module.exports = {
+  getLatestSnapshot
+};
