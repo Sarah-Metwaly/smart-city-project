@@ -1,5 +1,5 @@
 const express = require('express');
-const ldrController = require('../controllers/ldrController');
+const ldrController = require('./ldrController');
 const router = express.Router();
 
 router.post('/save', ldrController.saveReading);

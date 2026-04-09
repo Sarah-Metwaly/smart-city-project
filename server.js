@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const http = require('http'); 
-const dailySummaryService = require('./services/dailySummaryService');
+const dailySummaryService = require('./modules/daily-summary/dailySummaryService');
 
 dotenv.config({ path: './config.env' });
 const app = require('./app');

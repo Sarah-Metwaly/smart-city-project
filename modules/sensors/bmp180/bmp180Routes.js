@@ -1,5 +1,5 @@
 const express = require('express');
-const bmp180Controller = require('../controllers/bmp180Controller');
+const bmp180Controller = require('./bmp180Controller');
 const router = express.Router();
 
 router.post('/save', bmp180Controller.saveReading);

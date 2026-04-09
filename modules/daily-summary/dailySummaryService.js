@@ -1,9 +1,9 @@
-const dailySummaryModel = require('../models/dailySummaryModel');
-const settingsModel = require('../models/settingsModel');
-const ldrModel = require('../models/ldrModel');
-const dht11Model = require('../models/dht11Model');
-const bmp180Model = require('../models/bmp180Model');
-const mq135Model = require('../models/mq135Model');
+const dailySummaryModel = require('./dailySummaryModel');
+const settingsModel = require('../../shared/models/settingsModel');
+const ldrModel = require('../sensors/ldr/ldrModel');
+const dht11Model = require('../sensors/dht11/dht11Model');
+const bmp180Model = require('../sensors/bmp180/bmp180Model');
+const mq135Model = require('../sensors/mq135/mq135Model');
 
 const saveSensorSummary = async (sensorType, sensorId, date, avgPower, totalEnergy, totalCost) => {
     await dailySummaryModel.findOneAndUpdate(

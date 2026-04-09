@@ -1,4 +1,4 @@
-const LDR = require('../models/ldrModel');
+const LDR = require('./ldrModel');
 
 exports.saveReading = async (data) => {
     const reading = new LDR({

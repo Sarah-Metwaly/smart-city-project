@@ -1,5 +1,5 @@
-const incidentService = require('../services/incidentService');
-const  catchAsync  = require('../utils/catchAsync');
+const incidentService = require('./incidentService');
+const  catchAsync  = require('../../shared/utils/catchAsync');
 
 class IncidentController {
 

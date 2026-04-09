@@ -1,5 +1,5 @@
-const bmp180Service = require('../services/bmp180Service');
-const catchAsync = require('../utils/catchAsync');
+const bmp180Service = require('./bmp180Service');
+const catchAsync = require('../../../shared/utils/catchAsync');
 
 exports.saveReading = catchAsync(async (req, res) => {
     const data = req.body;

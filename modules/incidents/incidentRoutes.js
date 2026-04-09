@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const incidentController = require('../controllers/incidentController');
-const { validateIncident } = require('../middlewares/validateIncident');
+const incidentController = require('./incidentController');
+const { validateIncident } = require('../../shared/middlewares/validateIncident');
 
 router.post('/sensor', validateIncident, incidentController.createFromSensor);
 

@@ -1,5 +1,5 @@
-const dht11Service = require('../services/dht11Service');
-const catchAsync = require('../utils/catchAsync');
+const dht11Service = require('./dht11Service');
+const catchAsync = require('../../../shared/utils/catchAsync');
 
 exports.saveReading = catchAsync(async (req, res) => {
     const data = req.body;

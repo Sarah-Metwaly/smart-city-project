@@ -1,4 +1,4 @@
-const mq135Model = require('../models/mq135Model');
+const mq135Model = require('./mq135Model');
 
 exports.saveReading = async (data) => {
     const reading = new mq135Model({

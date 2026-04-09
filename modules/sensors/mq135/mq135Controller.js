@@ -1,5 +1,5 @@
-const mq135Service = require('../services/mq135Service');
-const catchAsync = require('../utils/catchAsync');
+const mq135Service = require('./mq135Service');
+const catchAsync = require('../../../shared/utils/catchAsync');
 
 exports.saveReading = catchAsync(async (req, res) => {
     const data = req.body;

@@ -1,5 +1,5 @@
-const ldrService = require('../services/ldrService');
-const catchAsync = require('../utils/catchAsync');
+const ldrService = require('./ldrService');
+const catchAsync = require('../../../shared/utils/catchAsync');
 
 exports.saveReading = catchAsync(async (req , res) => {
     const reading = await ldrService.saveReading(req.body);

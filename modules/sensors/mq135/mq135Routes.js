@@ -1,5 +1,5 @@
 const express = require('express');
-const mq135Controller = require('../controllers/mq135Controller');
+const mq135Controller = require('./mq135Controller');
 const router = express.Router();
 
 router.post('/save', mq135Controller.saveReading);

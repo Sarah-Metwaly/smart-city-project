@@ -1,13 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const ldrRoutes = require('./routes/ldrRoutes');
-const errorController = require('./controllers/errorController');
-const AppError = require('./utils/AppError');
-const dht11Routes = require('./routes/dht11Routes');
-const bmp180Routes = require('./routes/bmp180Routes');
-const mq135Routes = require('./routes/mq135Routes');
-const dailySummaryRoutes = require('./routes/dailySummaryRoutes');
-const incidentRoutes = require('./routes/incidentRoutes');
+const ldrRoutes = require('./modules/sensors/ldr/ldrRoutes');
+const errorController = require('./shared/controllers/errorController');
+const AppError = require('./shared/utils/AppError');
+const dht11Routes = require('./modules/sensors/dht11/dht11Routes');
+const bmp180Routes = require('./modules/sensors/bmp180/bmp180Routes');
+const mq135Routes = require('./modules/sensors/mq135/mq135Routes');
+const dailySummaryRoutes = require('./modules/daily-summary/dailySummaryRoutes');
+const incidentRoutes = require('./modules/incidents/incidentRoutes');
 
 const app = express();
 

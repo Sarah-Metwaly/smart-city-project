@@ -1,5 +1,5 @@
 const express = require('express');
-const dht11Controller = require('../controllers/dht11Controller');
+const dht11Controller = require('./dht11Controller');
 const router = express.Router();
 
 router.post('/save', dht11Controller.saveReading);

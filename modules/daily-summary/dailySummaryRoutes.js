@@ -1,4 +1,4 @@
-const dailySummaryController = require('../controllers/dailySummaryController');
+const dailySummaryController = require('./dailySummaryController');
 const express = require('express');
 const router = express.Router();
 

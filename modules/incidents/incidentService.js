@@ -1,6 +1,6 @@
-const Incident = require('../models/IncidentModel');
-const { buildIncidentPayload } = require('../utils/payloadBuilders');
-const sensorSnapshotService = require('./sensorSnapshotService'); // هيتبني لاحقاً
+const Incident = require('./IncidentModel');
+const { buildIncidentPayload } = require('../../shared/utils/payloadBuilders');
+const sensorSnapshotService = require('../../shared/services/sensorSnapshotService'); // هيتبني لاحقاً
 
 class IncidentService {
 
