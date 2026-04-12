@@ -1,4 +1,6 @@
 const BMP180 = require('./bmp180Model');
+const incidentService = require('../../incidents/incidentService');
+const eventEmitter = require('../../../shared/utils/eventEmitter');
 
 exports.saveReading = async (data) => {
     const reading = new BMP180({
@@ -33,3 +35,24 @@ exports.getLatestReadings = async () =>{
     ]);
     return latestReadings;
 }
+
+
+exports.checkThresholds = async (data) => {
+  let incident;
+  if (data.pressure < 950) {
+  incident =  await incidentService.createFromSensor({
+      type: 'LOW_PRESSURE',
+      sensorId: data.sensor_id,
+      readings: { pressure: data.pressure }
+    });
+  }
+  if (data.temperature > 45) {
+  incident =  await incidentService.createFromSensor({
+      type: 'HIGH_TEMPERATURE',
+      sensorId: data.sensor_id,
+      readings: { temperature: data.temperature }
+    });
+  }
+    eventEmitter.emit('incident:created', incident);
+  return incident;
+};

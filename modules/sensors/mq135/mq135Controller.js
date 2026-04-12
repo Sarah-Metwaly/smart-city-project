@@ -3,10 +3,12 @@ const catchAsync = require('../../../shared/utils/catchAsync');
 
 exports.saveReading = catchAsync(async (req, res) => {
     const data = req.body;
+      const incident = await mq135Service.checkThresholds(data);
     const savedReading = await mq135Service.saveReading(data);
     res.status(201).json({
         status: 'success',
-        data: savedReading
+        data: savedReading,
+        incident: incident || null
     });
 });
 

@@ -11,7 +11,8 @@ const IncidentSchema = new mongoose.Schema({
 
   type: {
     type: String,
-    enum: ['WEAPON_DETECTION',  'BEHAVIOR_ANOMALY',  'FIRE_DETECTION','SMOKE_DETECTION', 'GAS_LEAK',   'ENERGY_ANOMALY', 'CITIZEN_CALL',   'MANUAL_REPORT'
+    enum: ['WEAPON_DETECTION',  'BEHAVIOR_ANOMALY',  'FIRE_DETECTION','SMOKE_DETECTION', 'GAS_LEAK', "LOW_PRESSURE",     
+        "HIGH_TEMPERATURE" , 'ENERGY_ANOMALY', 'CITIZEN_CALL',   'MANUAL_REPORT'
     ],
     required: true,
     index: true,
@@ -30,7 +31,6 @@ const IncidentSchema = new mongoose.Schema({
      default: 'ACTIVE',
     index: true,
   },
-cameraId: { type: String, ref: 'Camera', index: true },     // ← Reference to Camera (if applicable)
   source: {
     type: { type: String, enum: ['SENSOR', 'AI', 'MANUAL', 'CITIZEN'], required: true },
     deviceId: String,

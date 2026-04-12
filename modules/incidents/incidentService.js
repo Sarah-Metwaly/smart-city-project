@@ -1,22 +1,23 @@
 const Incident = require('./IncidentModel');
 const { buildIncidentPayload } = require('../../shared/utils/payloadBuilders');
 const sensorSnapshotService = require('../../shared/services/sensorSnapshotService'); 
-// const { validateIncident } = require('../../shared/middlewares/validateIncident');
+const eventEmitter = require('../../shared/utils/eventEmitter');
 
-const createFromSensor = async (sensorPayload) => {
+exports.createFromSensor = async (data) => {  
+  const payloadWithSource = {
+    ...data,
+    source: { type: 'SENSOR', sensorId: data.sensorId }
+  };
+
   const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
-  const payload = buildIncidentPayload(sensorPayload, initialSnapshot);
-  // validateIncident(payload);
-
+  const payload = buildIncidentPayload(payloadWithSource, initialSnapshot);
   const incident = await Incident.create(payload);
 
-  // استخدم global.io مباشرة
-  global.io.to(['police-room', 'fire-room', 'energy-room']).emit('incident:created', incident);
-
+  eventEmitter.emit('incident:created', incident);
   return incident;
 };
 
-const createFromAI = async (aiPayload) => {
+exports.createFromAI = async (aiPayload) => {
   let sensorSnap = {};
   if (aiPayload.type === 'FIRE_DETECTION') {
     sensorSnap = await sensorSnapshotService.getLatestSnapshot();
@@ -24,16 +25,13 @@ const createFromAI = async (aiPayload) => {
   }
 
   const payload = buildIncidentPayload(aiPayload, sensorSnap);
-  // validateIncident(payload);
-
   const incident = await Incident.create(payload);
 
-  global.io.to(['police-room', 'fire-room']).emit('incident:created', incident);
-
+  eventEmitter.emit('incident:created', incident);
   return incident;
 };
 
-const updateExistingWithAI = async (existingIncident, aiPayload) => {
+exports.updateExistingWithAI = async (existingIncident, aiPayload) => {
   const freshSnapshot = await sensorSnapshotService.getLatestSnapshot();
   const updatedIncident = await Incident.findByIdAndUpdate(
     existingIncident._id,
@@ -61,49 +59,33 @@ const updateExistingWithAI = async (existingIncident, aiPayload) => {
     { new: true }
   );
 
-  global.io.to(['police-room', 'fire-room']).emit('incident:updated', updatedIncident);
-
+  eventEmitter.emit('incident:updated', updatedIncident);
   return updatedIncident;
 };
 
-const createFromManual = async (manualPayload, userId) => {
+exports.createFromManual = async (manualPayload, userId) => {
   const payload = buildIncidentPayload({
     ...manualPayload,
     source: { type: 'MANUAL', userId }
   });
 
-  // validateIncident(payload);
-
   const incident = await Incident.create(payload);
-
-  global.io.to(['police-room', 'fire-room']).emit('incident:created', incident);
-
+  eventEmitter.emit('incident:created', incident);
   return incident;
 };
 
-const updateIncident = async (id, updateData) => {
+exports.updateIncident = async (id, updateData) => {
   const updated = await Incident.findByIdAndUpdate(id, updateData, { new: true });
   if (!updated) throw new Error('Incident not found');
 
-  global.io.to(['police-room', 'fire-room']).emit('incident:updated', updated);
-
+  eventEmitter.emit('incident:updated', updated);
   return updated;
 };
 
-const getAllIncidents = async (query) => {
+exports.getAllIncidents = async (query) => {
   return Incident.find(query);
 };
 
-const getIncidentById = async (id) => {
+exports.getIncidentById = async (id) => {
   return Incident.findById(id);
-};
-
-module.exports = {
-  createFromSensor,
-  createFromAI,
-  updateExistingWithAI,
-  createFromManual,
-  updateIncident,
-  getAllIncidents,
-  getIncidentById
 };

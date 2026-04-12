@@ -1,4 +1,6 @@
 const DHT11 = require('./dht11Model');
+const incidentService = require('../../incidents/incidentService');
+const eventEmitter = require('../../../shared/utils/eventEmitter');
 
 exports.saveReading = async (data) => {
     const reading = new DHT11({
@@ -32,3 +34,23 @@ exports.getLatestReadings = async () =>{
     return latestReadings;
 }
 
+
+exports.checkThresholds = async (data) => {
+  let incident;
+  if (data.temperature > 50) {
+   incident = await incidentService.createFromSensor({
+      type: 'FIRE_DETECTION',
+      sensorId: data.sensor_id,
+      readings: { temperature: data.temperature }
+    });
+  }
+  if (data.humidity < 20) {
+   incident = await incidentService.createFromSensor({
+      type: 'LOW_HUMIDITY',
+      sensorId: data.sensor_id,
+      readings: { humidity: data.humidity }
+    });
+  }
+eventEmitter.emit('incident:created', incident);
+  return incident;
+};

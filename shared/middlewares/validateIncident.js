@@ -1,182 +1,118 @@
-// const { z } = require('zod');
-
-// // 1. تعريف الـ Location Schema المشترك
-// const locationSchema = z.object({
-//   lat: z.number().optional(), // اختياري لأننا ممكن نبعت coordinates مصفوفة
-//   lng: z.number().optional(),
-//   name: z.string({ required_error: "Location name is required" }),
-//   zone: z.string().optional(),
-//   coordinates: z.array(z.number()).length(2).optional() // [lng, lat]
-// });
-
-// // 2. تعريف الـ Schema لكل نوع بلاغ
-// const incidentSchema = z.discriminatedUnion("type", [
-  
-//   // بلاغ الحريق (IOT_FIRE / FIRE_DETECTION)
-//   z.object({
-//     type: z.literal("FIRE_DETECTION"),
-//     sensorId: z.string().optional(),
-//     location: locationSchema,
-//     readings: z.object({
-//       temp: z.number().optional(),
-//       humidity: z.number().optional(),
-//       gasLevel: z.number().optional(),
-//       flameDetected: z.boolean().optional()
-//     }).optional(),
-//     priority: z.string().optional(), // سمحنا بوجودها عشان Postman ميضربش
-//     frameUrl: z.string().url().optional()
-//   }),
-
-//   // بلاغ السلاح (AI_WEAPON / WEAPON_DETECTION)
-//   z.object({
-//     type: z.literal("WEAPON_DETECTION"),
-//     cameraId: z.string(),
-//     location: locationSchema,
-//     confidence: z.number().min(0).max(1),
-//     detections: z.array(z.any()).optional(),
-//     frameUrl: z.string().url().optional(),
-//     priority: z.string().optional()
-//   }),
-
-//   // بلاغ السلوك الغريب
-//   z.object({
-//     type: z.literal("BEHAVIOR_ANOMALY"),
-//     cameraId: z.string(),
-//     location: locationSchema,
-//     behaviorType: z.string().optional(),
-//     confidence: z.number().min(0).max(1),
-//     priority: z.string().optional()
-//   }),
-
-//   // بلاغ المواطن
-//   z.object({
-//     type: z.literal("CITIZEN_CALL"),
-//     location: locationSchema,
-//     transcript: z.string(),
-//     keywords: z.array(z.string()).optional(),
-//     urgency: z.number().min(0).max(1),
-//     priority: z.string().optional()
-//   })
-// ]);
-
-// // 3. الـ Middleware الأساسي مع معالجة الـ Error اللي ظهرلك
-// exports.validateIncident = (req, res, next) => {
-//   // استخدام safeParse عشان السيرفر ميكراشش لو فيه غلطة
-//   const result = incidentSchema.safeParse(req.body);
-  
-//   if (!result.success) {
-//     // حل مشكلة (reading 'map') بالتأكد من الوصول لـ result.error.issues
-//     return res.status(400).json({
-//       status: 'fail',
-//       message: 'Validation failed',
-//       errors: result.error.issues.map(err => ({
-//         field: err.path.join('.'),
-//         message: err.message,
-//         code: err.code
-//       }))
-//     });
-//   }
-  
-//   // لو تمام، بنمرر الداتا "النظيفة" للـ Request اللي بعده
-//   req.body = result.data;
-//   next();
-// };
-
-
-
 const { z } = require('zod');
 
-// 1. تعريف الـ Location Schema المشترك
+// Shared location schema — GeoJSON Point format
 const locationSchema = z.object({
-
-  
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-  name: z.string({ required_error: "Location name is required" }),
-  zone: z.string().optional(),
-  coordinates: z.array(z.number()).length(2).optional() 
+  type: z.literal("Point"),
+  coordinates: z.array(z.number()).length(2), // [longitude, latitude]
+  name: z.string(),
+  zone: z.string().optional()
 });
 
-// 2. تعريف الـ Schema لكل نوع بلاغ (Zod Discriminated Union)
+// Discriminated union — type field determines which schema to apply
 const incidentSchema = z.discriminatedUnion("type", [
-  
-  // بلاغ الحريق
-  z.object({
-    type: z.literal("FIRE_DETECTION"),
-    sensorId: z.string().optional(),
-    location: locationSchema,
-    readings: z.object({
-      temp: z.number().optional(),
-      humidity: z.number().optional(),
-      gasLevel: z.number().optional(),
-      flameDetected: z.boolean().optional()
-    }).optional(),
-    priority: z.string().optional(),
-    frameUrl: z.string().url().optional()
-  }),
 
-  // بلاغ السلاح
+  // AI vision contracts
   z.object({
     type: z.literal("WEAPON_DETECTION"),
     cameraId: z.string(),
     location: locationSchema,
     confidence: z.number().min(0).max(1),
-    detections: z.array(z.any()).optional(),
-    frameUrl: z.string().url().optional(),
-    priority: z.string().optional()
+    weaponType: z.enum(["Knife", "Gun", "Rifle", "Other"]),
+    frameUrl: z.string().url(),
+    boundingBox: z.array(z.number()).length(4).optional(),
   }),
 
-  // بلاغ السلوك الغريب
   z.object({
     type: z.literal("BEHAVIOR_ANOMALY"),
     cameraId: z.string(),
     location: locationSchema,
-    behaviorType: z.string().optional(),
     confidence: z.number().min(0).max(1),
-    priority: z.string().optional()
+    behaviorType: z.enum(["LURKING", "FIGHT", "THEFT", "CROWD_ANOMALY"]),
+    clipUrl: z.string().url(),
+    personCount: z.number().int().optional(),
+    liveFeedUrl: z.string().url().optional(),
   }),
 
-  // بلاغ المواطن
+  z.object({
+    type: z.literal("FIRE_DETECTION"),
+    cameraId: z.string(),
+    location: locationSchema,
+    confidence: z.number().min(0).max(1),
+    frameUrl: z.string().url(),
+  }),
+
+  // NLP / STT pipeline contract
   z.object({
     type: z.literal("CITIZEN_CALL"),
-    location: locationSchema,
     transcript: z.string(),
-    keywords: z.array(z.string()).optional(),
     urgency: z.number().min(0).max(1),
-    priority: z.string().optional()
-  })
+    priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
+    location: locationSchema.optional(), // extracted from transcript if possible
+    keywords: z.array(z.string()).optional(),
+    audioUrl: z.string().url().optional(),
+  }),
+
+  // Sensor service contracts
+  z.object({
+    type: z.literal("LOW_PRESSURE"),
+    sensorId: z.string(),
+    location: locationSchema,
+    readings: z.object({ pressure: z.number() }),
+  }),
+
+  z.object({
+    type: z.literal("HIGH_TEMPERATURE"),
+    sensorId: z.string(),
+    location: locationSchema,
+    readings: z.object({ temperature: z.number() }),
+  }),
+
+  z.object({
+    type: z.literal("GAS_LEAK"),
+    sensorId: z.string(),
+    location: locationSchema,
+    readings: z.object({ gasLevel: z.number() }).optional(),
+  }),
+
+  z.object({
+    type: z.literal("SMOKE_DETECTION"),
+    sensorId: z.string(),
+    location: locationSchema,
+  }),
+
+  z.object({
+    type: z.literal("ENERGY_ANOMALY"),
+    sensorId: z.string(),
+    location: locationSchema,
+  }),
+
+  // Manual officer report
+  z.object({
+    type: z.literal("MANUAL_REPORT"),
+    location: locationSchema,
+    notes: z.string().optional(),
+    priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
+  }),
 ]);
 
-// --- الجزء الجديد المعدل ---
-
-/**
- * 3. دالة التحقق الأساسية (للاستخدام داخل الـ Service)
- * @param {Object} data - البيانات المراد فحصها
- */
+// Core validation — used inside services for programmatic validation
 const validateIncident = (data) => {
-  console.log("DEBUG: Data reaching Zod:", data); // 👈 السطر ده هيكشف المستور في الـ Terminal
   const result = incidentSchema.safeParse(data);
-  
   if (!result.success) {
     const error = new Error('Validation failed');
     error.statusCode = 400;
-    // تجهيز تفاصيل الأخطاء بشكل منظم
     error.errors = result.error.issues.map(err => ({
       field: err.path.join('.'),
       message: err.message
     }));
-    throw error; // بنعمل Throw عشان الـ Service يمسكها في الـ catch
+    throw error;
   }
-  
-  return result.data; // بنرجع الداتا الـ Clean
+  return result.data;
 };
 
-/**
- * 4. الـ Middleware (للاستخدام داخل الـ Routes)
- */
+// Express middleware — used in routes
 const validateIncidentMiddleware = (req, res, next) => {
   try {
-    // بننادي الدالة اللي فوق
     req.body = validateIncident(req.body);
     next();
   } catch (err) {
@@ -188,8 +124,4 @@ const validateIncidentMiddleware = (req, res, next) => {
   }
 };
 
-// 5. التصدير بطريقة الـ Named Exports
-module.exports = {
-  validateIncident,
-  validateIncidentMiddleware
-};
+module.exports = { validateIncident, validateIncidentMiddleware };

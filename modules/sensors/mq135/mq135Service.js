@@ -1,4 +1,6 @@
 const mq135Model = require('./mq135Model');
+const incidentService = require('../../incidents/incidentService');
+const eventEmitter = require('../../../shared/utils/eventEmitter');
 
 exports.saveReading = async (data) => {
     const reading = new mq135Model({
@@ -41,3 +43,24 @@ exports.getLatestReadings = async () =>{
     ]);
     return latestReadings;
 }
+
+
+exports.checkThresholds = async (data) => {
+  let incident;
+  if (data.co > 10 || data.smoke > 200) {
+  incident =  await incidentService.createFromSensor({
+      type: 'AIR_POLLUTION',
+      sensorId: data.sensor_id,
+      readings: { co: data.co, smoke: data.smoke }
+    });
+  }
+  if (data.air_quality < 50) {
+    incident = await incidentService.createFromSensor({
+      type: 'POOR_AIR_QUALITY',
+      sensorId: data.sensor_id,
+      readings: { air_quality: data.air_quality }
+    });
+  }
+  eventEmitter.emit('incident:created', incident);
+  return incident;
+};

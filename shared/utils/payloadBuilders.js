@@ -5,11 +5,21 @@ const getPriority = (confidence = 0) => {
   return 'LOW';
 };
 
+const SOURCE_TYPE_MAP = {
+  FIRE_DETECTION:   'SENSOR',
+  GAS_LEAK:         'SENSOR',
+  LOW_PRESSURE:     'SENSOR',
+  HIGH_TEMPERATURE: 'SENSOR',
+  ENERGY_ANOMALY:   'SENSOR',
+  SMOKE_DETECTION:  'SENSOR',
+  WEAPON_DETECTION: 'AI',
+  BEHAVIOR_ANOMALY: 'AI',
+  CITIZEN_CALL:     'CITIZEN',
+  MANUAL_REPORT:    'MANUAL',
+};
+
 const basePayload = (data) => {
-  let sourceType = 'MANUAL'; 
-  if (data.type.includes('FIRE') || data.type.includes('GAS')) sourceType = 'SENSOR';
-  if (data.type.includes('WEAPON') || data.type.includes('BEHAVIOR')) sourceType = 'AI';
-  if (data.type === 'CITIZEN_CALL') sourceType = 'CITIZEN';
+  const sourceType = SOURCE_TYPE_MAP[data.type] || 'MANUAL'; 
 
   return {
     type: data.type,
@@ -17,7 +27,7 @@ const basePayload = (data) => {
     status: 'ACTIVE',
     
     source: {
-      type: data.source?.type || sourceType, 
+      type: data.source?.type || sourceType,  
       deviceId: data.sensorId || data.source?.deviceId || null,
       cameraId: data.cameraId || data.source?.cameraId || null,
       userId: data.source?.userId || null
@@ -86,7 +96,19 @@ const builders = {
       urgency: data.urgency,
       audioUrl: data.audioUrl
     }
-  })
+  }),
+
+  LOW_PRESSURE: (data, snapshot) => ({
+    ...basePayload(data),
+    sensorData: snapshot,
+    notes: `Pressure dropped to ${data.readings?.pressure} hPa`,
+  }),
+
+  HIGH_TEMPERATURE: (data, snapshot) => ({
+    ...basePayload(data),
+    sensorData: snapshot,
+    notes: `Temperature reached ${data.readings?.temperature}°C`,
+  }),
 };
 
 const buildIncidentPayload = (data, sensorSnap = {}) => {
