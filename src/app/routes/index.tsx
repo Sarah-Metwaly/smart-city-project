@@ -3,7 +3,7 @@ import { lazy } from "react";
 import LazyWrapper from "./LazyWrapper";
 import MainLayout from '../../shared/templates/MainLayout';
 
-const DashboardPage = lazy(() => import("../../pages/DashboardPage"));
+const DashboardPage = lazy(() => import("../../pages/DashboardPage.tsx"));
 const EnergyPage = lazy(() => import("../../pages/EnergyPage"));
 const FirePage = lazy(() => import("../../pages/FirePage"));
 const PolicePage = lazy(() => import("../../pages/PolicePage"));
