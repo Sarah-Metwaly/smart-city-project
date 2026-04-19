@@ -104,10 +104,22 @@ const builders = {
     notes: `Pressure dropped to ${data.readings?.pressure} hPa`,
   }),
 
-  HIGH_TEMPERATURE: (data, snapshot) => ({
+  HIGH_PRESSURE: (data, snapshot) => ({
+    ...basePayload(data),
+    sensorData: snapshot,
+    notes: `Pressure increased to ${data.readings?.pressure} hPa`,
+  }),
+
+  HIGH_TEMP: (data, snapshot) => ({
     ...basePayload(data),
     sensorData: snapshot,
     notes: `Temperature reached ${data.readings?.temperature}°C`,
+  }),
+
+  POOR_AIR_QUALITY: (data, snapshot) => ({
+    ...basePayload(data),
+    sensorData: snapshot,
+    notes: `Air quality is ${data.readings?.air_quality}`,
   }),
 };
 

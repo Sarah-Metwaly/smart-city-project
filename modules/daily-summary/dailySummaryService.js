@@ -5,6 +5,18 @@ const dht11Model = require('../sensors/dht11/dht11Model');
 const bmp180Model = require('../sensors/bmp180/bmp180Model');
 const mq135Model = require('../sensors/mq135/mq135Model');
 
+let todaySummaryCashe = null;
+let lastCasheTime = 0;
+
+const getCachedTodaySummary = async () => {
+    const now = Date.now();
+    if(!todaySummaryCashe || now-lastCasheTime > 30_000){
+        todaySummaryCashe=await exports.getTodaySummary();
+        lastCasheTime=now;
+    }
+    return todaySummaryCashe;
+}
+
 const saveSensorSummary = async (sensorType, sensorId, date, avgPower, totalEnergy, totalCost) => {
     await dailySummaryModel.findOneAndUpdate(
         { sensor_id: sensorId, date: date },
@@ -38,12 +50,19 @@ const calculateSensorData = async (model, sensorId, startTime, endTime, costPerK
         {
             $group: {
                 _id: "$sensor_id",
+                status: { $first: "$status" },
                 active_power: { $first: "$power" },
                 avg_power: { $avg: "$power" }
             }
         }
     ]);
-    const activePower = readings[0]?.active_power || 0;
+    let activePower = 0;
+    if(readings[0].status == 'OFF' || readings[0].status == 'FAULTY'){
+        activePower = 0;  
+    }
+    else{
+        activePower = readings[0]?.active_power || 0;
+    }
     const avgPower = readings[0]?.avg_power || 0;
     const hours = (endTime - startTime) / (1000 * 60 * 60);
     const energy = avgPower * hours / 1000;
@@ -53,22 +72,30 @@ const calculateSensorData = async (model, sensorId, startTime, endTime, costPerK
 
 const loopThroughSensorIds = async (model, startTime, endTime, costPerKwh, save) => {
     const sensorIds = await model.distinct('sensor_id');
-    console.log(`Processing ${model.modelName} for sensors: `, sensorIds);
+
     let totalActivePower = 0;
     let totalEnergy = 0;
     let totalCost = 0;
     let totalAvgPower = 0;
-    for (const sensorId of sensorIds) {
-        const sensorData = await calculateSensorData(model, sensorId, startTime, endTime, costPerKwh);
-        console.log(`Sensor: ${sensorId}, Active Power: ${sensorData.activePower}, Avg Power: ${sensorData.avgPower}, Energy: ${sensorData.energy}, Cost: ${sensorData.cost}`);
+
+    // Run all sensors in parallel
+    const results = await Promise.all(
+        sensorIds.map(sensorId => calculateSensorData(model, sensorId, startTime, endTime, costPerKwh)
+            .then(result => ({ sensorId, ...result })) // include sensorId
+        )
+    );
+
+    // Process results
+    for (const result of results) {
         if(save){
-            await saveSensorSummary(model.modelName, sensorId, startTime, sensorData.avgPower, sensorData.energy, sensorData.cost);
+            await saveSensorSummary(model.modelName, result.sensorId, startTime, result.avgPower, result.energy, result.cost);
         }
-        totalActivePower += sensorData.activePower;
-        totalEnergy += sensorData.energy;
-        totalCost += sensorData.cost;
-        totalAvgPower += sensorData.avgPower;
+        totalActivePower += result.activePower;
+        totalEnergy += result.energy;
+        totalCost += result.cost;
+        totalAvgPower += result.avgPower;
     }
+
     return { totalActivePower, totalEnergy, totalCost, totalAvgPower };
 }
 
@@ -92,11 +119,12 @@ exports.getDailySummary = async () => {
     const settings = await settingsModel.findOne();
     const costPerKwh = settings ? settings.cost_per_kwh : 1.5;
 
-    await loopThroughSensorIds(dht11Model, yesterday, today, costPerKwh , true);
-    await loopThroughSensorIds(bmp180Model, yesterday, today, costPerKwh , true);
-    await loopThroughSensorIds(mq135Model, yesterday, today, costPerKwh , true);
-    await loopThroughSensorIds(ldrModel, yesterday, today, costPerKwh , true);
-
+    await promise.all([
+            loopThroughSensorIds(dht11Model, yesterday, today, costPerKwh , true),
+            loopThroughSensorIds(bmp180Model, yesterday, today, costPerKwh , true),
+            loopThroughSensorIds(mq135Model, yesterday, today, costPerKwh , true),
+            loopThroughSensorIds(ldrModel, yesterday, today, costPerKwh , true),
+    ]);
  }  
 
 exports.getWeeklyConsumption = async () => {
@@ -160,7 +188,7 @@ exports.getWeeklyConsumption = async () => {
             });
     }
     //GET Today's data as they are not in the daily summary collection yet
-    const todaySummary = await exports.getTodaySummary();
+    const todaySummary = await getCachedTodaySummary();
     const todayDateStr = new Date().toISOString().split('T')[0];
     if(result[result.length - 1].date === todayDateStr){
         result[result.length - 1].total_energy = todaySummary.totalEnergy;
@@ -183,21 +211,22 @@ exports.getTodaySummary = async () =>{
     today.setHours(0, 0, 0, 0);
 
     const liveTime= new Date();
-    console.log("Today: ", today);
-    console.log("Live Time: ", liveTime);
 
     // Get cost per kWh from settings
     const settings = await settingsModel.findOne();
     const costPerKwh = settings ? settings.cost_per_kwh : 1.5; // default to 1.5 if not found
 
-    const ldrSummary = await loopThroughSensorIds(ldrModel, today, liveTime, costPerKwh , false);
-    const dht11Summary = await loopThroughSensorIds(dht11Model, today, liveTime, costPerKwh , false);
-    const bmp180Summary = await loopThroughSensorIds(bmp180Model, today, liveTime, costPerKwh , false);
-    const mq135Summary = await loopThroughSensorIds(mq135Model, today, liveTime, costPerKwh , false);
-    console.log("LDR Summary: ", ldrSummary);
-    console.log("DHT11 Summary: ", dht11Summary);
-    console.log("BMP180 Summary: ", bmp180Summary);
-    console.log("MQ135 Summary: ", mq135Summary);
+    const [
+        ldrSummary,
+        dht11Summary,
+        bmp180Summary,
+        mq135Summary
+    ] = await Promise.all([
+        loopThroughSensorIds(ldrModel, today, liveTime, costPerKwh , false),
+        loopThroughSensorIds(dht11Model, today, liveTime, costPerKwh , false),
+        loopThroughSensorIds(bmp180Model, today, liveTime, costPerKwh , false),
+        loopThroughSensorIds(mq135Model, today, liveTime, costPerKwh , false)
+    ]);
 
     return {
         date: liveTime.toISOString().split('T')[0],
@@ -209,7 +238,7 @@ exports.getTodaySummary = async () =>{
 }
 
 exports.getDailyComparison = async () => {
-    const today = await exports.getTodaySummary();
+    const today = await getCachedTodaySummary();
     const todayDate = new Date();
     todayDate.setHours(0, 0, 0, 0);
     const yesterdayDate = new Date();

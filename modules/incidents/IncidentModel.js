@@ -11,8 +11,8 @@ const IncidentSchema = new mongoose.Schema({
 
   type: {
     type: String,
-    enum: ['WEAPON_DETECTION',  'BEHAVIOR_ANOMALY',  'FIRE_DETECTION','SMOKE_DETECTION', 'GAS_LEAK', "LOW_PRESSURE",     
-        "HIGH_TEMPERATURE" , 'ENERGY_ANOMALY', 'CITIZEN_CALL',   'MANUAL_REPORT'
+    enum: ['POOR_AIR_QUALITY','HIGH_HUMIDITY' , 'FIRE_DETECTION', "LOW_PRESSURE", "HIGH_PRESSURE" ,'WEAPON_DETECTION',  'BEHAVIOR_ANOMALY','SMOKE_DETECTION',     
+      'ENERGY_ANOMALY', 'CITIZEN_CALL',   'MANUAL_REPORT'
     ],
     required: true,
     index: true,

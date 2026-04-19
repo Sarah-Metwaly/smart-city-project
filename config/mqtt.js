@@ -1,8 +1,9 @@
 const mqtt = require('mqtt');
-const ldrService = require('../services/ldrService');
-const dht11Service = require('../services/dht11Service');
-const bmp180Service = require('../services/bmp180Service');
-const mq135Service = require('../services/mq135Service');
+const ldrService = require('../modules/sensors/ldr/ldrService');
+const dht11Service = require('../modules/sensors/dht11/dht11Service');
+const bmp180Service = require('../modules/sensors/bmp180/bmp180Service');
+const mq135Service = require('../modules/sensors/mq135/mq135Service');
+const mq135Controller = require('../modules/sensors/mq135/mq135Controller');
 const { broadcast } = require('./webSocket');
 
 //const BROKER_URL = 'mqtt://localhost:1883'; 

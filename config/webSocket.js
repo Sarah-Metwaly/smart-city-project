@@ -1,34 +1,20 @@
-const { Server } = require('socket.io');
-const eventEmitter = require('../shared/utils/eventEmitter');
+const { WebSocketServer } = require('ws');
 
-let io;
+let wss;
+
 const init = (server) => {
-    io = new Server(server, {
-        cors: { origin: "*" } 
+    wss = new WebSocketServer({ server, path: '/ws' });
+    wss.on('connection', (ws) => {
+        console.log('🔌 Frontend client connected');
     });
+};
 
-    io.on('connection', (socket) => {
-        console.log('🔌 New Client Connected:', socket.id);
-        
-        socket.on('disconnect', () => {
-            console.log('❌ Client disconnected');
-        });
-    });
-
-    eventEmitter.on('incident:created', (incident) => {
-        if (incident) {
-            emitIncident(incident);
+const broadcast = (topic, data) => {
+    wss.clients.forEach(client => {
+        if (client.readyState === 1) {
+            client.send(JSON.stringify({ topic, data }));
         }
     });
-
-    return io;
 };
 
-const emitIncident = (incident) => {
-    if (io) {
-        io.emit('new-incident', incident); 
-        console.log(`📡 Incident [${incident.type}] sent to all connected clients`);
-    }
-};
-
-module.exports = { init, emitIncident };
+module.exports = { init, broadcast };

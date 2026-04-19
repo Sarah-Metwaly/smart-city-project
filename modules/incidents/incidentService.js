@@ -31,37 +31,37 @@ exports.createFromAI = async (aiPayload) => {
   return incident;
 };
 
-exports.updateExistingWithAI = async (existingIncident, aiPayload) => {
-  const freshSnapshot = await sensorSnapshotService.getLatestSnapshot();
-  const updatedIncident = await Incident.findByIdAndUpdate(
-    existingIncident._id,
-    {
-      $set: {
-        aiData: {
-          ...existingIncident.aiData,
-          ...aiPayload.aiData
-        },
-        sensorData: freshSnapshot,
-        media: {
-          images: [...(existingIncident.media?.images || []), ...(aiPayload.media?.images || [])],
-          videos: [...(existingIncident.media?.videos || []), ...(aiPayload.media?.videos || [])]
-        }
-      },
-      $push: {
-        actions: {
-          user: 'AI_SYSTEM',
-          action: 'CORRELATE',
-          note: `AI Detection correlated - Fresh sensor snapshot added at ${new Date().toISOString()}`,
-          timestamp: new Date()
-        }
-      }
-    },
-    { new: true }
-  );
+// exports.updateExistingWithAI = async (existingIncident, aiPayload) => {
+//   const freshSnapshot = await sensorSnapshotService.getLatestSnapshot();
+//   const updatedIncident = await Incident.findByIdAndUpdate(
+//     existingIncident._id,
+//     {
+//       $set: {
+//         aiData: {
+//           ...existingIncident.aiData,
+//           ...aiPayload.aiData
+//         },
+//         sensorData: freshSnapshot,
+//         media: {
+//           images: [...(existingIncident.media?.images || []), ...(aiPayload.media?.images || [])],
+//           videos: [...(existingIncident.media?.videos || []), ...(aiPayload.media?.videos || [])]
+//         }
+//       },
+//       $push: {
+//         actions: {
+//           user: 'AI_SYSTEM',
+//           action: 'CORRELATE',
+//           note: `AI Detection correlated - Fresh sensor snapshot added at ${new Date().toISOString()}`,
+//           timestamp: new Date()
+//         }
+//       }
+//     },
+//     { new: true }
+//   );
 
-  eventEmitter.emit('incident:updated', updatedIncident);
-  return updatedIncident;
-};
+//   eventEmitter.emit('incident:updated', updatedIncident);
+//   return updatedIncident;
+// };
 
 exports.createFromManual = async (manualPayload, userId) => {
   const payload = buildIncidentPayload({
