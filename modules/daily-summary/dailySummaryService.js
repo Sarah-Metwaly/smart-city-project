@@ -57,7 +57,7 @@ const calculateSensorData = async (model, sensorId, startTime, endTime, costPerK
         }
     ]);
     let activePower = 0;
-    if(readings[0].status == 'OFF' || readings[0].status == 'FAULTY'){
+    if(readings[0]?.status == 'OFF' || readings[0]?.status == 'FAULTY'){
         activePower = 0;  
     }
     else{
