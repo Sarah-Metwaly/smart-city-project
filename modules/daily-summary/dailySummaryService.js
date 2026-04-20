@@ -119,7 +119,7 @@ exports.getDailySummary = async () => {
     const settings = await settingsModel.findOne();
     const costPerKwh = settings ? settings.cost_per_kwh : 1.5;
 
-    await promise.all([
+    await Promise.all([
             loopThroughSensorIds(dht11Model, yesterday, today, costPerKwh , true),
             loopThroughSensorIds(bmp180Model, yesterday, today, costPerKwh , true),
             loopThroughSensorIds(mq135Model, yesterday, today, costPerKwh , true),
