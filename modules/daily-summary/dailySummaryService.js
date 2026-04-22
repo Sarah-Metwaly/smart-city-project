@@ -4,6 +4,7 @@ const ldrModel = require('../sensors/ldr/ldrModel');
 const dht11Model = require('../sensors/dht11/dht11Model');
 const bmp180Model = require('../sensors/bmp180/bmp180Model');
 const mq135Model = require('../sensors/mq135/mq135Model');
+const flameModel = require('../sensors/flame/flameModel');
 
 let todaySummaryCashe = null;
 let lastCasheTime = 0;
