@@ -2,63 +2,54 @@ const mongoose = require('mongoose');
 //changing file name to MQ135Model.js to avoid confusion with the service file and to follow naming conventions for models
 
 const MQ135Schema = new mongoose.Schema({
-    sensor_id: {
-        type : String,
-        required : true,
-        trim: true
-    },
-    nh3: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    benzene: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    alcohol:{
-        type: Number,
-        required: true,
-        min: 0
-    },
-    smoke:{
-        type: Number,
-        required: true,
-        min: 0
-    },
-    co2:{
-        type: Number,
-        required: true,
-        min: 0
-    },
-    co:{
-        type: Number,
-        required: true,
-        min: 0
-    },
-    air_quality: {
+  device_id: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  sensors: [
+    {
+      sensor_id: {
         type: String,
         required: true,
-        enum: ['GOOD', 'MODERATE', 'POOR' , 'HAZARDOUS']
-    },
-    status: {
+        trim: true,
+      },
+      type: {
         type: String,
-        required: true ,
-        enum: ['NORMAL', 'FAULTY']
-    },
-    power : {
+        required: true,
+        enum: ['mq-2', 'mq-135'],
+      },
+      value: {
         type: Number,
         required: true,
-        min: 0
+      },
+      unit: {
+        type: String,
+        default: '%',
+      },
+      power: {
+        type: Number,
+      },
     },
-    timestamp : {
-        type: Date,
-        default: Date.now
-    }
+  ],
+  air_quality: {
+    level: {
+      type: String,
+      enum: ['GOOD AIR', 'MODERATE AIR', 'POLLUTION HIGH'],
+      required: true,
+    },
+    score: { type: Number, required: true },
+  },
+  status: {
+    type: String,
+    enum: ['SAFE', 'WARNING', 'DANGER'],
+    default: 'SAFE',
+  },
+  power: { type: Number, min: 0 , required: true },
+  timestamp: { type: Date, default: Date.now },
 });
 
 MQ135Schema.index({ timestamp: 1 }, { expireAfterSeconds: 172800 });
 
-const MQ135 = mongoose.model('MQ135' ,MQ135Schema);
+const MQ135 = mongoose.model('MQ135', MQ135Schema);
 module.exports = MQ135;

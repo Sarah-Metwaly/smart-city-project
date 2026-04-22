@@ -1,9 +1,10 @@
-const dht11Service = require('./dht11Service');
+const flameService = require('./flameService');
 const catchAsync = require('../../../shared/utils/catchAsync');
 
+//Only for testing purposes, to be removed in production
 exports.saveReading = catchAsync(async (req, res) => {
     const data = req.body;
-    const savedReading = await dht11Service.saveReading(data);
+    const savedReading = await flameService.saveReading(data);
     res.status(201).json({
         status: 'success',
         data: savedReading,
@@ -11,7 +12,7 @@ exports.saveReading = catchAsync(async (req, res) => {
 });
 
 exports.getLatestReadings = catchAsync(async (req, res) => {
-    const latestReadings = await dht11Service.getLatestReadings();
+    const latestReadings = await flameService.getLatestReadings();
     res.status(200).json({
         status: 'success',
         data: latestReadings

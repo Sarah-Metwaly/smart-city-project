@@ -5,16 +5,11 @@ const eventEmitter = require('../../../shared/utils/eventEmitter');
 exports.saveReading = async (data) => {
     const incident = await exports.checkThresholds(data);
     const reading = new mq135Model({
-        sensor_id: data.sensor_id,
-        nh3: data.nh3,
-        benzene: data.benzene,
-        alcohol: data.alcohol,
-        smoke: data.smoke,
-        co2: data.co2,
-        co: data.co,
+        device_id: data.device_id,
+        sensors: data.sensors,
         air_quality: data.air_quality,
         status: data.status,
-        power: data.power
+        power: data.power,
     });
     return await reading.save();
 }
@@ -23,22 +18,17 @@ exports.getLatestReadings = async () =>{
     const latestReadings = await mq135Model.aggregate([
         {
             $sort : {
-                timeStamp : -1      
+                timestamp : -1  
             }
         },
         {
             $group : {
-                _id : "$sensor_id",
-                nh3 : { $first : "$nh3" },
-                benzene : { $first : "$benzene" },
-                alcohol : { $first : "$alcohol" },
-                smoke : { $first : "$smoke" },
-                co2 : { $first : "$co2" },
-                co : { $first : "$co" },
-                air_quality : { $first : "$air_quality" },
-                status : { $first : "$status" },
-                power : { $first : "$power" },
-                timeStamp : { $first : "$timeStamp" }
+                _id : "$device_id",
+                sensors: { $first: "$sensors" },
+                air_quality: { $first: "$air_quality" },
+                status: { $first: "$status" },
+                power: { $first: "$power" },
+                timestamp: { $first: "$timestamp" }
             }
         }
     ]);
@@ -48,11 +38,11 @@ exports.getLatestReadings = async () =>{
 
 exports.checkThresholds = async (data) => {
   let incident;
-  if (data.air_quality === 'POOR' || data.air_quality === 'HAZARDOUS') {
+  if (data.air_quality.level === 'POLLUTION HIGH' || data.status === 'DANGER') {
     incident = await incidentService.createFromSensor({
       type: 'POOR_AIR_QUALITY',
       sensorId: data.sensor_id,
-      readings: { air_quality: data.air_quality }
+      readings: { air_quality: data.air_quality.level }
     });
   }
   eventEmitter.emit('incident:created', incident);

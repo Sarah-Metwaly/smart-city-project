@@ -8,6 +8,7 @@ const bmp180Routes = require('./modules/sensors/bmp180/bmp180Routes');
 const mq135Routes = require('./modules/sensors/mq135/mq135Routes');
 const dailySummaryRoutes = require('./modules/daily-summary/dailySummaryRoutes');
 const incidentRoutes = require('./modules/incidents/incidentRoutes');
+const flameRoutes = require('./modules/sensors/flame/flameRoutes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/v1/dht11', dht11Routes);
 app.use('/api/v1/bmp180', bmp180Routes);
 app.use('/api/v1/mq135', mq135Routes);
 app.use('/api/v1/summary', dailySummaryRoutes);
+app.use('/api/v1/flame', flameRoutes);
 
 //Handle all the routes that are not defined in our app and send an error message to the client.
 app.use((req, res, next) => {

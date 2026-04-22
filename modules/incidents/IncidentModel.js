@@ -11,7 +11,7 @@ const IncidentSchema = new mongoose.Schema({
 
   type: {
     type: String,
-    enum: ['POOR_AIR_QUALITY','HIGH_HUMIDITY' , 'FIRE_DETECTION', "LOW_PRESSURE", "HIGH_PRESSURE" ,'WEAPON_DETECTION',  'BEHAVIOR_ANOMALY','SMOKE_DETECTION',     
+    enum: [,'SMOKE_DETECTION' , 'POOR_AIR_QUALITY','HIGH_HUMIDITY' , 'FIRE_DETECTION', "LOW_PRESSURE", "HIGH_PRESSURE" ,'WEAPON_DETECTION',  'BEHAVIOR_ANOMALY',     
       'ENERGY_ANOMALY', 'CITIZEN_CALL',   'MANUAL_REPORT'
     ],
     required: true,
@@ -67,7 +67,7 @@ const IncidentSchema = new mongoose.Schema({
 
   actions: [{
     user: { type: String, default: 'SYSTEM' },
-  action: { type: String, enum: ['CREATE', 'DISPATCH', 'RESOLVE', 'CLOSE', 'FALSE_ALARM', 'CORRELATE'] },    note: String,
+    action: { type: String, enum: ['CREATE', 'DISPATCH', 'RESOLVE', 'CLOSE', 'FALSE_ALARM', 'CORRELATE'] },    note: String,
     timestamp: { type: Date, default: Date.now },
   }],
 

@@ -7,7 +7,6 @@ exports.saveReading = catchAsync(async (req, res) => {
     res.status(201).json({
         status: 'success',
         data: savedReading,
-        incident: incident || null
         });
 });
 

@@ -124,6 +124,7 @@ exports.getDailySummary = async () => {
             loopThroughSensorIds(bmp180Model, yesterday, today, costPerKwh , true),
             loopThroughSensorIds(mq135Model, yesterday, today, costPerKwh , true),
             loopThroughSensorIds(ldrModel, yesterday, today, costPerKwh , true),
+            loopThroughSensorIds(flameModel, yesterday, today, costPerKwh , true)
     ]);
  }  
 
@@ -220,20 +221,22 @@ exports.getTodaySummary = async () =>{
         ldrSummary,
         dht11Summary,
         bmp180Summary,
-        mq135Summary
+        mq135Summary,
+        flameSummary
     ] = await Promise.all([
         loopThroughSensorIds(ldrModel, today, liveTime, costPerKwh , false),
         loopThroughSensorIds(dht11Model, today, liveTime, costPerKwh , false),
         loopThroughSensorIds(bmp180Model, today, liveTime, costPerKwh , false),
-        loopThroughSensorIds(mq135Model, today, liveTime, costPerKwh , false)
+        loopThroughSensorIds(mq135Model, today, liveTime, costPerKwh , false),
+        loopThroughSensorIds(flameModel, today, liveTime, costPerKwh , false)
     ]);
 
     return {
         date: liveTime.toISOString().split('T')[0],
-        totalActiveLoad: parseFloat((ldrSummary.totalActivePower + dht11Summary.totalActivePower + bmp180Summary.totalActivePower + mq135Summary.totalActivePower).toFixed(2)),
-        totalEnergy: parseFloat((ldrSummary.totalEnergy + dht11Summary.totalEnergy + bmp180Summary.totalEnergy + mq135Summary.totalEnergy).toFixed(2)),
-        totalCost: parseFloat((ldrSummary.totalCost + dht11Summary.totalCost + bmp180Summary.totalCost + mq135Summary.totalCost).toFixed(2)),
-        totalAvgPower: parseFloat((ldrSummary.totalAvgPower + dht11Summary.totalAvgPower + bmp180Summary.totalAvgPower + mq135Summary.totalAvgPower).toFixed(2))
+        totalActiveLoad: parseFloat((ldrSummary.totalActivePower + dht11Summary.totalActivePower + bmp180Summary.totalActivePower + mq135Summary.totalActivePower + flameSummary.totalActivePower).toFixed(2)),
+        totalEnergy: parseFloat((ldrSummary.totalEnergy + dht11Summary.totalEnergy + bmp180Summary.totalEnergy + mq135Summary.totalEnergy + flameSummary.totalEnergy).toFixed(2)),
+        totalCost: parseFloat((ldrSummary.totalCost + dht11Summary.totalCost + bmp180Summary.totalCost + mq135Summary.totalCost + flameSummary.totalCost).toFixed(2)),
+        totalAvgPower: parseFloat((ldrSummary.totalAvgPower + dht11Summary.totalAvgPower + bmp180Summary.totalAvgPower + mq135Summary.totalAvgPower + flameSummary.totalAvgPower).toFixed(2))
     }
 }
 

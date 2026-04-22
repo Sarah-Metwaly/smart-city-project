@@ -3,7 +3,7 @@ const ldrService = require('../modules/sensors/ldr/ldrService');
 const dht11Service = require('../modules/sensors/dht11/dht11Service');
 const bmp180Service = require('../modules/sensors/bmp180/bmp180Service');
 const mq135Service = require('../modules/sensors/mq135/mq135Service');
-const mq135Controller = require('../modules/sensors/mq135/mq135Controller');
+const flameService = require('../modules/sensors/flame/flameService');
 const { broadcast } = require('./webSocket');
 
 //const BROKER_URL = 'mqtt://localhost:1883'; 
@@ -15,6 +15,7 @@ const TOPICS = [
     'smartcity/dht11',
     'smartcity/bmp180',
     'smartcity/mq135',
+    'smartcity/flame',
     // add new sensors here later
     // 'sensors/temperature',
     // 'sensors/motion',
@@ -58,7 +59,12 @@ const init = () => {
         if (topic === 'smartcity/mq135') {
             mq135Service.saveReading(data);
             broadcast('mq135', data);
-        }   
+        }
+        if(topic === 'smartcity/flame') {
+            flameService.saveReading(data);
+            broadcast('flame', data);
+        }  
+        // add new sensors here later
     });
 
     client.on('error', (err) => {

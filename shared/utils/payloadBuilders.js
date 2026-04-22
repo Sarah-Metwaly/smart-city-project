@@ -33,7 +33,7 @@ const basePayload = (data) => {
       userId: data.source?.userId || null
     },
 
-   location: data.location || { type: 'Point', coordinates: [0, 0], name: 'Unknown' },
+    location: data.location || { type: 'Point', coordinates: [0, 0], name: 'Unknown' },
     actions: [{
       user: 'SYSTEM',
       action: 'CREATE',
@@ -121,6 +121,12 @@ const builders = {
     sensorData: snapshot,
     notes: `Air quality is ${data.readings?.air_quality}`,
   }),
+
+  SMOKE_DETECTION: (data, snapshot) => ({
+    ...basePayload(data),
+    sensorData: snapshot,
+    notes: `Smoke detected with risk level ${data.readings?.risk_level}`,
+  }), 
 };
 
 const buildIncidentPayload = (data, sensorSnap = {}) => {
