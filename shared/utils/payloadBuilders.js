@@ -1,3 +1,5 @@
+const { checkThresholds } = require("../../modules/sensors/dht11/dht11Service");
+
 const getPriority = (confidence = 0) => {
   if (confidence >= 0.90) return 'CRITICAL';
   if (confidence >= 0.75) return 'HIGH';
@@ -23,7 +25,6 @@ const basePayload = (data) => {
 
   return {
     type: data.type,
-    priority: data.priority || getPriority(data.confidence),
     status: 'ACTIVE',
     
     source: {
@@ -46,45 +47,77 @@ const basePayload = (data) => {
 const builders = {
   WEAPON_DETECTION: (data) => ({
     ...basePayload(data),
+    priority: data.aiData?.weapon_analysis?.priority || getPriority(data.aiData?.weapon_analysis?.confidence),
     aiData: {
       modelName: 'weapon_detection',
-      confidence: data.confidence,
-      detectedClass: 'weapon',
-      boundingBox: data.boundingBox,
-      frameUrl: data.frameUrl
+      items: data.aiData?.weapon_analysis?.items || [],
+      confidence: data.aiData?.weapon_analysis?.confidence,
+      detected:  data.aiData?.weapon_analysis?.detected,
     },
-    media: {
-      images: data.frameUrl ? [data.frameUrl] : [],
-      videos: []
+    // media: {
+    //   images: data.frameUrl ? [data.frameUrl] : [],
+    //   videos: []
+    // }
+  }),
+
+  THEFT_DETECTION: (data) => ({
+    ...basePayload(data),
+    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
+    aiData: {
+      modelName: 'theft_detection',
+      confidence: data.aiData?.behavior_analysis?.confidence,
+      alert: data.aiData?.behavior_analysis?.alert,
     }
   }),
 
-  BEHAVIOR_ANOMALY: (data) => ({
+  CROWD_MANAGEMENT: (data) => ({
     ...basePayload(data),
+    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
     aiData: {
-      modelName: 'behavior_analysis',
-      confidence: data.confidence,
-      detectedClass: data.behaviorType,
-      personCount: data.personCount,
-      clipUrl: data.clipUrl
-    },
-    media: {
-      videos: data.clipUrl ? [data.clipUrl] : []
+      modelName: 'crowd_management',
+      count: data.aiData?.behavior_analysis?.count,
+      confidence: data.aiData?.behavior_analysis?.confidence,
+      isCrowded: data.aiData?.behavior_analysis?.is_crowded,
+      threshold: data.aiData?.behavior_analysis?.threshold,
+    }
+  }),
+
+  WRONG_WAY_DETECTION: (data) => ({
+    ...basePayload(data),
+    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
+    aiData: {
+      modelName: 'wrong_way_detection',
+      confidence: data.aiData?.behavior_analysis?.confidence,
+      detected: data.aiData?.behavior_analysis?.detected,
+      direction: data.aiData?.behavior_analysis?.direction,
+    }
+  }),
+
+  MEDICAL_EMERGENCY: (data) => ({
+    ...basePayload(data),
+    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
+    aiData: {
+      modelName: 'medical_emergency',
+      confidence: data.aiData?.behavior_analysis?.confidence,
+      personDown: data.aiData?.behavior_analysis?.personDown,
+      status: data.aiData?.behavior_analysis?.status
     }
   }),
 
   FIRE_DETECTION: (data, sensorSnap = {}) => ({
     ...basePayload(data),
+    priority: data.aiData?.fire_analysis?.priority || getPriority(data.aiData?.confidence),
     aiData: {
       modelName: 'fire_detection',
-      confidence: data.confidence,
-      flameDetected: true,
-      frameUrl: data.frameUrl
+      detected: data.aiData?.fire_analysis?.detected,
+      confidence: data.aiData?.fire_analysis?.confidence,
+      danger_level: data.aiData?.fire_analysis?.danger_level,
+      fusion_data: {
+        smoke_sensor_value: data.aiData?.fire_analysis?.fusion_data?.smoke_sensor_value,
+        is_confirmed_by_sensor: data.aiData?.fire_analysis?.fusion_data?.is_confirmed_by_sensor
     },
-    sensorData: sensorSnap,           
-    media: {
-      images: data.frameUrl ? [data.frameUrl] : []
-    }
+    sensorData: sensorSnap,   
+  }        
   }),
 
   CITIZEN_CALL: (data) => ({

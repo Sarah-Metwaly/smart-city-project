@@ -15,11 +15,9 @@ const getLatestSnapshot = async () => {
   humidity: dhtData[0]?.humidity,
   pressure: bmpData[0] ?.pressure,
   airAnalysis: {
-    co2: mqData[0]?.co2,
-    smoke: mqData[0]?.smoke,
-    alcohol: mqData[0]?.alcohol,
-    benzene: mqData[0]?.benzene,
-    status: mqData[0]?.air_quality 
+    level: mqData[0]?.air_quality.level,
+    score: mqData[0]?.air_quality.score,
+    status: mqData[0]?.status,
   },
   timestamp: new Date()
 };

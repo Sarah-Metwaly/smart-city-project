@@ -21,7 +21,7 @@ exports.createFromAI = async (aiPayload) => {
   let sensorSnap = {};
   if (aiPayload.type === 'FIRE_DETECTION') {
     sensorSnap = await sensorSnapshotService.getLatestSnapshot();
-    console.log("DEBUG Snapshot:", sensorSnap);
+    //console.log("DEBUG Snapshot:", sensorSnap);
   }
 
   const payload = buildIncidentPayload(aiPayload, sensorSnap);
