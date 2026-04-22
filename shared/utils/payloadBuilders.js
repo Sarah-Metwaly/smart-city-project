@@ -133,30 +133,35 @@ const builders = {
 
   LOW_PRESSURE: (data, snapshot) => ({
     ...basePayload(data),
+    priority: getPriority(), //Need to determine priority later based on a check
     sensorData: snapshot,
     notes: `Pressure dropped to ${data.readings?.pressure} hPa`,
   }),
 
   HIGH_PRESSURE: (data, snapshot) => ({
     ...basePayload(data),
+    priority: getPriority(), //Need to determine priority later based on a check
     sensorData: snapshot,
     notes: `Pressure increased to ${data.readings?.pressure} hPa`,
   }),
 
   HIGH_TEMP: (data, snapshot) => ({
     ...basePayload(data),
+    priority: getPriority(), //Need to determine priority later based on a check
     sensorData: snapshot,
     notes: `Temperature reached ${data.readings?.temperature}°C`,
   }),
 
   POOR_AIR_QUALITY: (data, snapshot) => ({
     ...basePayload(data),
+    priority: getPriority(), //Need to determine priority later based on a check
     sensorData: snapshot,
     notes: `Air quality is ${data.readings?.air_quality}`,
   }),
 
   SMOKE_DETECTION: (data, snapshot) => ({
     ...basePayload(data),
+    priority: getPriority(), //Need to determine priority later based on a check
     sensorData: snapshot,
     notes: `Smoke detected with risk level ${data.readings?.risk_level}`,
   }), 
