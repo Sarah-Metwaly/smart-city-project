@@ -1,4 +1,4 @@
-import Chart from "../../../shared/ui/molecules/PieChart";
+import Chart from "../../../shared/ui/molecules/CircleChart";
 import { useLightSystem } from "../hooks/useLightsytem";
 
 

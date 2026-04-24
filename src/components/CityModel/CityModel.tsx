@@ -78,7 +78,7 @@ function CityModel() {
             <ErrorBoundary>
                 <div
                     ref={containerRef}
-                    className={'h-4/6 w-3/4 bg-aman-dark rounded-lg cursor-grab active:cursor-grabbing'}
+                    className={'h-full w-full  rounded-lg cursor-grab active:cursor-grabbing'}
                     onMouseDown={(e) => onPointerDown(dragging, last, e)}
                     onMouseUp={() => onPointerUp(dragging)}
                     onMouseLeave={() => onPointerUp(dragging)}
