@@ -6,6 +6,19 @@ const mq135Service = require('../modules/sensors/mq135/mq135Service');
 const flameService = require('../modules/sensors/flame/flameService');
 const { broadcast } = require('./webSocket');
 
+//Throttling - filtering the saving of the input data to manage the storage.
+const lastSaveTime={};
+const shouldSave = (sensorId)=>{
+    const now = Date.now();
+    const lastSave=lastSaveTime[sensorId];
+    //If never saved or last save was more than 1 hour ago
+    if(!lastSave || now-lastSave >=60*60*1000){
+        lastSaveTime[sensorId]= now;
+        return true;
+    }
+    return false;
+}
+
 //const BROKER_URL = 'mqtt://localhost:1883'; 
 //To connect to the raspberry pi , which is not in the same network , Connect to a cloud 
 const BROKER_URL = `mqtts://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`; 
@@ -45,23 +58,23 @@ const init = () => {
         console.log(`📥 Message received on ${topic}:`, data);
 
         if (topic === 'smartcity/streetlight1') {
-            ldrService.saveReading(data);
+            if(shouldSave(data.sensor_id)) ldrService.saveReading(data);
             broadcast('ldr', data);
         }
         if (topic === 'smartcity/dht11') {
-            dht11Service.saveReading(data); 
+            if(shouldSave(data.sensor_id)) dht11Service.saveReading(data); 
             broadcast('dht11', data);       
         }
         if (topic === 'smartcity/bmp180') {
-            bmp180Service.saveReading(data);
+            if(shouldSave(data.sensor_id)) bmp180Service.saveReading(data);
             broadcast('bmp180', data);
         }
         if (topic === 'smartcity/mq135') {
-            mq135Service.saveReading(data);
+            if(shouldSave(data.sensor_id)) mq135Service.saveReading(data);
             broadcast('mq135', data);
         }
         if(topic === 'smartcity/flame') {
-            flameService.saveReading(data);
+            if(shouldSave(data.sensor_id)) flameService.saveReading(data);
             broadcast('flame', data);
         }  
         // add new sensors here later
