@@ -1,7 +1,7 @@
 const User = require('../userModel');
 const token = require('../utils/token');
 const { sendVerificationEmail } = require('../utils/email');
-const AppError = require('../../../shared/utils/appError');
+const AppError = require('../../../shared/utils/AppError');
 
 exports.signUpUser = async ({email , password , firstName , lastName}) => {
     // Check if the email is already registered

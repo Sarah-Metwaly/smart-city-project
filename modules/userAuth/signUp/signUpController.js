@@ -1,6 +1,6 @@
 const signUpService = require('./signUpService');
 const catchAsync = require('../../../shared/utils/catchAsync');
-const AppError = require('../../../shared/utils/appError');
+const AppError = require('../../../shared/utils/AppError');
 
 exports.signUpUser = catchAsync(async (req, res, next) => {
     const {email , password , firstName , lastName} = req.body;
