@@ -96,32 +96,36 @@ const incidentSchema = z.discriminatedUnion("type", [
 ]);
 
 // Core validation — used inside services for programmatic validation
-const validateIncident = (data) => {
-  const result = incidentSchema.safeParse(data);
-  if (!result.success) {
-    const error = new Error('Validation failed');
-    error.statusCode = 400;
-    error.errors = result.error.issues.map(err => ({
-      field: err.path.join('.'),
-      message: err.message
-    }));
-    throw error;
-  }
-  return result.data;
-};
+// const validateIncident = (data) => {
+//   const result = incidentSchema.safeParse(data);
+//   if (!result.success) {
+//     const error = new Error('Validation failed');
+//     error.statusCode = 400;
+//     error.errors = result.error.issues.map(err => ({
+//       field: err.path.join('.'),
+//       message: err.message
+//     }));
+//     throw error;
+//   }
+//   return result.data;
+// };
 
-// Express middleware — used in routes
-const validateIncidentMiddleware = (req, res, next) => {
-  try {
-    req.body = validateIncident(req.body);
-    next();
-  } catch (err) {
-    return res.status(400).json({
-      status: 'fail',
-      message: err.message,
-      errors: err.errors
-    });
-  }
-};
+// // Express middleware — used in routes
+// const validateIncidentMiddleware = (req, res, next) => {
+//   try {
+//     req.body = validateIncident(req.body);
+//     next();
+//   } catch (err) {
+//     return res.status(400).json({
+//       status: 'fail',
+//       message: err.message,
+//       errors: err.errors
+//     });
+//   }
+// };
 
-module.exports = { validateIncident, validateIncidentMiddleware };
+module.exports= {
+  incidentSchema,
+  // validateIncident,
+  // validateIncidentMiddleware
+};

@@ -1,16 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const incidentController = require('./incidentController');
-const { validateIncidentMiddleware} = require('../../shared/middlewares/validateIncident');
+//const { validateIncidentMiddleware} = require('../../shared/middlewares/validateIncident');
+const validateMiddleware = require('../../shared/middlewares/validate');
+const { incidentSchema } = require('./incidentValidation');
 
 
-router.post('/sensor', validateIncidentMiddleware, incidentController.createFromSensor);
+router.post('/sensor', validateMiddleware.validate(incidentSchema), incidentController.createFromSensor);
 
-router.post('/ai', validateIncidentMiddleware, incidentController.createFromAI);
+router.post('/ai', validateMiddleware.validate(incidentSchema), incidentController.createFromAI);
 
-router.post('/manual', validateIncidentMiddleware, incidentController.createFromManual);
+router.post('/manual', validateMiddleware.validate(incidentSchema), incidentController.createFromManual);
 
-router.put('/:id', validateIncidentMiddleware, incidentController.updateIncident);
+router.put('/:id', validateMiddleware.validate(incidentSchema), incidentController.updateIncident);
 
 router.get('/', incidentController.getAllIncidents);  
 

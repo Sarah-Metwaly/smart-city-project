@@ -1,4 +1,5 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const ldrRoutes = require('./modules/sensors/ldr/ldrRoutes');
 const errorController = require('./shared/controllers/errorController');
@@ -10,21 +11,36 @@ const dailySummaryRoutes = require('./modules/daily-summary/dailySummaryRoutes')
 const incidentRoutes = require('./modules/incidents/incidentRoutes');
 const flameRoutes = require('./modules/sensors/flame/flameRoutes');
 const aiDataRoutes = require('./modules/aiData/aiDataRoutes');
+const signUpRoutes = require('./modules/userAuth/signUp/signUpRoute');
+const verifyEmailRoutes = require('./modules/userAuth/verifyEmail/verifyEmailRoute');
+const logInRoutes = require('./modules/userAuth/logIn/logInRoutes');
+const authenticate = require('./modules/userAuth/middleware/authenticate');
+const authorize = require('./modules/userAuth/middleware/authorize');
+const refreshTokenRoutes = require('./modules/userAuth/refreshToken/refreshTokenRoutes');
+const logOutRoutes = require('./modules/userAuth/logOut/logOutRoute')
 
 const app = express();
 
+app.use(cookieParser())
 app.use(cors()); //To allow access from the frontEnd Local host
 app.use(express.json());
 
-app.use('/api/v1/incidents', incidentRoutes);
+//To authorize any path
+//app.use('/api/v1/ldr',authenticate.authenticate, authorize.isAdmin, ldrRoutes);
 
-app.use('/api/v1/ldr', ldrRoutes);
+app.use('/api/v1/ldr' , ldrRoutes);
 app.use('/api/v1/dht11', dht11Routes);
 app.use('/api/v1/bmp180', bmp180Routes);
 app.use('/api/v1/mq135', mq135Routes);
 app.use('/api/v1/summary', dailySummaryRoutes);
 app.use('/api/v1/flame', flameRoutes);
 app.use('/api/v1/ai-data', aiDataRoutes);
+app.use('/api/v1/incidents', incidentRoutes);
+app.use('/api/v1/auth', signUpRoutes);
+app.use('/api/v1/auth', verifyEmailRoutes);
+app.use('/api/v1/auth', logInRoutes);
+app.use('/api/v1/auth' , refreshTokenRoutes);
+app.use('/api/v1/auth' , logOutRoutes)
 
 //Handle all the routes that are not defined in our app and send an error message to the client.
 app.use((req, res, next) => {
