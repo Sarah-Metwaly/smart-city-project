@@ -1,4 +1,11 @@
 const LDR = require('./ldrModel');
+const {
+  hasActiveIncident,
+  addIncident,
+  removeIncident,
+  getIncidentId,
+  loadActiveIncidents,
+} = require('../../../shared/utils/incidentCashe')
 
 exports.saveReading = async (data) => {
     const reading = new LDR({
@@ -47,3 +54,15 @@ exports.getTotalActiveLoad = async () => {
     const total = onSensors.reduce((sum , sensor)=> sum+sensor.power , 0); 
     return total;
 }
+
+exports.checkThresholds = async (data) => {
+    if (data.status === 'Faulty') {
+        await incidentService.upsertFromSensor({
+            type: 'ENERGY_ANOMALY',
+            sensorId: data.sensor_id,
+            readings: { status: data.status }
+        });
+    } else {
+        await incidentService.resolveFromSensor(data.sensor_id, 'ENERGY_ANOMALY');
+    }
+};

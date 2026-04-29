@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const dailySummaryService = require('./modules/daily-summary/dailySummaryService');
+const {loadActiveIncidents} = require('./shared/utils/incidentCashe')
 
 dotenv.config({ path: './config.env' });
 const app = require('./app');
@@ -16,7 +17,8 @@ const server = app.listen(port, () => {
 
 mongoose
   .connect(process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD))
-  .then(() => {console.log('DB connected') 
+  .then(async () => {console.log('DB connected') 
+    await loadActiveIncidents(); //loads incident from DB to the cashe.
     mqtt.init();
     websocket.init(server);
 

@@ -159,6 +159,13 @@ const builders = {
     notes: `Air quality is ${data.readings?.air_quality}`,
   }),
 
+  ENERGY_ANOMALY: (data, snapshot) => ({
+    ...basePayload(data),
+    priority: getPriority(), //Need to determine priority later based on a check
+    sensorData: snapshot,
+    notes: `Sensor is ${data.readings?.status}`,
+  }),
+
   SMOKE_DETECTION: (data, snapshot) => ({
     ...basePayload(data),
     priority: getPriority(), //Need to determine priority later based on a check

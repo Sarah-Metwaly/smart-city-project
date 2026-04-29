@@ -1,6 +1,13 @@
 const flameModel = require('./flameModel');
 const incidentService = require('../../incidents/incidentService');
 const eventEmitter = require('../../../shared/utils/eventEmitter');
+const {
+  hasActiveIncident,
+  addIncident,
+  removeIncident,
+  getIncidentId,
+  loadActiveIncidents,
+} = require('../../../shared/utils/incidentCashe')
 
 exports.saveReading = async (data) => {
     const incident = await exports.checkThresholds(data);
@@ -36,12 +43,13 @@ exports.getLatestReadings = async () =>{
 exports.checkThresholds = async (data) => {
     let incident;
     if (data.is_flame_detected) {
-        incident = await incidentService.createFromSensor({
+        await incidentService.upsertFromSensor({
             type: 'SMOKE_DETECTION',
             sensorId: data.sensor_id,
             readings: { status: data.status, risk_level: data.risk_level }
         });
     } 
-    eventEmitter.emit('incident:created', incident);
-    return incident;
+    else{
+        await incidentService.resolveFromSensor(data.sensor_id, 'SMOKE_DETECTION');
+    }
 };

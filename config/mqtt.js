@@ -59,22 +59,27 @@ const init = () => {
 
         if (topic === 'smartcity/streetlight1') {
             if(shouldSave(data.sensor_id)) ldrService.saveReading(data);
+            ldrService.checkThresholds(data);
             broadcast('ldr', data);
         }
         if (topic === 'smartcity/dht11') {
             if(shouldSave(data.sensor_id)) dht11Service.saveReading(data); 
+            dht11Service.checkThresholds(data);
             broadcast('dht11', data);       
         }
         if (topic === 'smartcity/bmp180') {
             if(shouldSave(data.sensor_id)) bmp180Service.saveReading(data);
+            bmp180Service.checkThresholds(data);
             broadcast('bmp180', data);
         }
         if (topic === 'smartcity/mq135') {
             if(shouldSave(data.sensor_id)) mq135Service.saveReading(data);
+            mq135Service.checkThresholds(data);
             broadcast('mq135', data);
         }
         if(topic === 'smartcity/flame') {
             if(shouldSave(data.sensor_id)) flameService.saveReading(data);
+            flameService.checkThresholds(data);
             broadcast('flame', data);
         }  
         // add new sensors here later

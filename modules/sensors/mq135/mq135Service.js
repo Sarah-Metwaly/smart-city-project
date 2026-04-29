@@ -1,6 +1,13 @@
 const mq135Model = require('./mq135Model');
 const incidentService = require('../../incidents/incidentService');
 const eventEmitter = require('../../../shared/utils/eventEmitter');
+const {
+  hasActiveIncident,
+  addIncident,
+  removeIncident,
+  getIncidentId,
+  loadActiveIncidents,
+} = require('../../../shared/utils/incidentCashe')
 
 exports.saveReading = async (data) => {
     const incident = await exports.checkThresholds(data);
@@ -39,12 +46,13 @@ exports.getLatestReadings = async () =>{
 exports.checkThresholds = async (data) => {
   let incident;
   if (data.air_quality.level === 'POLLUTION HIGH' || data.status === 'DANGER') {
-    incident = await incidentService.createFromSensor({
+    await incidentService.upsertFromSensor({
       type: 'POOR_AIR_QUALITY',
       sensorId: data.sensor_id,
       readings: { air_quality: data.air_quality.level }
     });
   }
-  eventEmitter.emit('incident:created', incident);
-  return incident;
+  else{
+        await incidentService.resolveFromSensor(data.sensor_id, 'POOR_AIR_QUALITY');
+  }
 };
