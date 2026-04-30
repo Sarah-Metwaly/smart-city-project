@@ -8,7 +8,7 @@ const getPriority = (confidence = 0) => {
 };
 
 const SOURCE_TYPE_MAP = {
-  FIRE_DETECTION:   'SENSOR',
+  FIRE_DETECTION:   'AI',
   GAS_LEAK:         'SENSOR',
   LOW_PRESSURE:     'SENSOR',
   HIGH_TEMPERATURE: 'SENSOR',
@@ -48,87 +48,43 @@ const builders = {
   WEAPON_DETECTION: (data) => ({
     ...basePayload(data),
     priority: data.aiData?.weapon_analysis?.priority || getPriority(data.aiData?.weapon_analysis?.confidence),
-    aiData: {
-      modelName: 'weapon_detection',
-      items: data.aiData?.weapon_analysis?.items || [],
-      confidence: data.aiData?.weapon_analysis?.confidence,
-      detected:  data.aiData?.weapon_analysis?.detected,
-    },
-    // media: {
-    //   images: data.frameUrl ? [data.frameUrl] : [],
-    //   videos: []
-    // }
+    aiData: data.aiData?.weapon_analysis,
   }),
 
   THEFT_DETECTION: (data) => ({
     ...basePayload(data),
     priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: {
-      modelName: 'theft_detection',
-      confidence: data.aiData?.behavior_analysis?.confidence,
-      alert: data.aiData?.behavior_analysis?.alert,
-    }
+    aiData: data.aiData?.theft_detection
   }),
 
   CROWD_MANAGEMENT: (data) => ({
     ...basePayload(data),
     priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: {
-      modelName: 'crowd_management',
-      count: data.aiData?.behavior_analysis?.count,
-      confidence: data.aiData?.behavior_analysis?.confidence,
-      isCrowded: data.aiData?.behavior_analysis?.is_crowded,
-      threshold: data.aiData?.behavior_analysis?.threshold,
-    }
+    aiData: data.aiData?.crowd_management
   }),
 
   WRONG_WAY_DETECTION: (data) => ({
     ...basePayload(data),
     priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: {
-      modelName: 'wrong_way_detection',
-      confidence: data.aiData?.behavior_analysis?.confidence,
-      detected: data.aiData?.behavior_analysis?.detected,
-      direction: data.aiData?.behavior_analysis?.direction,
-    }
+    aiData: data.aiData?.wrong_way
   }),
 
   MEDICAL_EMERGENCY: (data) => ({
     ...basePayload(data),
     priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: {
-      modelName: 'medical_emergency',
-      confidence: data.aiData?.behavior_analysis?.confidence,
-      personDown: data.aiData?.behavior_analysis?.personDown,
-      status: data.aiData?.behavior_analysis?.status
-    }
+    aiData: data.aiData?.medical_emergency
   }),
 
   FIRE_DETECTION: (data, sensorSnap = {}) => ({
     ...basePayload(data),
     priority: data.aiData?.fire_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: {
-      modelName: 'fire_detection',
-      detected: data.aiData?.fire_analysis?.detected,
-      confidence: data.aiData?.fire_analysis?.confidence,
-      danger_level: data.aiData?.fire_analysis?.danger_level,
-      fusion_data: {
-        smoke_sensor_value: data.aiData?.fire_analysis?.fusion_data?.smoke_sensor_value,
-        is_confirmed_by_sensor: data.aiData?.fire_analysis?.fusion_data?.is_confirmed_by_sensor
-    },
+    aiData: data.aiData?.fire_analysis ,
     sensorData: sensorSnap,   
-  }        
   }),
 
   CITIZEN_CALL: (data) => ({
     ...basePayload(data),
-    aiData: {
-      modelName: 'call_analysis',
-      transcript: data.transcript,
-      keywords: data.keywords,
-      urgency: data.urgency,
-      audioUrl: data.audioUrl
-    }
+    aiData: data.aiData
   }),
 
   LOW_PRESSURE: (data, snapshot) => ({
