@@ -2,14 +2,13 @@ const Incident = require('./IncidentModel');
 const { buildIncidentPayload } = require('../../shared/utils/payloadBuilders');
 const sensorSnapshotService = require('../../shared/services/sensorSnapshotService');
 const eventEmitter = require('../../shared/utils/eventEmitter');
-const {
-activeIncidents , hasActiveIncident, getIncidentKey , addIncident, removeIncident, getIncidentId , loadActiveIncidents, addAiCachedData ,checkAiCachedData
+const {activeIncidents , hasActiveIncident, getIncidentKey , addIncident, removeIncident, getIncidentId , loadActiveIncidents, addAiCachedData ,checkAiCachedData
 } = require('../../shared/utils/incidentCashe')
 
 exports.createFromSensor = async (data) => {
   const payloadWithSource = {
     ...data,
-    source: { type: 'SENSOR', sensorId: data.sensorId },
+    source: { type: 'SENSOR', deviceId: data.sensorId },
   };
 
   const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
@@ -105,29 +104,28 @@ exports.resolveFromSensor = async (sensorId, type) => {
   return resolved;
 };
 
-exports.upsertFromAi=async (aiPayload)=>{
-  //build incident 
-  let sensorSnap = {};
-  if (aiPayload.type === 'FIRE_DETECTION') {
-    sensorSnap = await sensorSnapshotService.getLatestSnapshot();
-    //console.log("DEBUG Snapshot:", sensorSnap);
-  }
-  const payload = buildIncidentPayload(aiPayload, sensorSnap);
+exports.upsertFromAi = async (aiPayload) => {
+    let sensorSnap = {};
+    if (aiPayload.type === 'FIRE_DETECTION') {
+        sensorSnap = await sensorSnapshotService.getLatestSnapshot();
+    }
+    const payload = buildIncidentPayload(aiPayload, sensorSnap);
 
-  const deviceId=aiPayload.source.deviceId;
-  const aiData = payload.aiData;
+    const deviceId = aiPayload.source.deviceId;
+    const aiData = payload.aiData;
 
-  //If incident is Active / cached.
-  if(hasActiveIncident(deviceId, payload.type)){
-    checkAiCachedData(deviceId, payload.type , aiData);
-    exports.updateFromAi(activeIncidents[getIncidentKey(deviceId, payload.type)] , aiData)
-  }
-  else{ //No active/cached incident.
-    const incident = await exports.createFromAI(payload);
-    addIncident(deviceId, payload.type, incident._id);
-    addAiCachedData(deviceId, payload.type, aiData);
-  }
-}
+    if (hasActiveIncident(deviceId, payload.type)) {
+        const hasChanged = checkAiCachedData(deviceId, payload.type, aiData);
+        if (hasChanged) {  // FIX: Only update if data actually changed
+            const incidentId = getIncidentId(deviceId, payload.type);
+            await exports.updateFromAi(incidentId, aiData);  // FIX: Use getIncidentId + await
+        }
+    } else {
+        const incident = await exports.createFromAI(payload);
+        addIncident(deviceId, payload.type, incident._id.toString());
+        addAiCachedData(deviceId, payload.type, aiData);
+    }
+};
 
 exports.updateFromAi = async (IncidentId , UpdatedAiData) =>{
   const updated = await Incident.findByIdAndUpdate(
