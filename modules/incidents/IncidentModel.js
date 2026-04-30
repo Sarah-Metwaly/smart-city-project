@@ -27,7 +27,7 @@ const IncidentSchema = new mongoose.Schema({
 
   status: {
     type: String,
-     enum: ['ACTIVE', 'DISPATCHED', 'RESOLVED', 'CLOSED', 'FALSE_ALARM'],
+     enum: ['ACTIVE', 'DISPATCHED', 'RESOLVED', 'CLOSED', 'FALSE_ALARM' , 'AI CLEARED-AWAITING CONFIRMATION'],
      default: 'ACTIVE',
     index: true,
   },
@@ -67,7 +67,7 @@ const IncidentSchema = new mongoose.Schema({
 
   actions: [{
     user: { type: String, default: 'SYSTEM' },
-    action: { type: String, enum: ['CREATE', 'DISPATCH', 'RESOLVE', 'CLOSE', 'FALSE_ALARM', 'CORRELATE'] },    note: String,
+    action: { type: String, enum: ['CREATE','AI CLEARED-AWAITING CONFIRMATION', 'DISPATCH', 'RESOLVE', 'CLOSE', 'FALSE_ALARM', 'CORRELATE'] },    note: String,
     timestamp: { type: Date, default: Date.now },
   }],
 

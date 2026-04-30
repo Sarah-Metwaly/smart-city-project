@@ -21,19 +21,17 @@ const aiDataSchema = new mongoose.Schema({
             detected: Boolean,
             confidence: Number,
             danger_level: String,
+            incident_image_url :String ,
             priority: {
                 type: String,
                 enum: ['LOW', 'MEDIUM', 'HIGH' , 'CRITICAL']
-            },
-            fusion_data:{
-                smoke_sensor_value: Number,
-                is_confirmed_by_sensor: Boolean
             }
         },
         weapon_analysis: {
             detected: Boolean,
             items: [String],
             confidence: Number,
+            incident_image_url :String ,
             priority: {
                 type: String,
                 enum: ['LOW', 'MEDIUM', 'HIGH' , 'CRITICAL']
@@ -43,6 +41,7 @@ const aiDataSchema = new mongoose.Schema({
             theft_detection:{
                 alert: Boolean,
                 confidence: Number,
+                incident_image_url :String ,
                 priority: {
                     type: String,
                     enum: ['LOW', 'MEDIUM', 'HIGH' , 'CRITICAL']
@@ -52,22 +51,16 @@ const aiDataSchema = new mongoose.Schema({
                 count: Number,
                 is_crowded: Boolean,
                 threshold: Number,
+                incident_image_url :String ,
                 priority: {
                     type: String,
                     enum: ['LOW', 'MEDIUM', 'HIGH' , 'CRITICAL']
                 },
             },
-            wrong_way:{
-                detected: Boolean,
-                direction: String,
-                priority: {
-                    type: String,
-                    enum: ['LOW', 'MEDIUM', 'HIGH' , 'CRITICAL']
-                }
-            },
             medical_emergency:{
                 person_down: Boolean,
                 status: String,
+                incident_image_url :String ,
                 priority: {
                     type: String,
                     enum: ['LOW', 'MEDIUM', 'HIGH' , 'CRITICAL']

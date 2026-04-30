@@ -4,6 +4,7 @@ const dht11Service = require('../modules/sensors/dht11/dht11Service');
 const bmp180Service = require('../modules/sensors/bmp180/bmp180Service');
 const mq135Service = require('../modules/sensors/mq135/mq135Service');
 const flameService = require('../modules/sensors/flame/flameService');
+const aiDataService=require('../modules/aiData/aiDataService');
 const { broadcast } = require('./webSocket');
 
 //Throttling - filtering the saving of the input data to manage the storage.
@@ -29,6 +30,7 @@ const TOPICS = [
     'smartcity/bmp180',
     'smartcity/mq135',
     'smartcity/flame',
+    'ai/fullDetection'
     // add new sensors here later
     // 'sensors/temperature',
     // 'sensors/motion',
@@ -81,6 +83,9 @@ const init = () => {
             if(shouldSave(data.sensor_id)) flameService.saveReading(data);
             flameService.checkThresholds(data);
             broadcast('flame', data);
+        }
+        if(topic==='ai/fullDetection'){
+            aiDataService.detectActiveIncidents(data);
         }  
         // add new sensors here later
     });
