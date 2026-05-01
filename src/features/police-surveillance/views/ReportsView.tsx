@@ -1,10 +1,11 @@
+import CitySurveillanceMap from "../../../shared/ui/organisms/CitySurveillanceMap"
+import CrimeStatus from "../components/ReportComponent/CrimeStatus"
+import Crimetype from "../components/ReportComponent/Crimetype"
+import IncidentChart from "../components/ReportComponent/IncidentChart"
+import TimeResponseChart from "../components/ReportComponent/TimeResponseChart"
+import WeeklyType from "../components/ReportComponent/WeeklyIncType"
 
-import Crimetype from "../components/Report/Crimetype";
-import CitySurveillanceMap from "../../../shared/ui/organisms/CitySurveillanceMap";
-import IncidentChart from "../components/Report/IncidentChart";
-import TimeResponseChart from "../components/Report/TimeResponseChart";
-import CrimeStatus from "../components/Report/CrimeStatus";
-import WeeklyType from "../components/Report/WeeklyIncType";
+
 
 const ReportsView = () => {
   return (
