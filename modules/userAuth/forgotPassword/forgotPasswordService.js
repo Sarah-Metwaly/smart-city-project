@@ -20,7 +20,7 @@ exports.forgotPassword = async (email) =>{
     await user.save({validateBeforeSave:false});
 
     //sendEmail
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token${rawToken}`
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`
     sendPasswordResetEmail(email , resetUrl).catch((err)=>{
         console.error('Failed to send reset email:', err);
     });

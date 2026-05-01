@@ -18,6 +18,7 @@ const authorize = require('./modules/userAuth/middleware/authorize');
 const refreshTokenRoutes = require('./modules/userAuth/refreshToken/refreshTokenRoutes');
 const logOutRoutes = require('./modules/userAuth/logOut/logOutRoute');
 const forgotPasswordRoutes = require('./modules/userAuth/forgotPassword/forgotPasswordRoute');
+const resetPasswordRoutes = require('./modules/userAuth/resetPassword/resetPasswordRoutes');
 
 const app = express();
 
@@ -40,7 +41,8 @@ app.use('/api/v1/auth', verifyEmailRoutes);
 app.use('/api/v1/auth', logInRoutes);
 app.use('/api/v1/auth' , refreshTokenRoutes);
 app.use('/api/v1/auth' , logOutRoutes);
-app.use('/api/v1/auth' , forgotPasswordRoutes)
+app.use('/api/v1/auth' , forgotPasswordRoutes);
+app.use('/api/v1/auth' , resetPasswordRoutes);
 
 //Handle all the routes that are not defined in our app and send an error message to the client.
 app.use((req, res, next) => {
