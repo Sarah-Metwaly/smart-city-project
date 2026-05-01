@@ -1,5 +1,3 @@
-
-// Sub-component:DRY dont repeat yourself
 interface CardProps {
   icon: React.ReactNode;
   trend:React.ReactNode;

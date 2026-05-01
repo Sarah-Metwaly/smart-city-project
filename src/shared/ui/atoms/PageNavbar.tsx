@@ -1,25 +1,32 @@
 interface NavLink {
   name: string;
   id: string;
+  path: string; 
 }
 
-// Define that this component MUST receive 'links'
 interface NavbarProps {
   links: NavLink[]; 
+  activeView: string;
+  onViewChange: (id: string) => void; 
 }
 
-const PoliceNavbar = ({ links }: NavbarProps) => {
+const PoliceNavbar = ({ links, activeView, onViewChange }: NavbarProps) => { 
   return (
     <nav className="flex justify-start w-full"> 
-      <div className="flex  gap-1 bg-[#1E3A46]/20 border border-[#1E3A46] rounded-xl p-1.5 backdrop-blur-md">
+      <div className="flex gap-1 bg-aman-teal/20 border border-aman-teal rounded-xl p-1.5 backdrop-blur-md">
         {links.map((link) => (
-          <a
+          <button
             key={link.id}
-            href={`#${link.id}`}
-           className="px-5 py-1 font-['DM_Mono'] text-[10px] font-thin tracking-[1.3px] uppercase antialiased transition-all duration-300 ease-in-out rounded-[8px] text-white hover:bg-[#7A9AAA] hover:text-black"
+            type="button"
+            onClick={() => onViewChange(link.id)} // دي اللي بتغير الـ State
+            className={`px-5 py-1 font-['DM_Mono'] text-[10px] font-thin tracking-[1.3px] uppercase antialiased transition-all duration-300 ease-in-out rounded-lg ${
+              activeView === link.id 
+                ? 'bg-[#7A9AAA] text-black' 
+                : 'text-white hover:bg-[#7A9AAA] hover:text-black'
+            }`}
           >
             {link.name}
-          </a>
+          </button>
         ))}
       </div>
     </nav>

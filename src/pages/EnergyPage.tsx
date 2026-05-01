@@ -9,7 +9,7 @@ import {
   HiLightningBolt,
 } from "react-icons/hi";
 import Lightsystem from "../features/energy-optimization/components/Lightsystem";
-import Card from "../shared/ui/molecules/Card";
+import Card from "../shared/ui/atoms/Card";
 import Energy from "../features/energy-optimization/components/Energy";
 import { useLightSystem } from "../features/energy-optimization/hooks/useLightsytem";
 import { useTotalData } from "../shared/hooks/useTotalData";

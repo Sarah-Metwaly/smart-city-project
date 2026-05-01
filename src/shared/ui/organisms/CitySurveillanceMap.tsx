@@ -14,10 +14,8 @@ interface Zone {
 
 const ZONES: Zone[] = [
   { id: 1, name: "East Side", x: "68%", y: "35%", risk: "high", rate: 85, size: 150 },
-  { id: 2, name: "Shubra", x: "22%", y: "26%", risk: "high", rate: 78, size: 135 },
   { id: 3, name: "Central", x: "50%", y: "56%", risk: "medium", rate: 52, size: 120 },
   { id: 4, name: "North Bridge", x: "56%", y: "20%", risk: "medium", rate: 45, size: 115 },
-  { id: 5, name: "Harbor", x: "33%", y: "76%", risk: "low", rate: 22, size: 105 },
   { id: 6, name: "West Gate", x: "17%", y: "63%", risk: "low", rate: 30, size: 100 },
 ];
 
@@ -48,14 +46,14 @@ const CitySurveillanceMap: React.FC = () => {
       </div>
 
       <div className="relative flex-1 overflow-hidden" style={{ background: "#050c10", minHeight: "200px" }}>
-        <div className="absolute inset-0 pointer-events-none z-[1]"
+        <div className="absolute inset-0 pointer-events-none z-1"
           style={{ backgroundImage: "linear-gradient(rgba(126,207,207,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(126,207,207,0.04) 1px,transparent 1px)", backgroundSize: "36px 36px" }}
         />
         {[28, 55, 78].map(t => (
-          <div key={t} className="absolute left-0 right-0 h-px z-[2]" style={{ top: `${t}%`, background: "rgba(30,58,70,0.5)" }} />
+          <div key={t} className="absolute left-0 right-0 h-px z-2" style={{ top: `${t}%`, background: "rgba(30,58,70,0.5)" }} />
         ))}
         {[32, 65].map(l => (
-          <div key={l} className="absolute top-0 bottom-0 w-px z-[2]" style={{ left: `${l}%`, background: "rgba(30,58,70,0.5)" }} />
+          <div key={l} className="absolute top-0 bottom-0 w-px z-2" style={{ left: `${l}%`, background: "rgba(30,58,70,0.5)" }} />
         ))}
 
         {showHeat && ZONES.map(z => {
