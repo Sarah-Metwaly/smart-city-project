@@ -6,12 +6,15 @@ import { MdOutlineLightbulb } from "react-icons/md";
 import { RiFlashlightFill } from "react-icons/ri";
 import { FaDollarSign } from "react-icons/fa";
 import Card from "../shared/ui/molecules/Card";
-import Crimetype from "../features/police-surveillance/components/Report/Crimetype";
+import Crimetype from "../features/police-surveillance/components/ReportComponent/Crimetype";
 import CitySurveillanceMap from "../features/police-surveillance/components/CitySurveillanceMap";
-import IncidentChart from "../features/police-surveillance/components/Report/IncidentChart";
-import TimeResponseChart from "../features/police-surveillance/components/Report/TimeResponseChart";
-import CrimeStatus from "../features/police-surveillance/components/Report/CrimeStatus";
-import WeeklyType from "../features/police-surveillance/components/Report/WeeklyIncType";
+import IncidentChart from "../features/police-surveillance/components/ReportComponent/IncidentChart";
+import TimeResponseChart from "../features/police-surveillance/components/ReportComponent/TimeResponseChart";
+import CrimeStatus from "../features/police-surveillance/components/ReportComponent/CrimeStatus";
+import WeeklyType from "../features/police-surveillance/components/ReportComponent/WeeklyIncType";
+import Behavior from "../features/police-surveillance/views/Behavior";
+
+
 
 const policeLinks = [
   { name: "Live Events", id: "LiveEvents" },
@@ -113,7 +116,7 @@ const PolicePage = () => {
         <main className="space-y-20 px-30">
           <section id="LiveEvents" className=""></section>
 
-          {/* --- PAGE CONTENT AREA --- */}
+          {/* --- Report--- */}
           <section id="Reports" className="grid grid-cols-6 gap-4 ">
             {/***********Incident chart*********** */}
             <div className="col-span-3  bg-aman-teal rounded-xl shadow-sm">
@@ -173,6 +176,18 @@ const PolicePage = () => {
               <CrimeStatus />
             </div>
           </section>
+
+          {/********behavior******** */}
+          <section id="behavior">
+            <Behavior/>
+           
+
+
+
+          </section>
+          
+
+
         </main>
       </div>
     </div>
