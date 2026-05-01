@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import StatCards from "../components/StatCards";
+import { AlertTriangle, Camera, Eye, EyeOff, FileText, Shield } from "lucide-react";
+import StatCards from "../../../shared/ui/organisms/StatCards";
 import PoliceLiveFeed from "../components/PoliceLiveFeed";
-import CitySurveillanceMap from "../components/CitySurveillanceMap";
-import ActiveAlertsSidebar from "../components/ActiveAlertsSidebar";
-import IncidentTable from "../components/IncidentTable";
+import CitySurveillanceMap from "../../../shared/ui/organisms/CitySurveillanceMap";
+import ActiveAlertsSidebar from "../../../shared/ui/organisms/ActiveAlertsSidebar";
+import IncidentTable from "../../../shared/ui/organisms/IncidentTable";
 
 type AlertStatus = 'active' | 'dispatched' | 'resolved';
 
@@ -21,12 +21,17 @@ const LiveEventsView: React.FC = () => {
     { id: 2, status: "active" },
   ];
 
+  const surveillanceStats = [
+  { title: "Active Cameras", value: "24", icon: Camera, badge: "LIVE", colorClass: { bg: "bg-aman-red", text: "text-[#ff4d4d]" } },
+  { title: "Officers On Duty", value: "08", icon: Shield, badge: "+2", colorClass: { bg: "bg-aman-green", text: "text-[#4caf8a]" } },
+  { title: "Incidents Today", value: "12", icon: FileText, badge: "TODAY", colorClass: { bg: "bg-aman-cyan", text: "text-[#7ecfcf]" } },
+  { title: "Active Alerts", value: "03", icon: AlertTriangle, badge: "URGENT", colorClass: { bg: "bg-aman-orange", text: "text-[#f5a623]" } },
+];
   return (
     <>
-      <div className="flex flex-col min-h-screen gap-6 px-4 py-5 font-mono bg-[#131a21] text-aman-white sm:px-6 lg:px-12">
+      <div className="flex flex-col min-h-screen gap-6 px-4 py-5 font-mono text-aman-white sm:px-6 lg:px-12">
         {/* 1. KPI SECTION */}
-        <StatCards />
-
+      <StatCards stats={surveillanceStats} />
         {/* 2. MASTER FEED (Main Screen) */}
         <div className="relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]">
           <button
@@ -47,19 +52,19 @@ const LiveEventsView: React.FC = () => {
               Camera Grid Component
             </div>
           ) : (
-            // <PoliceLiveFeed />
+            <PoliceLiveFeed />
           )}
         </div>
 
         {/* MIDDLE SECTION: MAP + ALERTS */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
           {/* MAP CONTAINER */}
-          <div className="flex flex-col overflow-hidden border shadow-lg bg-aman-teal border-aman-teal rounded-2xl min-h-[400px]">
-            {/* <CitySurveillanceMap /> */}
+          <div className="flex flex-col overflow-hidden border shadow-lg bg-aman-teal border-aman-teal rounded-2xl min-h-100">
+            <CitySurveillanceMap />
           </div>
 
           {/* ALERTS SIDEBAR */}
-          <div className="flex flex-col overflow-hidden border shadow-lg bg-aman-teal border-aman-teal rounded-2xl max-h-[400px]">
+          <div className="flex flex-col overflow-hidden border shadow-lg bg-aman-teal border-aman-teal rounded-2xl max-h-100">
             <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-aman-teal/70 shrink-0">
               <span className="text-[10px] font-medium tracking-[2px] uppercase text-aman-white">
                 Active Intelligence
@@ -72,14 +77,14 @@ const LiveEventsView: React.FC = () => {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-              {/* <ActiveAlertsSidebar /> */}
+              <ActiveAlertsSidebar />
             </div>
           </div>
         </div>
 
         {/* INCIDENT REPORTS */}
         <div className="w-full">
-          {/* <IncidentTable /> */}
+          <IncidentTable />
         </div>
       </div>
     </>

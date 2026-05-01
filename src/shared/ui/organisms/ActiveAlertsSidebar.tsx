@@ -1,5 +1,5 @@
 import React from 'react';
-import AlertItem from './AlertItem';
+import AlertItem from '../atoms/AlertItem';
 
 type AlertStatus = 'active' | 'dispatched' | 'resolved';
 

@@ -24,7 +24,7 @@ const STATUS_CLS: Record<AlertStatus, string> = {
 
 const AlertItem: React.FC<AlertItemProps> = ({ alert }) => {
   return (
-    <div className="bg-aman-dark flex items-center gap-3 px-3.5 py-2.5 transition-colors duration-150 hover:bg-aman-teal/35 cursor-pointer group">
+    <div className="bg-aman-teal flex items-center gap-3 px-3.5 py-2.5 transition-colors duration-150 hover:bg-aman-teal/35 cursor-pointer group">
       
       <div className="flex items-center justify-center border rounded-lg w-9 h-9 shrink-0 bg-aman-red/10 border-aman-red/22 group-hover:border-aman-red/50">
         <Crosshair className="w-3.5 h-3.5 text-aman-red" strokeWidth={1.7} />

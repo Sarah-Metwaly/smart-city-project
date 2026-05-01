@@ -30,7 +30,6 @@ const LineChart = ({ data, title, color }: LineChartProps) => {
           label: title, 
           color: color,
         }]}
-        // 1. تفعيل الخطوط بالطول وبالعرض معاً
         grid={{ horizontal: true, vertical: true }} 
         height={380}
         width={350}
