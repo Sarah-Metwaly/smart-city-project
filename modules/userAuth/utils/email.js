@@ -33,7 +33,27 @@ const sendVerificationEmail = async (userEmail, verificationUrl) => {
     })
 };
 
+const sendPasswordResetEmail = async (email, resetUrl) => {
+  await sendEmail({
+    to: email,
+    subject: 'Password Reset - Smart City',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Password Reset Request</h2>
+        <p>You requested a password reset. Click the link below to reset your password:</p>
+        <a href="${resetUrl}" 
+           style="display: inline-block; padding: 12px 24px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px; margin: 16px 0;">
+          Reset Password
+        </a>
+        <p>This link expires in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      </div>
+    `,
+  });
+};
+
 module.exports = {
     sendEmail,
-    sendVerificationEmail
+    sendVerificationEmail,
+    sendPasswordResetEmail
 };

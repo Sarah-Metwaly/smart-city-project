@@ -14,6 +14,14 @@ exports.generateEmailVerificationToken = () => {
     return {rawToken: token, hashedToken, expiresAt };
 };
 
+exports.generatePasswordResetToken = () =>{
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashedToken = exports.hashToken(token);
+    const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    return { rawToken: token, hashedToken, expiresAt };
+}
+
 // Function to generate a JWT access token for a user
 exports.generateAccessToken = (userId) =>{
     // Generate a JWT access token with the user's ID as the payload
