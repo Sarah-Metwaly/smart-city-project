@@ -6,14 +6,7 @@ const {activeIncidents , hasActiveIncident, getIncidentKey , addIncident, remove
 } = require('../../shared/utils/incidentCashe')
 
 exports.createFromSensor = async (data) => {
-  const payloadWithSource = {
-    ...data,
-    source: { type: 'SENSOR', deviceId: data.sensorId },
-  };
-
-  const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
-  const payload = buildIncidentPayload(payloadWithSource, initialSnapshot);
-  const incident = await Incident.create(payload);
+  const incident = await Incident.create(data);
 
   eventEmitter.emit('incident:created', incident);
   return incident;
@@ -58,26 +51,56 @@ exports.createFromAI = async (payload) => {
 //   return updatedIncident;
 // };
 
-exports.createFromManual = async (manualPayload, userId) => {
-  const payload = buildIncidentPayload({
-    ...manualPayload,
-    source: { type: 'MANUAL', userId },
-  });
+// exports.createFromManual = async (manualPayload, userId) => {
+//   const payload = buildIncidentPayload({
+//     ...manualPayload,
+//     source: { type: 'MANUAL', userId },
+//   });
 
-  const incident = await Incident.create(payload);
-  eventEmitter.emit('incident:created', incident);
-  return incident;
-};
+//   const incident = await Incident.create(payload);
+//   eventEmitter.emit('incident:created', incident);
+//   return incident;
+// };
 
 
 exports.upsertFromSensor = async (data) => {
-  if (hasActiveIncident(data.sensorId, data.type)) return;
+    const payloadWithSource = {
+    ...data,
+    source: { type: 'SENSOR', deviceId: data.sensorId },
+  };
 
-  //create new incident if there is no active incident for it.
-  const incident = await exports.createFromSensor(data);
-  addIncident(data.sensorId, data.type, incident.incidentId);
-  return incident;
+  const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
+  const payload = buildIncidentPayload(payloadWithSource, initialSnapshot);
+  
+  const deviceId=payload.source.deviceId;
+
+  if (hasActiveIncident(deviceId, payload.type)){
+      const hasChanged = checkAiCachedData(deviceId, payload.type, initialSnapshot);
+      if (hasChanged) {  // FIX: Only update if data actually changed
+          const incidentId = getIncidentId(deviceId, payload.type);
+          await exports.updateFromSensor(incidentId, initialSnapshot);  // FIX: Use getIncidentId + await
+      }
+  }
+  else{
+      const incident = await exports.createFromSensor(payload);
+      addIncident(deviceId, payload.type, incident._id.toString());
+      addAiCachedData(deviceId, payload.type, initialSnapshot);
+  }
 };
+
+exports.updateFromSensor = async (IncidentId , snapShot) =>{
+  const updated = await Incident.findByIdAndUpdate(
+    IncidentId ,
+    {
+      $set:{
+        sensorData : snapShot
+      }
+    },
+    { returnDocument: 'after' }
+  );
+  eventEmitter.emit('incident:updated' , updated);
+  return updated;
+}
 
 exports.resolveFromSensor = async (sensorId, type) => {
   if (!hasActiveIncident(sensorId, type)) return; //no active incident to be resolved

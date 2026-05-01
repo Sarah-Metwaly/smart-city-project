@@ -10,7 +10,6 @@ const {
 } = require('../../../shared/utils/incidentCashe')
 
 exports.saveReading = async (data) => {
-    const incident = await exports.checkThresholds(data);
     const reading = new mq135Model({
         device_id: data.device_id,
         sensors: data.sensors,

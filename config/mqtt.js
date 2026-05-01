@@ -20,6 +20,9 @@ const shouldSave = (sensorId)=>{
     return false;
 }
 
+//save latest data from each topic
+const latestData={};
+
 //const BROKER_URL = 'mqtt://localhost:1883'; 
 //To connect to the raspberry pi , which is not in the same network , Connect to a cloud 
 const BROKER_URL = `mqtts://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`; 
@@ -60,26 +63,31 @@ const init = () => {
         console.log(`📥 Message received on ${topic}:`, data);
 
         if (topic === 'smartcity/streetlight1') {
+            latestData[topic]=data;
             if(shouldSave(data.sensor_id)) ldrService.saveReading(data);
             ldrService.checkThresholds(data);
             broadcast('ldr', data);
         }
         if (topic === 'smartcity/dht11') {
+            latestData[topic]=data;
             if(shouldSave(data.sensor_id)) dht11Service.saveReading(data); 
             dht11Service.checkThresholds(data);
             broadcast('dht11', data);       
         }
         if (topic === 'smartcity/bmp180') {
+            latestData[topic]=data;
             if(shouldSave(data.sensor_id)) bmp180Service.saveReading(data);
             bmp180Service.checkThresholds(data);
             broadcast('bmp180', data);
         }
         if (topic === 'smartcity/mq135') {
+            latestData[topic]=data;
             if(shouldSave(data.sensor_id)) mq135Service.saveReading(data);
             mq135Service.checkThresholds(data);
             broadcast('mq135', data);
         }
         if(topic === 'smartcity/flame') {
+            latestData[topic]=data;
             if(shouldSave(data.sensor_id)) flameService.saveReading(data);
             flameService.checkThresholds(data);
             broadcast('flame', data);
@@ -99,4 +107,4 @@ const init = () => {
     });
 };
 
-module.exports = { init };
+module.exports = { init , latestData };

@@ -10,7 +10,6 @@ const {
 } = require('../../../shared/utils/incidentCashe')
 
 exports.saveReading = async (data) => {
-  const incident = await exports.checkThresholds(data);
   const reading = new BMP180({
     sensor_id: data.sensor_id,
     temperature: data.temperature,

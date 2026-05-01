@@ -1,5 +1,3 @@
-const { checkThresholds } = require("../../modules/sensors/dht11/dht11Service");
-
 const getPriority = (confidence = 0) => {
   if (confidence >= 0.90) return 'CRITICAL';
   if (confidence >= 0.75) return 'HIGH';
@@ -49,37 +47,56 @@ const builders = {
     ...basePayload(data),
     priority: data.aiData?.weapon_analysis?.priority || getPriority(data.aiData?.weapon_analysis?.confidence),
     aiData: data.aiData?.weapon_analysis,
+    media : {
+      images: data.aiData?.weapon_analysis?.incident_image_url 
+            ? [data.aiData.weapon_analysis.incident_image_url] 
+            : []
+    }
   }),
 
   THEFT_DETECTION: (data) => ({
     ...basePayload(data),
-    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: data.aiData?.theft_detection
+    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.behavior_analysis?.confidence),
+    aiData: data.aiData?.behavior_analysis,
+    media : {
+      images: data.aiData?.behavior_analysis?.incident_image_url 
+            ? [data.aiData.behavior_analysis.incident_image_url] 
+            : []
+    }
   }),
 
   CROWD_MANAGEMENT: (data) => ({
     ...basePayload(data),
     priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: data.aiData?.crowd_management
-  }),
-
-  WRONG_WAY_DETECTION: (data) => ({
-    ...basePayload(data),
-    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: data.aiData?.wrong_way
+    aiData: data.aiData?.crowd_management,
+    media : {
+      images: data.aiData?.crowd_management?.incident_image_url 
+            ? [data.aiData.crowd_management.incident_image_url] 
+            : []
+    }
   }),
 
   MEDICAL_EMERGENCY: (data) => ({
     ...basePayload(data),
     priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: data.aiData?.medical_emergency
+    aiData: data.aiData?.medical_emergency,
+    media : {
+      images: data.aiData?.medical_emergency?.incident_image_url 
+            ? [data.aiData.medical_emergency.incident_image_url] 
+            : []
+    }
   }),
 
   FIRE_DETECTION: (data, sensorSnap = {}) => ({
     ...basePayload(data),
     priority: data.aiData?.fire_analysis?.priority || getPriority(data.aiData?.confidence),
     aiData: data.aiData?.fire_analysis ,
-    sensorData: sensorSnap,   
+    sensorData: sensorSnap,  
+    media : {
+      images: data.aiData?.fire_analysis?.incident_image_url 
+            ? [data.aiData.fire_analysis.incident_image_url] 
+            : []
+    } 
   }),
 
   CITIZEN_CALL: (data) => ({
@@ -101,7 +118,14 @@ const builders = {
     notes: `Pressure increased to ${data.readings?.pressure} hPa`,
   }),
 
-  HIGH_TEMP: (data, snapshot) => ({
+  HIGH_HUMIDITY: (data, snapshot) => ({
+    ...basePayload(data),
+    priority: getPriority(), //Need to determine priority later based on a check
+    sensorData: snapshot,
+    notes: `Humidity increased to ${data.readings?.humidity} hPa`,
+  }),
+
+  HIGH_TEMPERATURE: (data, snapshot) => ({
     ...basePayload(data),
     priority: getPriority(), //Need to determine priority later based on a check
     sensorData: snapshot,

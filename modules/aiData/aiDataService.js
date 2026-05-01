@@ -28,7 +28,6 @@ exports.detectActiveIncidents = async (aiDataEntry) => {
             await incidentService.upsertFromAi(aiPayload);
         }
         else { //No Incident but check if it was resolved.
-            console.log("AI CLEARED" , hasActiveIncident(aiPayload.source.deviceId , 'FIRE_DETECTION'))
             if(hasActiveIncident(aiPayload.source.deviceId , 'FIRE_DETECTION')){
                 await incidentService.aiClearedAwaitingConfirmation(aiPayload.source.deviceId , 'FIRE_DETECTION')
             }
