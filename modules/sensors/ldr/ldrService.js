@@ -1,4 +1,5 @@
 const LDR = require('./ldrModel');
+const incidentService = require('../../incidents/incidentService');
 const {
   hasActiveIncident,
   addIncident,
@@ -56,7 +57,7 @@ exports.getTotalActiveLoad = async () => {
 }
 
 exports.checkThresholds = async (data) => {
-    if (data.status === 'Faulty') {
+    if (data.status === 'FAULTY') {
         await incidentService.upsertFromSensor({
             type: 'ENERGY_ANOMALY',
             sensorId: data.sensor_id,
