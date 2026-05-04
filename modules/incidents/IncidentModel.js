@@ -20,14 +20,14 @@ const IncidentSchema = new mongoose.Schema({
 
   priority: {
     type: String,
-    enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
+    enum: ['LOW', 'MEDIUM', 'HIGH'],
     required: true,
     index: true,
   },
 
   status: {
     type: String,
-     enum: ['ACTIVE', 'DISPATCHED', 'RESOLVED', 'CLOSED', 'FALSE_ALARM' , 'AI CLEARED-AWAITING CONFIRMATION'],
+     enum: ['ACTIVE', 'DISPATCHED', 'RESOLVED', 'FALSE_ALARM' , 'AI CLEARED-AWAITING CONFIRMATION'],
      default: 'ACTIVE',
     index: true,
   },
