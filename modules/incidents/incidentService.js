@@ -188,8 +188,15 @@ exports.aiClearedAwaitingConfirmation = async (deviceId, type) => {
   return cleared;
 };
 
+//EndPoints for all incidents with query for filtering
 exports.getAllIncidents = async (query) => {
-  return Incident.find(query);
+  const filter = {};
+
+  if(query.type) filter.type = query.type;
+  if(query.status) filter.status = query.status;
+  if(query.priority) filter.priority = query.priority;
+
+  return Incident.find(filter).sort({ createdAt: -1 });
 };
 
 exports.getIncidentById = async (id) => {
