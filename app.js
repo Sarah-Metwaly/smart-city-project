@@ -19,12 +19,14 @@ const refreshTokenRoutes = require('./modules/userAuth/refreshToken/refreshToken
 const logOutRoutes = require('./modules/userAuth/logOut/logOutRoute');
 const forgotPasswordRoutes = require('./modules/userAuth/forgotPassword/forgotPasswordRoute');
 const resetPasswordRoutes = require('./modules/userAuth/resetPassword/resetPasswordRoutes');
+const createOfficerRoutes = require('./modules/userAuth/createOfficer/createOfficerRoutes');
 
 const app = express();
 
 app.use(cookieParser())
 app.use(cors()); //To allow access from the frontEnd Local host
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 //To authorize any path
 //app.use('/api/v1/ldr',authenticate.authenticate, authorize.isAdmin, ldrRoutes);
@@ -43,6 +45,7 @@ app.use('/api/v1/auth' , refreshTokenRoutes);
 app.use('/api/v1/auth' , logOutRoutes);
 app.use('/api/v1/auth' , forgotPasswordRoutes);
 app.use('/api/v1/auth' , resetPasswordRoutes);
+app.use('/api/v1/auth/admin' , createOfficerRoutes);
 
 //Handle all the routes that are not defined in our app and send an error message to the client.
 app.use((req, res, next) => {
