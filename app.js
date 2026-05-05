@@ -20,6 +20,7 @@ const logOutRoutes = require('./modules/userAuth/logOut/logOutRoute');
 const forgotPasswordRoutes = require('./modules/userAuth/forgotPassword/forgotPasswordRoute');
 const resetPasswordRoutes = require('./modules/userAuth/resetPassword/resetPasswordRoutes');
 const createOfficerRoutes = require('./modules/userAuth/createOfficer/createOfficerRoutes');
+const dangerZoneRoutes = require('./modules/dangerZone/dangerZoneRoutes');
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use('/api/v1/auth' , logOutRoutes);
 app.use('/api/v1/auth' , forgotPasswordRoutes);
 app.use('/api/v1/auth' , resetPasswordRoutes);
 app.use('/api/v1/auth/admin' , createOfficerRoutes);
+app.use('/api/v1/danger-zones', dangerZoneRoutes);
 
 //Handle all the routes that are not defined in our app and send an error message to the client.
 app.use((req, res, next) => {

@@ -39,6 +39,7 @@ const getIncidentById = catchAsync(async (req, res) => {
   res.json({ success: true, message: 'Incident fetched successfully', data: incident });
 });
 
+
 module.exports = {
   createFromSensor,
   createFromAI,

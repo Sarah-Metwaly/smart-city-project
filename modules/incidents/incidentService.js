@@ -188,9 +188,13 @@ exports.aiClearedAwaitingConfirmation = async (deviceId, type) => {
   return cleared;
 };
 
-//EndPoints for all incidents with query for filtering
+//EndPoints for today's incidents with query for filtering
 exports.getAllIncidents = async (query) => {
+  let today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of the day
+
   const filter = {};
+  filter.createdAt = { $gte: today }; // Only incidents created today
 
   if(query.type) filter.type = query.type;
   if(query.status) filter.status = query.status;
@@ -201,4 +205,99 @@ exports.getAllIncidents = async (query) => {
 
 exports.getIncidentById = async (id) => {
   return Incident.findById(id);
+};
+
+
+const getYesterdayCountsFromSummary = async (yesterdayStr) => {
+  const summaries = await IncidentSummary.find({ date: yesterdayStr });
+
+  let weapon = 0, fire = 0, behavior = 0;
+
+  summaries.forEach(doc => {
+    weapon += doc.weaponIncidents || 0;
+    fire += doc.fireIncidents || 0;
+    behavior += doc.behaviorIncidents || 0;
+  });
+
+  return { weapon, fire, behavior };
+};
+
+const getTodayCounts = async (todayStart) => {
+  const result = await Incident.aggregate([
+    { $match: { createdAt: { $gte: todayStart } } },
+    {
+      $group: {
+        _id: "$type",
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  let weapon = 0, fire = 0, behavior = 0;
+
+  result.forEach(r => {
+    if (r._id === 'WEAPON_DETECTION') weapon = r.count;
+    else if (r._id === 'FIRE_DETECTION') fire = r.count;
+    else if (
+      ['THEFT_DETECTION', 'MEDICAL_EMERGENCY', 'CROWD_MANAGEMENT'].includes(r._id)
+    ) {
+      behavior += r.count;
+    }
+  });
+
+  return { weapon, fire, behavior };
+};
+
+exports.getDailyStats = async () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const todayStr = today.toISOString().split('T')[0];
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  // Fetch data
+  const todayCounts = await getTodayCounts(today);
+  const yesterdayCounts = await getYesterdayCountsFromSummary(yesterdayStr);
+
+  const totalToday =
+    todayCounts.weapon +
+    todayCounts.fire +
+    todayCounts.behavior;
+
+  const calcTodayPercentage = (count) =>
+    totalToday ? (count / totalToday) * 100 : 0;
+
+  const calcChange = (today, yesterday) => {
+    if (yesterday === 0) {
+      return today === 0 ? 0 : 100; // or null if you prefer
+    }
+    return ((today - yesterday) / yesterday) * 100;
+  };
+
+  return {
+    weapon: {
+      todayPercentage: calcTodayPercentage(todayCounts.weapon),
+      changePercentage: calcChange(
+        todayCounts.weapon,
+        yesterdayCounts.weapon
+      ),
+    },
+    fire: {
+      todayPercentage: calcTodayPercentage(todayCounts.fire),
+      changePercentage: calcChange(
+        todayCounts.fire,
+        yesterdayCounts.fire
+      ),
+    },
+    behavior: {
+      todayPercentage: calcTodayPercentage(todayCounts.behavior),
+      changePercentage: calcChange(
+        todayCounts.behavior,
+        yesterdayCounts.behavior
+      ),
+    },
+  };
 };
