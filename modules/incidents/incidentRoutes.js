@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const incidentController = require('./incidentController');
-//const { validateIncidentMiddleware} = require('../../shared/middlewares/validateIncident');
+const {getAllIncidents} = require('./incidentController');
 const validateMiddleware = require('../../shared/middlewares/validate');
 const { incidentSchema } = require('./incidentValidation');
 
@@ -14,9 +13,10 @@ const { incidentSchema } = require('./incidentValidation');
 
 // router.put('/:id', validateMiddleware.validate(incidentSchema), incidentController.updateIncident);
 
-router.get('/', incidentController.getAllIncidents);  
+// router.get('/', incidentController.getAllIncidents);
 
-// router.get('/:id', incidentController.getIncidentById);    
+// router.get('/:id', incidentController.getIncidentById); 
 
+router.get('/DailyIncidents', getAllIncidents);  
 
 module.exports = router;

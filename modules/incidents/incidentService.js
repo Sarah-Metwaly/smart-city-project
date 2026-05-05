@@ -19,49 +19,6 @@ exports.createFromAI = async (payload) => {
   return incident;
 };
 
-// exports.updateExistingWithAI = async (existingIncident, aiPayload) => {
-//   const freshSnapshot = await sensorSnapshotService.getLatestSnapshot();
-//   const updatedIncident = await Incident.findByIdAndUpdate(
-//     existingIncident._id,
-//     {
-//       $set: {
-//         aiData: {
-//           ...existingIncident.aiData,
-//           ...aiPayload.aiData
-//         },
-//         sensorData: freshSnapshot,
-//         media: {
-//           images: [...(existingIncident.media?.images || []), ...(aiPayload.media?.images || [])],
-//           videos: [...(existingIncident.media?.videos || []), ...(aiPayload.media?.videos || [])]
-//         }
-//       },
-//       $push: {
-//         actions: {
-//           user: 'AI_SYSTEM',
-//           action: 'CORRELATE',
-//           note: `AI Detection correlated - Fresh sensor snapshot added at ${new Date().toISOString()}`,
-//           timestamp: new Date()
-//         }
-//       }
-//     },
-//     { new: true }
-//   );
-
-//   eventEmitter.emit('incident:updated', updatedIncident);
-//   return updatedIncident;
-// };
-
-// exports.createFromManual = async (manualPayload, userId) => {
-//   const payload = buildIncidentPayload({
-//     ...manualPayload,
-//     source: { type: 'MANUAL', userId },
-//   });
-
-//   const incident = await Incident.create(payload);
-//   eventEmitter.emit('incident:created', incident);
-//   return incident;
-// };
-
 
 exports.upsertFromSensor = async (data) => {
     const payloadWithSource = {
@@ -188,9 +145,14 @@ exports.aiClearedAwaitingConfirmation = async (deviceId, type) => {
   return cleared;
 };
 
+//EndPoints for today's incidents with query for filtering
 //EndPoints for all incidents with query for filtering
 exports.getAllIncidents = async (query) => {
+  let today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of the day
+
   const filter = {};
+  filter.createdAt = { $gte: today }; // Only incidents created today
 
   if(query.type) filter.type = query.type;
   if(query.status) filter.status = query.status;

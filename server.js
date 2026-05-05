@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
 const dailySummaryService = require('./modules/daily-summary/dailySummaryService');
+const { generateSummary } = require('./modules/incident-summary/incidentSummaryService');
 const {loadActiveIncidents} = require('./shared/utils/incidentCashe')
 
 dotenv.config({ path: './config.env' });
@@ -27,6 +28,9 @@ mongoose
         console.log('⏰ Running daily summary...');
         await dailySummaryService.getDailySummary();
         console.log('✅ Daily summary completed');
+
+          console.log('[IncidentSummary] Generating daily summary...');
+          await generateSummary();
     });
   })
   .catch((err) => console.log(err));
