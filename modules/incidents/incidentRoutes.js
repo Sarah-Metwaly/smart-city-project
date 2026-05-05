@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const incidentController = require('./incidentController');
-//const { validateIncidentMiddleware} = require('../../shared/middlewares/validateIncident');
 const validateMiddleware = require('../../shared/middlewares/validate');
 const { incidentSchema } = require('./incidentValidation');
 

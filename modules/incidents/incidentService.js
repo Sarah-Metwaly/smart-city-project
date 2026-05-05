@@ -5,59 +5,16 @@ const eventEmitter = require('../../shared/utils/eventEmitter');
 const {activeIncidents , hasActiveIncident, getIncidentKey , addIncident, removeIncident, getIncidentId , loadActiveIncidents, addAiCachedData ,checkAiCachedData
 } = require('../../shared/utils/incidentCashe')
 
-exports.createFromSensor = async (data) => {
-  const incident = await Incident.create(data);
+// exports.createFromSensor = async (data) => {
+//   const incident = await Incident.create(data);
 
-  eventEmitter.emit('incident:created', incident);
-  return incident;
-};
-
-exports.createFromAI = async (payload) => {
-  const incident = await Incident.create(payload);
-
-  eventEmitter.emit('incident:created', incident);
-  return incident;
-};
-
-// exports.updateExistingWithAI = async (existingIncident, aiPayload) => {
-//   const freshSnapshot = await sensorSnapshotService.getLatestSnapshot();
-//   const updatedIncident = await Incident.findByIdAndUpdate(
-//     existingIncident._id,
-//     {
-//       $set: {
-//         aiData: {
-//           ...existingIncident.aiData,
-//           ...aiPayload.aiData
-//         },
-//         sensorData: freshSnapshot,
-//         media: {
-//           images: [...(existingIncident.media?.images || []), ...(aiPayload.media?.images || [])],
-//           videos: [...(existingIncident.media?.videos || []), ...(aiPayload.media?.videos || [])]
-//         }
-//       },
-//       $push: {
-//         actions: {
-//           user: 'AI_SYSTEM',
-//           action: 'CORRELATE',
-//           note: `AI Detection correlated - Fresh sensor snapshot added at ${new Date().toISOString()}`,
-//           timestamp: new Date()
-//         }
-//       }
-//     },
-//     { new: true }
-//   );
-
-//   eventEmitter.emit('incident:updated', updatedIncident);
-//   return updatedIncident;
+//   eventEmitter.emit('incident:created', incident);
+//   return incident;
 // };
 
-// exports.createFromManual = async (manualPayload, userId) => {
-//   const payload = buildIncidentPayload({
-//     ...manualPayload,
-//     source: { type: 'MANUAL', userId },
-//   });
-
+// exports.createFromAI = async (payload) => {
 //   const incident = await Incident.create(payload);
+
 //   eventEmitter.emit('incident:created', incident);
 //   return incident;
 // };

@@ -23,10 +23,7 @@ const updateIncident = catchAsync(async (req, res) => {
   res.json({ success: true, message: 'Incident updated successfully', data: updated });
 });
 
-const getAllIncidents = catchAsync(async (req, res) => {
-  const incidents = await incidentService.getAllIncidents(req.query);
-  res.json({ success: true, message: 'Incidents fetched successfully', data: incidents });
-});
+
 
 const getIncidentById = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -35,11 +32,12 @@ const getIncidentById = catchAsync(async (req, res) => {
   res.json({ success: true, message: 'Incident fetched successfully', data: incident });
 });
 
+
 module.exports = {
   createFromSensor,
   createFromAI,
   createFromManual,
   updateIncident,
   getAllIncidents,
-  getIncidentById
+  getIncidentById,
 };
