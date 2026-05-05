@@ -5,19 +5,19 @@ const eventEmitter = require('../../shared/utils/eventEmitter');
 const {activeIncidents , hasActiveIncident, getIncidentKey , addIncident, removeIncident, getIncidentId , loadActiveIncidents, addAiCachedData ,checkAiCachedData
 } = require('../../shared/utils/incidentCashe')
 
-// exports.createFromSensor = async (data) => {
-//   const incident = await Incident.create(data);
+exports.createFromSensor = async (data) => {
+  const incident = await Incident.create(data);
 
-//   eventEmitter.emit('incident:created', incident);
-//   return incident;
-// };
+  eventEmitter.emit('incident:created', incident);
+  return incident;
+};
 
-// exports.createFromAI = async (payload) => {
-//   const incident = await Incident.create(payload);
+exports.createFromAI = async (payload) => {
+  const incident = await Incident.create(payload);
 
-//   eventEmitter.emit('incident:created', incident);
-//   return incident;
-// };
+  eventEmitter.emit('incident:created', incident);
+  return incident;
+};
 
 
 exports.upsertFromSensor = async (data) => {
@@ -145,8 +145,19 @@ exports.aiClearedAwaitingConfirmation = async (deviceId, type) => {
   return cleared;
 };
 
+//EndPoints for today's incidents with query for filtering
 exports.getAllIncidents = async (query) => {
-  return Incident.find(query);
+  let today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of the day
+
+  const filter = {};
+  filter.createdAt = { $gte: today }; // Only incidents created today
+
+  if(query.type) filter.type = query.type;
+  if(query.status) filter.status = query.status;
+  if(query.priority) filter.priority = query.priority;
+
+  return Incident.find(filter).sort({ createdAt: -1 });
 };
 
 exports.getIncidentById = async (id) => {

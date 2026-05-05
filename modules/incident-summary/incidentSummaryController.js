@@ -1,5 +1,5 @@
 const catchAsync = require('../../shared/utils/catchAsync');
-const { generateSummary, getPoliceSummary, getWeeklyTrend } = require('./incidentSummaryService');
+const { generateSummary, getPoliceSummary, getWeeklyTrend , getDailyStats } = require('./incidentSummaryService');
 
 const generate = catchAsync(async (req, res) => {
   const summary = await generateSummary(req.query.date);
@@ -13,7 +13,13 @@ const policeSummary = catchAsync(async (req, res) => {
   res.json({ success: true, data: summary });
 });
 
+const dailyCrimeComparison = catchAsync(async (req, res) => {
+  const stats = await getDailyStats();
+  res.json({ success: true, data: stats });
+});
+
 module.exports = {
   generate,
-  policeSummary
+  policeSummary,
+  dailyCrimeComparison,
 };

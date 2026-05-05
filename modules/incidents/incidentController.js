@@ -23,7 +23,14 @@ const updateIncident = catchAsync(async (req, res) => {
   res.json({ success: true, message: 'Incident updated successfully', data: updated });
 });
 
-
+const getAllIncidents = catchAsync(async (req, res) => {
+  const incidents = await incidentService.getAllIncidents(req.query);
+  res.status(200).json({
+      status: 'success',
+      length: incidents.length,
+      data: incidents
+  });
+});
 
 const getIncidentById = catchAsync(async (req, res) => {
   const { id } = req.params;
