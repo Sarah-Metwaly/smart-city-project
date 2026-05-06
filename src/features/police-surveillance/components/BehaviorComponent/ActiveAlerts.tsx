@@ -60,7 +60,7 @@ const entries: {
 ];
 
 const ActiveAlerts: FC = () => (
-  <div className="bg-aman-dark hover:bg-aman-teal border-aman-teal transition-all rounded-2xl p-4">
+  <div className="bg-aman-teal hover:bg-aman-teal border-aman-teal transition-all rounded-2xl p-4">
     <p className="text-[10px] font-inter tracking-widest text-slate-500 mb-3">
       ACTIVE ALERTS
     </p>
