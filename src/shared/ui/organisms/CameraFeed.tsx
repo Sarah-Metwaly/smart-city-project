@@ -15,7 +15,7 @@ const CameraFeed: React.FC<CameraFeedProps> = ({
   return (
     <div className="flex flex-col h-full bg-[#050c10] border border-aman-teal/30 rounded-2xl overflow-hidden shadow-2xl">
       
-      {/* Header Bar - مستوحى من صورة image_75154b.png */}
+      
       <div className="flex items-center justify-between p-3 border-b bg-black/60 border-aman-teal/10">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-2 py-0.5 bg-red-500/10 border border-red-500/30 rounded text-[9px] text-red-500 font-bold">

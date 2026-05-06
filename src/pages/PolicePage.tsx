@@ -5,6 +5,8 @@ import { useState } from "react";
 import LiveEventsView from "../features/police-surveillance/views/LiveEventsView";
 import WeaponView from "../features/police-surveillance/views/WeaponView";
 import ReportsView from "../features/police-surveillance/views/ReportsView";
+import Behavior from "../features/police-surveillance/views/Behavior";
+
 
 const navLinks = [
   { name: 'Live Events', id: 'LiveEvents', path: '/live' },
@@ -59,6 +61,8 @@ const PolicePage = () => {
           {activeView === 'LiveEvents' && <LiveEventsView />}
           {activeView === 'weapon' && <WeaponView />}
           {activeView === 'Reports' && <ReportsView />}
+          {activeView === 'behavior' && <Behavior />}
+
         </main>
       </div>
     </div>
