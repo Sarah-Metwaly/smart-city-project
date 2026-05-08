@@ -17,12 +17,6 @@ const createFromManual = catchAsync(async (req, res) => {
   res.status(201).json({ success: true, message: 'Manual incident created', data: incident });
 });
 
-const updateIncident = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const updated = await incidentService.updateIncident(id, req.body);
-  res.json({ success: true, message: 'Incident updated successfully', data: updated });
-});
-
 const getAllIncidents = catchAsync(async (req, res) => {
   const incidents = await incidentService.getAllIncidents(req.query);
   res.status(200).json({
@@ -41,12 +35,18 @@ const getAllIncidentsForAdmin = catchAsync(async (req, res) => {
   });
 });
 
-const getIncidentById = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const incident = await incidentService.getIncidentById(id);
-  if (!incident) return res.status(404).json({ success: false, message: 'Incident not found' });
-  res.json({ success: true, message: 'Incident fetched successfully', data: incident });
+const updateIncident = catchAsync(async (req, res) => {
+  const { incidentId } = req.params;
+  const updated = await incidentService.updateIncident(incidentId, req.body);
+  res.json({ success: true, message: 'Incident updated successfully', data: updated });
 });
+
+// const getIncidentById = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+//   const incident = await incidentService.getIncidentById(id);
+//   if (!incident) return res.status(404).json({ success: false, message: 'Incident not found' });
+//   res.json({ success: true, message: 'Incident fetched successfully', data: incident });
+// });
 
 
 module.exports = {
@@ -56,5 +56,4 @@ module.exports = {
   updateIncident,
   getAllIncidents,
   getAllIncidentsForAdmin,
-  getIncidentById,
 };

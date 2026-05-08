@@ -173,6 +173,28 @@ exports.getAllIncidentsForAdmin = async (query) => {
   return Incident.find(filter).sort({ createdAt: -1 });
 };
 
-exports.getIncidentById = async (id) => {
-  return Incident.findById(id);
+exports.updateIncident = async (incidentId, updateData) => {
+  const updated = await Incident.findOneAndUpdate(
+    { incidentId: incidentId },
+    { $set: { status: updateData.status }  ,
+      $push: {
+        actions: {
+          user: updateData.user || 'SYSTEM', 
+          action: updateData.status,
+          note: updateData.note || `Incident manually updated via Officer / Admin`,
+          timestamp: new Date(),
+        },
+      },
+    },    
+    { returnDocument: 'after' }
+  );
+  if(updated.status === 'RESOLVED' || updated.status === 'AI CLEARED-AWAITING CONFIRMATION' || updated.status === 'FALSE_ALARM') {
+    removeIncident(updated.source.deviceId, updated.type);
+  }
+  eventEmitter.emit('incident:updated', updated);
+  return updated;
 };
+
+// exports.getIncidentById = async (id) => {
+//   return Incident.findById(id);
+// };
