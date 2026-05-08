@@ -10,7 +10,6 @@ const app = require('./app');
 const mqtt = require('./config/mqtt');
 const websocket = require('./config/webSocket');
 
-
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
   console.log(`App is running on http://localhost:${port}`);

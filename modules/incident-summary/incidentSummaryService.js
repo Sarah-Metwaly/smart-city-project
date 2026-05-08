@@ -5,13 +5,12 @@ const { calculateDangerScore } = require('../../shared/utils/dangerScoreCalculat
 
 const formatDate = (d) => d.toLocaleDateString('en-CA');
 //saves a document per zone per day with aggregated data for that zone and day
-const generateSummary = async () => {
+const generateSummary = async () => {   
     const now = new Date();
     const start = new Date(now);
     start.setHours(0, 0, 0, 0);
     const end = new Date(now);
     end.setHours(23, 59, 59, 999);
-
     const date = now.toLocaleDateString('en-CA');
 
     // Get all incidents for today except FALSE_ALARM
@@ -182,4 +181,36 @@ const getDailyStats = async () => {
   };
 };
 
-module.exports = { generateSummary, getDailyStats };
+// get incident counts for the past 7 days grouped by day and priority
+const getWeeklyTrend = async () => {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+
+  const summaries = await IncidentSummary.aggregate([
+    { $match: { date: { $in: days } } },
+    { $group: {
+        _id: '$date',
+        total:          { $sum: '$total' },
+        highPriority:   { $sum: '$highPriority' },
+        mediumPriority: { $sum: '$mediumPriority' },
+        lowPriority:    { $sum: '$lowPriority' },
+    }},
+    { $sort: { _id: 1 } }
+  ]);
+
+  return days.map(day => {
+    const found = summaries.find(s => s._id === day);
+    return found || {
+      _id: day, total: 0,
+      highPriority: 0, mediumPriority: 0, lowPriority: 0
+    };
+  });
+};
+
+
+
+module.exports = { generateSummary, getDailyStats , getWeeklyTrend };
