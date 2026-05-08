@@ -3,6 +3,8 @@ const router = express.Router();
 const {getAllIncidents , getAllIncidentsForAdmin} = require('./incidentController');
 const validateMiddleware = require('../../shared/middlewares/validate');
 const { incidentSchema } = require('./incidentValidation');
+const authenticate = require('../userAuth/middleware/authenticate');
+const authorize = require('../userAuth/middleware/authorize');
 
 
 // router.post('/sensor', validateMiddleware.validate(incidentSchema), incidentController.createFromSensor);
@@ -19,6 +21,6 @@ const { incidentSchema } = require('./incidentValidation');
 
 router.get('/DailyIncidents', getAllIncidents);  
 
-router.get('/AdminIncidents', getAllIncidentsForAdmin);  // New route for admin with filtering capabilities
+router.get('/AdminIncidents', authenticate.authenticate ,authorize.isAdmin, getAllIncidentsForAdmin);  // New route for admin with filtering capabilities
 
 module.exports = router;
