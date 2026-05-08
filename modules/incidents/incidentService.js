@@ -4,10 +4,12 @@ const sensorSnapshotService = require('../../shared/services/sensorSnapshotServi
 const eventEmitter = require('../../shared/utils/eventEmitter');
 const {activeIncidents , hasActiveIncident, getIncidentKey , addIncident, removeIncident, getIncidentId , loadActiveIncidents, addAiCachedData ,checkAiCachedData
 } = require('../../shared/utils/incidentCashe')
+const { generateSummary } = require('../incident-summary/incidentSummaryService');
 
 exports.createFromSensor = async (data) => {
   const incident = await Incident.create(data);
 
+  await generateSummary(); // Update daily summary immediately after creating an incident from sensor data
   eventEmitter.emit('incident:created', incident);
   return incident;
 };
@@ -15,6 +17,7 @@ exports.createFromSensor = async (data) => {
 exports.createFromAI = async (payload) => {
   const incident = await Incident.create(payload);
 
+  await generateSummary(); // Update daily summary immediately after creating an incident from AI data
   eventEmitter.emit('incident:created', incident);
   return incident;
 };
