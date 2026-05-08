@@ -10,7 +10,6 @@ const app = require('./app');
 const mqtt = require('./config/mqtt');
 const websocket = require('./config/webSocket');
 
-
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
   console.log(`App is running on http://localhost:${port}`);
@@ -28,9 +27,6 @@ mongoose
         console.log('⏰ Running daily summary...');
         await dailySummaryService.getDailySummary();
         console.log('✅ Daily summary completed');
-
-          console.log('[IncidentSummary] Generating daily summary...');
-          await generateSummary();
     });
   })
   .catch((err) => console.log(err));

@@ -4,10 +4,12 @@ const sensorSnapshotService = require('../../shared/services/sensorSnapshotServi
 const eventEmitter = require('../../shared/utils/eventEmitter');
 const {activeIncidents , hasActiveIncident, getIncidentKey , addIncident, removeIncident, getIncidentId , loadActiveIncidents, addAiCachedData ,checkAiCachedData
 } = require('../../shared/utils/incidentCashe')
+const { generateSummary } = require('../incident-summary/incidentSummaryService');
 
 exports.createFromSensor = async (data) => {
   const incident = await Incident.create(data);
 
+  await generateSummary(); // Update daily summary immediately after creating an incident from sensor data
   eventEmitter.emit('incident:created', incident);
   return incident;
 };
@@ -15,8 +17,19 @@ exports.createFromSensor = async (data) => {
 exports.createFromAI = async (payload) => {
   const incident = await Incident.create(payload);
 
+  await generateSummary(); // Update daily summary immediately after creating an incident from AI data
   eventEmitter.emit('incident:created', incident);
   return incident;
+};
+
+exports.createFromManual = async (manualPayload, userId) => {
+    const payload = buildIncidentPayload({
+        ...manualPayload,
+        source: { type: 'MANUAL', userId }
+    });
+    const incident = await Incident.create(payload);
+    eventEmitter.emit('incident:created', incident);
+    return incident;
 };
 
 
@@ -161,6 +174,37 @@ exports.getAllIncidents = async (query) => {
   return Incident.find(filter).sort({ createdAt: -1 });
 };
 
-exports.getIncidentById = async (id) => {
-  return Incident.findById(id);
+exports.getAllIncidentsForAdmin = async (query) => {
+  const filter = {};
+  if(query.type) filter.type = query.type;
+  if(query.status) filter.status = query.status;
+  if(query.priority) filter.priority = query.priority;
+
+  return Incident.find(filter).sort({ createdAt: -1 });
 };
+
+exports.updateIncident = async (incidentId, updateData) => {
+  const updated = await Incident.findOneAndUpdate(
+    { incidentId: incidentId },
+    { $set: { status: updateData.status }  ,
+      $push: {
+        actions: {
+          user: updateData.user || 'SYSTEM', 
+          action: updateData.status,
+          note: updateData.note || `Incident manually updated via Officer / Admin`,
+          timestamp: new Date(),
+        },
+      },
+    },    
+    { returnDocument: 'after' }
+  );
+  if(updated.status === 'RESOLVED' || updated.status === 'AI CLEARED-AWAITING CONFIRMATION' || updated.status === 'FALSE_ALARM' || updated.status === 'DISPATCHED'){ 
+    removeIncident(updated.source.deviceId, updated.type);
+  }
+  eventEmitter.emit('incident:updated', updated);
+  return updated;
+};
+
+// exports.getIncidentById = async (id) => {
+//   return Incident.findById(id);
+// };

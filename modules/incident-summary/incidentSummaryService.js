@@ -5,13 +5,12 @@ const { calculateDangerScore } = require('../../shared/utils/dangerScoreCalculat
 
 const formatDate = (d) => d.toLocaleDateString('en-CA');
 //saves a document per zone per day with aggregated data for that zone and day
-const generateSummary = async () => {
+const generateSummary = async () => {   
     const now = new Date();
     const start = new Date(now);
     start.setHours(0, 0, 0, 0);
     const end = new Date(now);
     end.setHours(23, 59, 59, 999);
-
     const date = now.toLocaleDateString('en-CA');
 
     // Get all incidents for today except FALSE_ALARM
@@ -82,49 +81,24 @@ const generateSummary = async () => {
     console.log(`✅ Incident summary generated for ${date}`);
 };
 
-//get counts for weapon, fire, behavior incidents for yesterday 
-const getYesterdayCountsFromSummary = async (yesterdayStr) => {
-  const summaries = await IncidentSummary.find({ date: yesterdayStr });
-
-  let weapon = 0, fire = 0, behavior = 0;
-
-  summaries.forEach(doc => {
-    weapon += doc.weaponIncidents || 0;
-    fire += doc.fireIncidents || 0;
-    behavior += doc.behaviorIncidents || 0;
-  });
-
-  return { weapon, fire, behavior };
-};
-
-//get counts for weapon, fire, behavior incidents for today
-const getTodayCounts = async (todayStart) => {
-  const result = await Incident.aggregate([
-    { $match: {
-        createdAt: { $gte: todayStart },
-        status: { $ne: 'FALSE_ALARM' }
-    } },
+const getCountsByDate = async (dateStr) => {
+  const [result] = await IncidentSummary.aggregate([
+    { $match: { date: dateStr } },
     {
       $group: {
-        _id: "$type",
-        count: { $sum: 1 }
+        _id: null,
+        weapon: { $sum: { $ifNull: ['$weaponIncidents', 0] } },
+        fire: { $sum: { $ifNull: ['$fireIncidents', 0] } },
+        behavior: { $sum: { $ifNull: ['$behaviorIncidents', 0] } },
       }
     }
   ]);
 
-  let weapon = 0, fire = 0, behavior = 0;
-
-  result.forEach(r => {
-    if (r._id === 'WEAPON_DETECTION') weapon = r.count;
-    else if (r._id === 'FIRE_DETECTION') fire = r.count;
-    else if (
-      ['THEFT_DETECTION', 'MEDICAL_EMERGENCY', 'CROWD_MANAGEMENT'].includes(r._id)
-    ) {
-      behavior += r.count;
-    }
-  });
-
-  return { weapon, fire, behavior };
+  return {
+    weapon: result?.weapon || 0,
+    fire: result?.fire || 0,
+    behavior: result?.behavior || 0,
+  };
 };
 
 // Additional function to get comparative stats for today's incidents vs yesterday's incidents
@@ -139,8 +113,8 @@ const getDailyStats = async () => {
   const yesterdayStr = formatDate(yesterday);
 
   // Fetch data
-  const todayCounts = await getTodayCounts(today);
-  const yesterdayCounts = await getYesterdayCountsFromSummary(yesterdayStr);
+  const todayCounts = await getCountsByDate(todayStr);
+  const yesterdayCounts = await getCountsByDate(yesterdayStr);
 
   const totalToday =
     todayCounts.weapon +
@@ -182,4 +156,113 @@ const getDailyStats = async () => {
   };
 };
 
-module.exports = { generateSummary, getDailyStats };
+// get incident counts for the past 7 days grouped by day and priority
+const getWeeklyTrend = async () => {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+
+  const summaries = await IncidentSummary.aggregate([
+    { $match: { date: { $in: days } } },
+    { $group: {
+        _id: '$date',
+        total:          { $sum: '$total' },
+        highPriority:   { $sum: '$highPriority' },
+        mediumPriority: { $sum: '$mediumPriority' },
+        lowPriority:    { $sum: '$lowPriority' },
+    }},
+    { $sort: { _id: 1 } }
+  ]);
+
+  return days.map(day => {
+    const found = summaries.find(s => s._id === day);
+    return found || {
+      _id: day, total: 0,
+      highPriority: 0, mediumPriority: 0, lowPriority: 0
+    };
+  });
+};
+
+
+// get average response time for incidents created on a given date (default to today)
+const getAvgResponseTime = async (dateStr) => {
+  const date = dateStr || new Date().toISOString().split('T')[0];
+  const start = new Date(`${date}T00:00:00.000Z`);
+  const end   = new Date(`${date}T23:59:59.999Z`);
+
+  return Incident.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: start, $lte: end },
+        resolvedAt: { $ne: null } 
+      }
+    },
+   {
+  $group: {
+    _id: { $hour: '$createdAt' },
+    avgMinutes: {
+      $avg: {
+        $divide: [
+          { $subtract: ['$resolvedAt', '$createdAt'] },
+          60000 
+        ]
+      }
+    }
+  }
+},
+    {
+      $project: {
+        _id: 0,
+        crimeHour: '$_id', 
+        avgMinutes: { $round: ['$avgMinutes', 1] }
+      }
+    },
+    { $sort: { crimeHour: 1 } } 
+  ]);
+};
+
+/**
+  * Get active incidents for map view with optional type filter and limit
+ */
+const getActiveIncidentsForMap = async (filters = {}) => {
+  const { 
+    type = null,    
+    limit = 20
+  } = filters;
+
+  const matchFilter = {
+    status: { 
+      $in: ['ACTIVE', 'DISPATCHED', 'AI CLEARED-AWAITING CONFIRMATION'] 
+    }
+  };
+
+  // type filter is optional, if provided and not 'ALL', we filter by that type
+  if (type && type !== 'ALL' && type !== 'all') {
+    matchFilter.type = type;
+  }
+
+return await Incident.aggregate([
+    { $match: matchFilter },
+    {
+        $project: {
+            _id: 1,
+            incidentId: 1,
+            type: 1,
+            priority: 1,
+            status: 1,
+            createdAt: 1,
+            coordinates: '$location.coordinates',
+            locationName: '$location.name',
+            zone: '$location.zone',
+            
+        }
+    },
+    { $sort: { createdAt: -1 } },
+    { $limit: Number(limit) }
+]);
+};
+
+module.exports = { generateSummary, getDailyStats , getWeeklyTrend, getAvgResponseTime, getActiveIncidentsForMap };

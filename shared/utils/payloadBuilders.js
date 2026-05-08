@@ -1,3 +1,5 @@
+const {getZone} = require('./zoneDetector');
+
 const getPriority = (confidence = 0) => {
   if (confidence >= 0.90) return 'CRITICAL';
   if (confidence >= 0.75) return 'HIGH';
@@ -24,7 +26,6 @@ const basePayload = (data) => {
   return {
     type: data.type,
     status: 'ACTIVE',
-    
     source: {
       type: data.source?.type || sourceType,  
       deviceId: data.sensorId || data.source?.deviceId || null,
@@ -32,7 +33,7 @@ const basePayload = (data) => {
       userId: data.source?.userId || null
     },
 
-    location: data.location || { type: 'Point', coordinates: [0, 0], name: 'Unknown' },
+    location:  { type: 'Point', coordinates: [data.location?.coordinates[0] || 0, data.location?.coordinates[1] || 0], name: `${getZone(data.location?.coordinates[0], data.location?.coordinates[1])}` },
     actions: [{
       user: 'SYSTEM',
       action: 'CREATE',
@@ -152,6 +153,14 @@ const builders = {
     sensorData: snapshot,
     notes: `Smoke detected with risk level ${data.readings?.risk_level}`,
   }), 
+
+  MANUAL_REPORT: (data) => ({
+    ...basePayload(data),
+    status: 'DISPATCHED', 
+    priority: data.priority || 'LOW',
+    notes: data.notes || '',
+    location: data.location || { type: 'Point', coordinates: [0, 0], name: 'Unknown' },
+  })
 };
 
 const buildIncidentPayload = (data, sensorSnap = {}) => {

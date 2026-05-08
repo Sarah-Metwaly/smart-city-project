@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const {getAllIncidents} = require('./incidentController');
+const {getAllIncidents , getAllIncidentsForAdmin , updateIncident , createFromManual} = require('./incidentController');
 const validateMiddleware = require('../../shared/middlewares/validate');
 const { incidentSchema } = require('./incidentValidation');
+const authenticate = require('../userAuth/middleware/authenticate');
+const authorize = require('../userAuth/middleware/authorize');
 
 
 // router.post('/sensor', validateMiddleware.validate(incidentSchema), incidentController.createFromSensor);
@@ -19,4 +21,10 @@ const { incidentSchema } = require('./incidentValidation');
 
 router.get('/DailyIncidents', getAllIncidents);  
 
-module.exports = router;
+router.get('/AdminIncidents', authenticate.authenticate ,authorize.isAdmin, getAllIncidentsForAdmin);  // New route for admin with filtering capabilities
+
+router.patch('/:incidentId', authenticate.authenticate ,authorize.isOfficer, updateIncident);
+
+router.post('/manual', authenticate.authenticate ,authorize.isOfficer, createFromManual);  // New route for citizens to report incidents manually
+
+ module.exports = router;

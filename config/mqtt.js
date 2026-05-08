@@ -58,42 +58,51 @@ const init = () => {
         });
     });
 
-    client.on('message', (topic, message) => {
-        const data = JSON.parse(message.toString());
+    client.on('message', async (topic, message) => {
+        const payload = message.toString().trim();
+
+        console.log("RAW:", payload);
+
+        if (!payload) {
+        console.log("⚠️ Empty payload received");
+        return; 
+        }
+
+        const data = JSON.parse(payload);
         console.log(`📥 Message received on ${topic}:`, data);
 
         if (topic === 'smartcity/streetlight1') {
             latestData[topic]=data;
-            if(shouldSave(data.sensor_id)) ldrService.saveReading(data);
-            ldrService.checkThresholds(data);
+            if(shouldSave(data.sensor_id)) await ldrService.saveReading(data);
+            await ldrService.checkThresholds(data);
             broadcast('ldr', data);
         }
         if (topic === 'smartcity/dht11') {
             latestData[topic]=data;
-            if(shouldSave(data.sensor_id)) dht11Service.saveReading(data); 
-            dht11Service.checkThresholds(data);
+            if(shouldSave(data.sensor_id)) await dht11Service.saveReading(data); 
+            await dht11Service.checkThresholds(data);
             broadcast('dht11', data);       
         }
         if (topic === 'smartcity/bmp180') {
             latestData[topic]=data;
-            if(shouldSave(data.sensor_id)) bmp180Service.saveReading(data);
-            bmp180Service.checkThresholds(data);
+            if(shouldSave(data.sensor_id))await bmp180Service.saveReading(data);
+            await bmp180Service.checkThresholds(data);
             broadcast('bmp180', data);
         }
         if (topic === 'smartcity/mq135') {
             latestData[topic]=data;
-            if(shouldSave(data.sensor_id)) mq135Service.saveReading(data);
-            mq135Service.checkThresholds(data);
+            if(shouldSave(data.sensor_id)) await mq135Service.saveReading(data);
+            await mq135Service.checkThresholds(data);
             broadcast('mq135', data);
         }
         if(topic === 'smartcity/flame') {
             latestData[topic]=data;
-            if(shouldSave(data.sensor_id)) flameService.saveReading(data);
-            flameService.checkThresholds(data);
+            if(shouldSave(data.sensor_id)) await flameService.saveReading(data);
+            await flameService.checkThresholds(data);
             broadcast('flame', data);
         }
         if(topic==='ai/fullDetection'){
-            aiDataService.detectActiveIncidents(data);
+            await aiDataService.detectActiveIncidents(data);
         }  
         // add new sensors here later
     });
