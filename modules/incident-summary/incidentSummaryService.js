@@ -249,4 +249,45 @@ const getAvgResponseTime = async (dateStr) => {
   ]);
 };
 
-module.exports = { generateSummary, getDailyStats , getWeeklyTrend, getAvgResponseTime };
+/**
+  * Get active incidents for map view with optional type filter and limit
+ */
+const getActiveIncidentsForMap = async (filters = {}) => {
+  const { 
+    type = null,    
+    limit = 20
+  } = filters;
+
+  const matchFilter = {
+    status: { 
+      $in: ['ACTIVE', 'DISPATCHED', 'AI CLEARED-AWAITING CONFIRMATION'] 
+    }
+  };
+
+  // type filter is optional, if provided and not 'ALL', we filter by that type
+  if (type && type !== 'ALL' && type !== 'all') {
+    matchFilter.type = type;
+  }
+
+return await Incident.aggregate([
+    { $match: matchFilter },
+    {
+        $project: {
+            _id: 1,
+            incidentId: 1,
+            type: 1,
+            priority: 1,
+            status: 1,
+            createdAt: 1,
+            coordinates: '$location.coordinates',
+            locationName: '$location.name',
+            zone: '$location.zone',
+            
+        }
+    },
+    { $sort: { createdAt: -1 } },
+    { $limit: Number(limit) }
+]);
+};
+
+module.exports = { generateSummary, getDailyStats , getWeeklyTrend, getAvgResponseTime, getActiveIncidentsForMap };
