@@ -1,20 +1,15 @@
 const incidentService = require('./incidentService');
 const catchAsync = require('../../shared/utils/catchAsync');
 
-const createFromSensor = catchAsync(async (req, res) => {
-  const incident = await incidentService.createFromSensor(req.body);
-  res.status(201).json({ success: true, message: 'Incident created from sensor', data: incident });
-});
-
-const createFromAI = catchAsync(async (req, res) => {
-  const incident = await incidentService.createFromAI(req.body);
-  res.status(201).json({ success: true, message: 'Incident created/correlated from AI', data: incident });
-});
 
 const createFromManual = catchAsync(async (req, res) => {
-  const userId = req.user ? req.user.id : null;
-  const incident = await incidentService.createFromManual(req.body, userId);
-  res.status(201).json({ success: true, message: 'Manual incident created', data: incident });
+    const userId = req.user.id;
+    const incident = await incidentService.createFromManual(req.body, userId);
+    res.status(201).json({
+        success: true,
+        message: 'Manual incident created',
+        data: incident
+    });
 });
 
 const getAllIncidents = catchAsync(async (req, res) => {
@@ -50,8 +45,6 @@ const updateIncident = catchAsync(async (req, res) => {
 
 
 module.exports = {
-  createFromSensor,
-  createFromAI,
   createFromManual,
   updateIncident,
   getAllIncidents,

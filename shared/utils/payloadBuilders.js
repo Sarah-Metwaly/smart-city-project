@@ -153,6 +153,14 @@ const builders = {
     sensorData: snapshot,
     notes: `Smoke detected with risk level ${data.readings?.risk_level}`,
   }), 
+
+  MANUAL_REPORT: (data) => ({
+    ...basePayload(data),
+    status: 'DISPATCHED', 
+    priority: data.priority || 'LOW',
+    notes: data.notes || '',
+    location: data.location || { type: 'Point', coordinates: [0, 0], name: 'Unknown' },
+  })
 };
 
 const buildIncidentPayload = (data, sensorSnap = {}) => {

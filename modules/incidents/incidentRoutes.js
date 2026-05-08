@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {getAllIncidents , getAllIncidentsForAdmin , updateIncident} = require('./incidentController');
+const {getAllIncidents , getAllIncidentsForAdmin , updateIncident , createFromManual} = require('./incidentController');
 const validateMiddleware = require('../../shared/middlewares/validate');
 const { incidentSchema } = require('./incidentValidation');
 const authenticate = require('../userAuth/middleware/authenticate');
@@ -25,4 +25,6 @@ router.get('/AdminIncidents', authenticate.authenticate ,authorize.isAdmin, getA
 
 router.patch('/:incidentId', authenticate.authenticate ,authorize.isOfficer, updateIncident);
 
-module.exports = router;
+router.post('/manual', authenticate.authenticate ,authorize.isOfficer, createFromManual);  // New route for citizens to report incidents manually
+
+ module.exports = router;

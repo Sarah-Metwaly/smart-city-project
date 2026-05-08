@@ -22,6 +22,16 @@ exports.createFromAI = async (payload) => {
   return incident;
 };
 
+exports.createFromManual = async (manualPayload, userId) => {
+    const payload = buildIncidentPayload({
+        ...manualPayload,
+        source: { type: 'MANUAL', userId }
+    });
+    const incident = await Incident.create(payload);
+    eventEmitter.emit('incident:created', incident);
+    return incident;
+};
+
 
 exports.upsertFromSensor = async (data) => {
     const payloadWithSource = {
@@ -188,7 +198,7 @@ exports.updateIncident = async (incidentId, updateData) => {
     },    
     { returnDocument: 'after' }
   );
-  if(updated.status === 'RESOLVED' || updated.status === 'AI CLEARED-AWAITING CONFIRMATION' || updated.status === 'FALSE_ALARM') {
+  if(updated.status === 'RESOLVED' || updated.status === 'AI CLEARED-AWAITING CONFIRMATION' || updated.status === 'FALSE_ALARM' || updated.status === 'DISPATCHED'){ 
     removeIncident(updated.source.deviceId, updated.type);
   }
   eventEmitter.emit('incident:updated', updated);
