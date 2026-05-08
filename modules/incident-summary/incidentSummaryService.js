@@ -212,5 +212,41 @@ const getWeeklyTrend = async () => {
 };
 
 
+// get average response time for incidents created on a given date (default to today)
+const getAvgResponseTime = async (dateStr) => {
+  const date = dateStr || new Date().toISOString().split('T')[0];
+  const start = new Date(`${date}T00:00:00.000Z`);
+  const end   = new Date(`${date}T23:59:59.999Z`);
 
-module.exports = { generateSummary, getDailyStats , getWeeklyTrend };
+  return Incident.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: start, $lte: end },
+        resolvedAt: { $ne: null } 
+      }
+    },
+   {
+  $group: {
+    _id: { $hour: '$createdAt' },
+    avgMinutes: {
+      $avg: {
+        $divide: [
+          { $subtract: ['$resolvedAt', '$createdAt'] },
+          60000 
+        ]
+      }
+    }
+  }
+},
+    {
+      $project: {
+        _id: 0,
+        crimeHour: '$_id', 
+        avgMinutes: { $round: ['$avgMinutes', 1] }
+      }
+    },
+    { $sort: { crimeHour: 1 } } 
+  ]);
+};
+
+module.exports = { generateSummary, getDailyStats , getWeeklyTrend, getAvgResponseTime };
