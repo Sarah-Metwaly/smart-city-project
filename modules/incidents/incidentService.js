@@ -164,6 +164,15 @@ exports.getAllIncidents = async (query) => {
   return Incident.find(filter).sort({ createdAt: -1 });
 };
 
+exports.getAllIncidentsForAdmin = async (query) => {
+  const filter = {};
+  if(query.type) filter.type = query.type;
+  if(query.status) filter.status = query.status;
+  if(query.priority) filter.priority = query.priority;
+
+  return Incident.find(filter).sort({ createdAt: -1 });
+};
+
 exports.getIncidentById = async (id) => {
   return Incident.findById(id);
 };

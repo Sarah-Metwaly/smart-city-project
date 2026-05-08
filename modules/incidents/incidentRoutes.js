@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {getAllIncidents} = require('./incidentController');
+const {getAllIncidents , getAllIncidentsForAdmin} = require('./incidentController');
 const validateMiddleware = require('../../shared/middlewares/validate');
 const { incidentSchema } = require('./incidentValidation');
 
@@ -18,5 +18,7 @@ const { incidentSchema } = require('./incidentValidation');
 // router.get('/:id', incidentController.getIncidentById); 
 
 router.get('/DailyIncidents', getAllIncidents);  
+
+router.get('/AdminIncidents', getAllIncidentsForAdmin);  // New route for admin with filtering capabilities
 
 module.exports = router;

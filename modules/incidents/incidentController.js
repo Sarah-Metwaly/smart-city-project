@@ -32,6 +32,15 @@ const getAllIncidents = catchAsync(async (req, res) => {
   });
 });
 
+const getAllIncidentsForAdmin = catchAsync(async (req, res) => {
+  const incidents = await incidentService.getAllIncidentsForAdmin(req.query);
+  res.status(200).json({
+      status: 'success',
+      length: incidents.length,
+      data: incidents
+  });
+});
+
 const getIncidentById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const incident = await incidentService.getIncidentById(id);
@@ -46,5 +55,6 @@ module.exports = {
   createFromManual,
   updateIncident,
   getAllIncidents,
+  getAllIncidentsForAdmin,
   getIncidentById,
 };

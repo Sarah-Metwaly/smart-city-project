@@ -33,7 +33,7 @@ const basePayload = (data) => {
       userId: data.source?.userId || null
     },
 
-    location: data.location || { type: 'Point', coordinates: [0, 0], name: `${getZone(data.location?.coordinates[0], data.location?.coordinates[1])}` },
+    location:  { type: 'Point', coordinates: [data.location?.coordinates[0] || 0, data.location?.coordinates[1] || 0], name: `${getZone(data.location?.coordinates[0], data.location?.coordinates[1])}` },
     actions: [{
       user: 'SYSTEM',
       action: 'CREATE',
