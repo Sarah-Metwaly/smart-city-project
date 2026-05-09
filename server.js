@@ -27,9 +27,6 @@ mongoose
         console.log('⏰ Running daily summary...');
         await dailySummaryService.getDailySummary();
         console.log('✅ Daily summary completed');
-
-          console.log('[IncidentSummary] Generating daily summary...');
-          await generateSummary();
     });
   })
   .catch((err) => console.log(err));

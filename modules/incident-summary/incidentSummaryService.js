@@ -81,49 +81,24 @@ const generateSummary = async () => {
     console.log(`✅ Incident summary generated for ${date}`);
 };
 
-//get counts for weapon, fire, behavior incidents for yesterday 
-const getYesterdayCountsFromSummary = async (yesterdayStr) => {
-  const summaries = await IncidentSummary.find({ date: yesterdayStr });
-
-  let weapon = 0, fire = 0, behavior = 0;
-
-  summaries.forEach(doc => {
-    weapon += doc.weaponIncidents || 0;
-    fire += doc.fireIncidents || 0;
-    behavior += doc.behaviorIncidents || 0;
-  });
-
-  return { weapon, fire, behavior };
-};
-
-//get counts for weapon, fire, behavior incidents for today
-const getTodayCounts = async (todayStart) => {
-  const result = await Incident.aggregate([
-    { $match: {
-        createdAt: { $gte: todayStart },
-        status: { $ne: 'FALSE_ALARM' }
-    } },
+const getCountsByDate = async (dateStr) => {
+  const [result] = await IncidentSummary.aggregate([
+    { $match: { date: dateStr } },
     {
       $group: {
-        _id: "$type",
-        count: { $sum: 1 }
+        _id: null,
+        weapon: { $sum: { $ifNull: ['$weaponIncidents', 0] } },
+        fire: { $sum: { $ifNull: ['$fireIncidents', 0] } },
+        behavior: { $sum: { $ifNull: ['$behaviorIncidents', 0] } },
       }
     }
   ]);
 
-  let weapon = 0, fire = 0, behavior = 0;
-
-  result.forEach(r => {
-    if (r._id === 'WEAPON_DETECTION') weapon = r.count;
-    else if (r._id === 'FIRE_DETECTION') fire = r.count;
-    else if (
-      ['THEFT_DETECTION', 'MEDICAL_EMERGENCY', 'CROWD_MANAGEMENT'].includes(r._id)
-    ) {
-      behavior += r.count;
-    }
-  });
-
-  return { weapon, fire, behavior };
+  return {
+    weapon: result?.weapon || 0,
+    fire: result?.fire || 0,
+    behavior: result?.behavior || 0,
+  };
 };
 
 // Additional function to get comparative stats for today's incidents vs yesterday's incidents
@@ -138,8 +113,8 @@ const getDailyStats = async () => {
   const yesterdayStr = formatDate(yesterday);
 
   // Fetch data
-  const todayCounts = await getTodayCounts(today);
-  const yesterdayCounts = await getYesterdayCountsFromSummary(yesterdayStr);
+  const todayCounts = await getCountsByDate(todayStr);
+  const yesterdayCounts = await getCountsByDate(yesterdayStr);
 
   const totalToday =
     todayCounts.weapon +
