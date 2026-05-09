@@ -291,6 +291,7 @@ const getAvgResponseTime = async (mode = 'weekly') => {
 
     return results;
 };
+
 // get active incidents for live map with optional filters (type, limit)
 const getActiveIncidentsForMap = async (filters = {}) => {
   const { 
