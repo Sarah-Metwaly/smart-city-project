@@ -24,7 +24,9 @@ const weeklyTrend = catchAsync(async (req, res) => {
 });
 
 const avgResponseTime = catchAsync(async (req, res) => {
-  const data = await getAvgResponseTime(req.query.date);
+    console.log('query:', req.query);
+  console.log('mode:', req.query.mode);
+  const data = await getAvgResponseTime(req.query.mode);
   res.json({ success: true, data });
 });
 

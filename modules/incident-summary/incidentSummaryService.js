@@ -211,47 +211,87 @@ const getWeeklyTrend = async () => {
   });
 };
 
+const getAvgResponseTime = async (mode = 'weekly') => {
+    mode = mode?.trim() || 'weekly';
 
-// get average response time for incidents created on a given date (default to today)
-const getAvgResponseTime = async (dateStr) => {
-  const date = dateStr || new Date().toISOString().split('T')[0];
-  const start = new Date(`${date}T00:00:00.000Z`);
-  const end   = new Date(`${date}T23:59:59.999Z`);
+    const now = new Date();
 
-  return Incident.aggregate([
-    {
-      $match: {
-        createdAt: { $gte: start, $lte: end },
-        resolvedAt: { $ne: null } 
-      }
-    },
-   {
-  $group: {
-    _id: { $hour: '$createdAt' },
-    avgMinutes: {
-      $avg: {
-        $divide: [
-          { $subtract: ['$resolvedAt', '$createdAt'] },
-          60000 
-        ]
-      }
+    const todayUTC = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate()
+    ));
+
+    if (mode === 'daily') {
+        const hours = Array.from({ length: 24 }, (_, i) => {
+            const start = new Date(todayUTC);
+            start.setUTCHours(i, 0, 0, 0);
+            const end = new Date(todayUTC);
+            end.setUTCHours(i, 59, 59, 999);
+            return { start, end, label: `${String(i).padStart(2, '0')}:00` };
+        });
+
+        const results = await Promise.all(
+            hours.map(async ({ start, end, label }) => {
+                const resolved = await Incident.find({
+                    createdAt: { $gte: start, $lte: end },
+                    status: 'RESOLVED',
+                    resolvedAt: { $ne: null }
+                }).select('createdAt resolvedAt');
+
+                const avgMinutes =
+                    resolved.length === 0
+                        ? 0
+                        : resolved.reduce((sum, inc) => {
+                              const diffMs = new Date(inc.resolvedAt) - new Date(inc.createdAt);
+                              return sum + diffMs / 1000 / 60;
+                          }, 0) / resolved.length;
+
+                return {
+                    hour: label,
+                    avgResponseTime: Math.round(avgMinutes * 10) / 10
+                };
+            })
+        );
+
+        return results;
     }
-  }
-},
-    {
-      $project: {
-        _id: 0,
-        crimeHour: '$_id', 
-        avgMinutes: { $round: ['$avgMinutes', 1] }
-      }
-    },
-    { $sort: { crimeHour: 1 } } 
-  ]);
-};
 
-/**
-  * Get active incidents for map view with optional type filter and limit
- */
+    // weekly (default)
+    const days = Array.from({ length: 7 }, (_, i) => {
+        const start = new Date(todayUTC);
+        start.setUTCDate(todayUTC.getUTCDate() - i);
+        const end = new Date(start);
+        end.setUTCHours(23, 59, 59, 999);
+        return { start, end, label: start.toISOString().slice(0, 10) };
+    }).reverse();
+
+    const results = await Promise.all(
+        days.map(async ({ start, end, label }) => {
+            const resolved = await Incident.find({
+                createdAt: { $gte: start, $lte: end },
+                status: 'RESOLVED',
+                resolvedAt: { $ne: null }
+            }).select('createdAt resolvedAt');
+
+            const avgMinutes =
+                resolved.length === 0
+                    ? 0
+                    : resolved.reduce((sum, inc) => {
+                          const diffMs = new Date(inc.resolvedAt) - new Date(inc.createdAt);
+                          return sum + diffMs / 1000 / 60;
+                      }, 0) / resolved.length;
+
+            return {
+                date: label,
+                avgResponseTime: Math.round(avgMinutes * 10) / 10
+            };
+        })
+    );
+
+    return results;
+};
+// get active incidents for live map with optional filters (type, limit)
 const getActiveIncidentsForMap = async (filters = {}) => {
   const { 
     type = null,    
