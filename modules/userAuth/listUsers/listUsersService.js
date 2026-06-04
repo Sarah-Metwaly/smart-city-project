@@ -20,6 +20,14 @@ const buildQuery = (filters) =>{
     return query;
 };
 
+const getUserById = async (userId) =>{
+    const user = await User.findById(userId).select('-password -refreshTokens -emailVerificationToken -passwordResetToken');
+    if(!user){
+        throw new AppError('User not found');
+    }
+    return user;
+}
+
 // Main function to list users based on filters, pagination, and sorting
 const listUsers = async (filters) => {
     const page = parseInt(filters.page , 10) || 1;
@@ -53,4 +61,4 @@ const listUsers = async (filters) => {
     }
 }
 
-module.exports = {listUsers};
+module.exports = {listUsers , getUserById};
