@@ -26,6 +26,7 @@ const listUsersRoutes = require('./modules/userAuth/listUsers/listUsersRoutes');
 const deactivateUserRoutes = require('./modules/userAuth/deactivateUser/deactivateUserRoutes');
 const activateUserRoutes = require('./modules/userAuth/activateUser/activateUserRoutes');
 const changePasswordRoutes = require('./modules/userAuth/changePassword/changePasswordRoutes');
+const hardDeleteRoutes = require('./modules/userAuth/hardDelete/hardDeleteRoutes');
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.use('/api/v1/auth/admin' , listUsersRoutes);
 app.use('/api/v1/auth/admin' , deactivateUserRoutes);
 app.use('/api/v1/auth/admin' , activateUserRoutes);
 app.use('/api/v1/auth' , changePasswordRoutes);
+app.use('/api/v1/auth/admin' , hardDeleteRoutes);
 
 //Handle all the routes that are not defined in our app and send an error message to the client.
 app.use((req, res, next) => {
