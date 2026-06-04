@@ -1,5 +1,5 @@
 //Zod validates the request body before reaching mongoose schema.
-exports.validate = (schema) => {
+const validate = (schema) => {
   return (req, res, next) => {
     const result = schema.safeParse(req.body); //safeParse returns an object with success and data or error properties, it doesn't throw an error like parse() does, so we can handle validation errors gracefully.
 
@@ -14,3 +14,5 @@ exports.validate = (schema) => {
     next();
   };
 };
+
+module.exports = {validate};
