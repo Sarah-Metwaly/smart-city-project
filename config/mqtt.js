@@ -58,7 +58,13 @@ const init = () => {
         });
     });
 
-    client.on('message', async (topic, message) => {
+    client.on('message', async (topic, message , packet) => {
+        // Skip retained messages delivered on (re)connect
+        if (packet.retain) {
+            console.log(`⏭️ Skipping retained message on ${topic}`);
+        return;
+        }
+        
         const payload = message.toString().trim();
 
         console.log("RAW:", payload);
