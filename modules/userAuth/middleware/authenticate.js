@@ -3,7 +3,7 @@ const User = require('../userModel');
 const AppError = require('../../../shared/utils/AppError');
 const catchAsync = require('../../../shared/utils/catchAsync');
 
-exports.authenticate = catchAsync(async (req, res, next) => {
+const authenticate = catchAsync(async (req, res, next) => {
     //step 1 :Get token from header or cookie
     let token;
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -34,3 +34,5 @@ exports.authenticate = catchAsync(async (req, res, next) => {
     next();
     
 })
+
+module.exports = { authenticate };
