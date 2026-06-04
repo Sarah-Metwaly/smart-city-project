@@ -6,17 +6,40 @@ const bmp180Model = require('../sensors/bmp180/bmp180Model');
 const mq135Model = require('../sensors/mq135/mq135Model');
 const flameModel = require('../sensors/flame/flameModel');
 
-let todaySummaryCashe = null;
-let lastCasheTime = 0;
+let todaySummaryCache = null;
+let lastCacheTime = 0;
+let inflightRequest = null; // <-- prevents race condition
+
+const CACHE_TTL = 5_000; // 5 seconds is more appropriate for live data
 
 const getCachedTodaySummary = async () => {
     const now = Date.now();
-    if(!todaySummaryCashe || now-lastCasheTime > 30_000){
-        todaySummaryCashe=await exports.getTodaySummary();
-        lastCasheTime=now;
+
+    // Return cache if still fresh
+    if (todaySummaryCache && now - lastCacheTime < CACHE_TTL) {
+        return todaySummaryCache;
     }
-    return todaySummaryCashe;
-}
+
+    // If a fetch is already in flight, wait for it instead of firing another
+    if (inflightRequest) {
+        return inflightRequest;
+    }
+
+    // Start a new fetch and store the promise
+    inflightRequest = exports.getTodaySummary()
+        .then(result => {
+            todaySummaryCache = result;
+            lastCacheTime = Date.now();
+            inflightRequest = null;
+            return result;
+        })
+        .catch(err => {
+            inflightRequest = null;
+            throw err;
+        });
+
+    return inflightRequest;
+};
 
 const saveSensorSummary = async (sensorType, sensorId, date, avgPower, totalEnergy, totalCost) => {
     await dailySummaryModel.findOneAndUpdate(
@@ -189,12 +212,17 @@ exports.getWeeklyConsumption = async () => {
             total_cost: 0
             });
     }
-    //GET Today's data as they are not in the daily summary collection yet
-    const todaySummary = await getCachedTodaySummary();
-    const todayDateStr = new Date().toISOString().split('T')[0];
-    if(result[result.length - 1].date === todayDateStr){
-        result[result.length - 1].total_energy = todaySummary.totalEnergy;
-        result[result.length - 1].total_cost = todaySummary.totalCost;
+
+    
+    try {
+        const todaySummary = await getCachedTodaySummary();
+    if (result[result.length - 1].date === todayDateStr) {
+        result[result.length - 1].total_energy = parseFloat(todaySummary.totalEnergy.toFixed(2));
+        result[result.length - 1].total_cost = parseFloat(todaySummary.totalCost.toFixed(2));
+    }
+    } catch(err) {
+        console.error('Failed to get today summary for weekly chart:', err);
+        // result already has 0s for today, which is acceptable
     }
 
     const maxDay = result.reduce((max, day) => day.total_energy > max.total_energy ? day : max, result[0]);
