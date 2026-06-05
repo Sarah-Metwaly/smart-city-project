@@ -18,6 +18,7 @@ exports.createFromAI = async (payload) => {
   const incident = await Incident.create(payload);
 
   await generateSummary(); // Update daily summary immediately after creating an incident from AI data
+  console.log("📤 Socket Sending Incident:", JSON.stringify(payload, null, 2));
   eventEmitter.emit('incident:created', incident);
   return incident;
 };
@@ -131,6 +132,7 @@ exports.updateFromAi = async (IncidentId , UpdatedAiData) =>{
     },
     { returnDocument: 'after' }
   );
+  console.log("📤 Socket update Incident:", JSON.stringify(updated, null, 2));
   eventEmitter.emit('incident:updated' , updated);
   return updated;
 }

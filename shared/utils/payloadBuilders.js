@@ -68,29 +68,29 @@ const builders = {
 
   CROWD_MANAGEMENT: (data) => ({
     ...basePayload(data),
-    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: data.aiData?.crowd_management,
+    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.behavior_analysis?.confidence),
+    aiData: data.aiData?.behavior_analysis || {},
     media : {
-      images: data.aiData?.crowd_management?.incident_image_url 
-            ? [data.aiData.crowd_management.incident_image_url] 
+      images: data.aiData?.behavior_analysis ?.incident_image_url 
+            ? [data.aiData.behavior_analysis .incident_image_url] 
             : []
     }
   }),
 
   MEDICAL_EMERGENCY: (data) => ({
     ...basePayload(data),
-    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData?.confidence),
-    aiData: data.aiData?.medical_emergency,
+    priority: data.aiData?.behavior_analysis?.priority || getPriority(data.aiData.behavior_analysis?.confidence),
+    aiData: data.aiData?.behavior_analysis ,
     media : {
-      images: data.aiData?.medical_emergency?.incident_image_url 
-            ? [data.aiData.medical_emergency.incident_image_url] 
+      images: data.aiData?.behavior_analysis ?.incident_image_url 
+            ? [data.aiData.behavior_analysis .incident_image_url] 
             : []
     }
   }),
 
   FIRE_DETECTION: (data, sensorSnap = {}) => ({
     ...basePayload(data),
-    priority: data.aiData?.fire_analysis?.priority || getPriority(data.aiData?.confidence),
+    priority: data.aiData?.fire_analysis?.priority || getPriority(data.aiData.fire_analysis?.confidence),
     aiData: data.aiData?.fire_analysis ,
     sensorData: sensorSnap,  
     media : {

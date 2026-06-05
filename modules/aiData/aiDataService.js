@@ -103,3 +103,43 @@ exports.detectActiveIncidents = async (aiDataEntry) => {
     }
 
 };
+
+
+
+// exports.detectActiveIncidents = async (aiDataEntry) => {
+//     const detections = aiDataEntry.detections || {};
+    
+//     let basePayload = {
+//         source: {
+//             type: 'AI',
+//             deviceId: aiDataEntry.header?.device_id,
+//             cameraId: aiDataEntry.header?.device_id
+//         },
+//         location: aiDataEntry.header?.location,
+//     };
+
+//     // Weapon Detection
+//     if (detections.weapon_analysis?.detected) {
+//         console.log("🚨 Weapon Detected! Sending to service...");
+//         await incidentService.upsertFromAi({
+//             ...basePayload,
+//             type: 'WEAPON_DETECTION',
+//             aiData: { weapon_analysis: detections.weapon_analysis } // لازم نلفها في aiData عشان الـ Service
+//         });
+//     }
+
+//     // Fire Detection
+//     if (detections.fire_analysis?.detected) {
+//         console.log("🔥 Fire Detected! Sending to service...");
+//         await incidentService.upsertFromAi({
+//             ...basePayload,
+//             type: 'FIRE_DETECTION',
+//             aiData: { fire_analysis: detections.fire_analysis }
+//         });
+//     }
+
+//     // إضافة الـ Else لعمل الـ Resolve (مهم جداً عشان الحادثة تتقفل لما الخطر يزول)
+//     if (!detections.weapon_analysis?.detected && hasActiveIncident(basePayload.source.deviceId, 'WEAPON_DETECTION')) {
+//         await incidentService.aiClearedAwaitingConfirmation(basePayload.source.deviceId, 'WEAPON_DETECTION');
+//     }
+// };
