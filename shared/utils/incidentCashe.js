@@ -73,6 +73,24 @@ const checkAiCachedData = (deviceId, type, aiData) => {
     }
 };
 
+// FIX #4: Added pending incidents tracking to prevent duplicate processing -Race condition-
+const pendingIncidents = new Set();
+
+const isPending = (deviceId, type) => {
+    const key = getIncidentKey(deviceId, type);
+    return pendingIncidents.has(key);
+};
+
+const addPending = (deviceId, type) => {
+    const key = getIncidentKey(deviceId, type);
+    pendingIncidents.add(key);
+};
+
+const removePending = (deviceId, type) => {
+    const key = getIncidentKey(deviceId, type);
+    pendingIncidents.delete(key);
+};
+
 module.exports = {
     activeIncidents,
     hasActiveIncident,
@@ -82,5 +100,8 @@ module.exports = {
     getIncidentId,
     loadActiveIncidents,
     addAiCachedData,
-    checkAiCachedData
+    checkAiCachedData,
+    isPending,
+    addPending,
+    removePending
 };

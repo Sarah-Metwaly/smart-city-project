@@ -3,7 +3,7 @@ const { buildIncidentPayload } = require('../../shared/utils/payloadBuilders');
 const sensorSnapshotService = require('../../shared/services/sensorSnapshotService');
 const eventEmitter = require('../../shared/utils/eventEmitter');
 const {activeIncidents , hasActiveIncident, getIncidentKey , addIncident, removeIncident, getIncidentId , loadActiveIncidents, addAiCachedData ,checkAiCachedData
-} = require('../../shared/utils/incidentCashe')
+,isPending, addPending, removePending } = require('../../shared/utils/incidentCashe')
 const { generateSummary } = require('../incident-summary/incidentSummaryService');
 
 exports.createFromSensor = async (data) => {
@@ -114,10 +114,24 @@ exports.upsertFromAi = async (aiPayload) => {
             const incidentId = getIncidentId(deviceId, payload.type);
             await exports.updateFromAi(incidentId, aiData);  // FIX: Use getIncidentId + await
         }
-    } else {
+        return; // Exit after handling existing incident, no need to create a new one
+      }
+    // } else {
+    //     const incident = await exports.createFromAI(payload);
+    //     addIncident(deviceId, payload.type, incident._id.toString());
+    //     addAiCachedData(deviceId, payload.type, aiData);
+    // }
+    if(isPending(deviceId, payload.type)) return; // Exit if incident is already pending
+
+    addPending(deviceId, payload.type); // Mark as pending to prevent duplicate incidents while processing
+
+    try {
         const incident = await exports.createFromAI(payload);
         addIncident(deviceId, payload.type, incident._id.toString());
         addAiCachedData(deviceId, payload.type, aiData);
+    }
+    finally {
+      removePending(deviceId, payload.type); // Ensure pending status is cleared regardless of success or failure
     }
 };
 
