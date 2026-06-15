@@ -3,7 +3,7 @@ import fire from '../assets/images/Fire/fire.jfif';
 import FireLiveEvents from '../features/fire-department/components/FireliveEvents';
 import AirQuality from '../features/fire-department/components/AirQuality';
 import IncidentTable from '../shared/ui/organisms/IncidentTable';
-import CitySurveillanceMap from '../shared/ui/organisms/CitySurveillanceMap';ذ
+import CitySurveillanceMap from '../shared/ui/organisms/CitySurveillanceMap';
 
 
 
