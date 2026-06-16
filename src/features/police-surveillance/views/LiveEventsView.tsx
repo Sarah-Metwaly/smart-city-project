@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { AlertTriangle, Camera, Eye, EyeOff, FileText, Shield } from "lucide-react";
 import StatCards from "../../../shared/ui/organisms/StatCards";
-import PoliceLiveFeed from "../components/PoliceLiveFeed";
 import CitySurveillanceMap from "../../../shared/ui/organisms/CitySurveillanceMap";
 import ActiveAlertsSidebar from "../../../shared/ui/organisms/ActiveAlertsSidebar";
 import IncidentTable from "../../../shared/ui/organisms/IncidentTable";
+import CameraFeed from "../../../shared/ui/organisms/CameraFeed";
 
 type AlertStatus = 'active' | 'dispatched' | 'resolved';
 
@@ -34,26 +34,9 @@ const LiveEventsView: React.FC = () => {
       <StatCards stats={surveillanceStats} />
         {/* 2. MASTER FEED (Main Screen) */}
         <div className="relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]">
-          <button
-            onClick={() => setShowGrid((p) => !p)}
-            className={`absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold tracking-[1.5px] uppercase backdrop-blur-md border transition-all duration-200
-              ${showGrid ? "bg-aman-cyan/15 border-aman-cyan/40 text-aman-cyan" : "bg-black/65 border-aman-teal/80 text-aman-gray hover:text-aman-light"}`}
-          >
-            {showGrid ? (
-              <EyeOff className="w-3 h-3" />
-            ) : (
-              <Eye className="w-3 h-3" />
-            )}
-            {showGrid ? "SINGLE VIEW" : "ALL CAMERAS"}
-          </button>
+    
+  <CameraFeed />
 
-          {showGrid ? (
-            <div className="p-20 text-center text-aman-gray">
-              Camera Grid Component
-            </div>
-          ) : (
-            <PoliceLiveFeed />
-          )}
         </div>
 
         {/* MIDDLE SECTION: MAP + ALERTS */}
