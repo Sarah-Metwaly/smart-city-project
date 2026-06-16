@@ -7,8 +7,8 @@ interface StatCardProps {
   icon: LucideIcon;
   badge?: string;
   colorClass: {
-    text: string; // اللون الخاص بالرقم والأيقونة
-    bg: string;   // ممكن تستخدميه للـ Badge لو حابة
+    text: string;
+    bg: string;   
   };
 }
 
