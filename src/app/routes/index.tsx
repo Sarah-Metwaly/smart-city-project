@@ -9,6 +9,7 @@ const FirePage = lazy(() => import("../../pages/FirePage"));
 const PolicePage = lazy(() => import("../../pages/PolicePage"));
 const AboutPage = lazy(() => import("../../pages/AboutPage"));
 const WeatherPage = lazy(() => import("../../pages/WeatherPage"));
+const AdminPage = lazy(() => import("../../features/admin/AdminRoute"));
 
 export const router = createBrowserRouter([
   {
@@ -63,6 +64,14 @@ export const router = createBrowserRouter([
           </LazyWrapper>
         ),
       },
+      {
+        path: "admin",
+        element: (
+          <LazyWrapper>
+            <AdminPage />
+          </LazyWrapper>
+        ),
+      }
     ],
   },
 ]);
