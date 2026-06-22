@@ -1,25 +1,39 @@
-import type { Incident } from "../../types/admin.types";
+import type { Incident } from '../../types/admin.types';
+import {
+  TbActivity,
+  TbHaze,
+  TbLockOpen,
+  TbFlame,
+  TbShieldExclamation,
+  TbUsersGroup,
+  TbAmbulance
+} from 'react-icons/tb';
+import { ReactNode } from 'react';
 
 interface Props {
   incidents: Incident[];
 }
 
-const INCIDENT_ICON: Record<string, string> = {
-  FIRE: "🔥",
-  ACCIDENT: "🚗",
-  MEDICAL: "🚑",
+const INCIDENT_ICON: Record<string, ReactNode> = {
+  SMOKE_DETECTION: <TbHaze size={16} />,
+  THEFT_DETECTION: <TbLockOpen size={16} />,
+  FIRE_DETECTION: <TbFlame size={16} />,
+  WEAPON_DETECTION: <TbShieldExclamation size={16} />,
+  CROWD_MANAGEMENT : <TbUsersGroup size={16} /> ,
+  MEDICAL_EMERGENCY : <TbAmbulance size={16} />,
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  ACTIVE: "text-emerald-400 bg-emerald-400/10",
-  RESOLVED: "text-gray-400 bg-gray-400/10",
-  PENDING: "text-amber-400 bg-amber-400/10",
+  ACTIVE: 'text-emerald-400 bg-emerald-400/10',
+  RESOLVED: 'text-gray-400 bg-gray-400/10',
+  PENDING: 'text-amber-400 bg-amber-400/10',
 };
 
 export default function RecentIncidentsWidget({ incidents }: Props) {
   return (
     <div className="bg-[#0d1120] border border-white/5 rounded-xl p-4">
-      <h3 className="text-sm font-medium text-gray-300 mb-3">
+      <h3 className="text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
+        <TbActivity size={16} className="text-gray-500" />
         Recent Incidents
       </h3>
 
@@ -31,11 +45,9 @@ export default function RecentIncidentsWidget({ incidents }: Props) {
             </span>
 
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-gray-200 truncate">
-                {inc.incidentId}
-              </p>
+              <p className="text-sm text-gray-200 truncate">{inc.incidentId}</p>
               <p className="text-xs text-gray-600">
-                {inc.type.replace(/_/g, " ")}
+                {inc.type.replace(/_/g, ' ')}
               </p>
             </div>
 
