@@ -1,5 +1,4 @@
 import type { User, ActiveView } from '../../types/admin.types';
-import type { Dispatch, SetStateAction } from 'react';
 import UsersTable from './UsersTable';
 
 interface UsersViewProps {
@@ -10,7 +9,6 @@ interface UsersViewProps {
   userFilters: any;
   setUserFilters: React.Dispatch<React.SetStateAction<any>>;
   pagination: any;
-  fetchUsers: () => void;
 
   onSelectUser: (user: User) => void;
   onToggleUser: (user: User) => void;
@@ -25,7 +23,6 @@ export default function UsersView({
   userFilters,
   setUserFilters,
   pagination,
-  fetchUsers,
 
   onSelectUser,
   onToggleUser,
@@ -33,8 +30,8 @@ export default function UsersView({
 }: UsersViewProps) {
   return (
     <div className="space-y-4">
-      {/* filters*/}
-      <div className="flex flex-wrap gap-3">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
         <input
           type="text"
           placeholder="Search by name..."
@@ -46,7 +43,17 @@ export default function UsersView({
               page: 1,
             }))
           }
-          className="bg-[#0d1120] border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-blue-500/50 w-48"
+          className="
+            w-full sm:w-64
+            bg-[#0d1120]
+            border border-white/10
+            rounded-lg
+            px-3 py-2
+            text-sm text-gray-200
+            placeholder-gray-600
+            focus:outline-none
+            focus:border-blue-500/50
+          "
         />
 
         {activeView === 'users' && (
@@ -59,7 +66,16 @@ export default function UsersView({
                 page: 1,
               }))
             }
-            className="bg-[#0d1120] border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-blue-500/50"
+            className="
+              w-full sm:w-auto
+              bg-[#0d1120]
+              border border-white/10
+              rounded-lg
+              px-3 py-2
+              text-sm text-gray-200
+              focus:outline-none
+              focus:border-blue-500/50
+            "
           >
             <option value="">All Roles</option>
             <option value="citizen">Citizen</option>
@@ -67,22 +83,6 @@ export default function UsersView({
             <option value="admin">Admin</option>
           </select>
         )}
-
-        <button
-          onClick={() => {
-            if (activeView === 'officers') {
-              setUserFilters((f: any) => ({
-                ...f,
-                role: 'officer',
-                page: 1,
-              }));
-            }
-            fetchUsers();
-          }}
-          className="px-4 py-2 bg-blue-500/15 border border-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/25 transition-colors"
-        >
-          Search
-        </button>
       </div>
 
       <UsersTable
@@ -94,30 +94,57 @@ export default function UsersView({
         onDeleteUser={onDeleteUser}
       />
 
-      {/* {pagination} */}
+      {/* Pagination */}
       {pagination && (
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-gray-500">
+          <span className="text-center sm:text-left">
             Showing {(pagination.page - 1) * pagination.limit + 1}–
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-            {pagination.total}
+            {Math.min(
+              pagination.page * pagination.limit,
+              pagination.total
+            )}{' '}
+            of {pagination.total}
           </span>
-          <div className="flex gap-2">
+
+          <div className="flex justify-center sm:justify-end gap-2">
             <button
               disabled={!pagination.hasPrevPage}
               onClick={() =>
-                setUserFilters((f) => ({ ...f, page: f.page - 1 }))
+                setUserFilters((f) => ({
+                  ...f,
+                  page: f.page - 1,
+                }))
               }
-              className="px-3 py-1.5 bg-[#0d1120] border border-white/10 rounded-lg disabled:opacity-30 hover:border-blue-500/30 transition-colors"
+              className="
+                px-3 py-1.5
+                bg-[#0d1120]
+                border border-white/10
+                rounded-lg
+                disabled:opacity-30
+                hover:border-blue-500/30
+                transition-colors
+              "
             >
               ←
             </button>
+
             <button
               disabled={!pagination.hasNextPage}
               onClick={() =>
-                setUserFilters((f) => ({ ...f, page: f.page + 1 }))
+                setUserFilters((f) => ({
+                  ...f,
+                  page: f.page + 1,
+                }))
               }
-              className="px-3 py-1.5 bg-[#0d1120] border border-white/10 rounded-lg disabled:opacity-30 hover:border-blue-500/30 transition-colors"
+              className="
+                px-3 py-1.5
+                bg-[#0d1120]
+                border border-white/10
+                rounded-lg
+                disabled:opacity-30
+                hover:border-blue-500/30
+                transition-colors
+              "
             >
               →
             </button>

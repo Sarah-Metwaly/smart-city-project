@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import DashboardSidebar from '../components/layout/DashboardSidebar';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import UserDetailsModal from '../components/modals/UserDetailsModal';
 import DeleteUserModal from '../components/modals/DeleteUserModal';
+
 import UsersView from '../components/users/UsersView';
 import OverviewView from '../components/overview/OverviewView';
 import RecentUsersWidget from '../components/overview/RecentUsersWidget';
 import RecentIncidentsWidget from '../components/overview/RecentIncidentsWidget';
 import IncidentsView from '../components/incidents/IncidentsView';
 import CreateOfficerView from '../components/officers/CreateOfficersView';
+
 import { useAdminUsers } from '../hooks/useAdminUsers';
 import { useAdminIncidents } from '../hooks/useAdminIncidents';
 import { useCreateOfficer } from '../hooks/useCreateOfficers';
@@ -16,43 +18,41 @@ import { useCreateOfficer } from '../hooks/useCreateOfficers';
 import type { User, ActiveView, Department } from '../types/admin.types';
 
 export default function AdminDashboard() {
+  // UI STATE ONLY
   const [activeView, setActiveView] = useState<ActiveView>('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
   const [toast, setToast] = useState<{
     msg: string;
     type: 'success' | 'error';
   } | null>(null);
 
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
   const showToast = useCallback((msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });
-
-    setTimeout(() => {
-      setToast(null);
-    }, 3500);
+    setTimeout(() => setToast(null), 3500);
   }, []);
 
+  // 🔥 USERS (React Query owns fetching)
   const {
     users,
     pagination,
     userFilters,
     setUserFilters,
     loading,
-    fetchUsers,
     handleToggleUser,
+    isTogglingUser,
     handleDeleteUser,
-  } = useAdminUsers(activeView, showToast);
+    isDeletingUser,
+  } = useAdminUsers(activeView);
 
-  const {
-    incidents,
-    incidentFilters,
-    setIncidentFilters,
-    incidentsLoading,
-    fetchIncidents,
-  } = useAdminIncidents(showToast);
+  // 🔥 INCIDENTS (React Query owns fetching)
+  const { incidents, incidentFilters, setIncidentFilters, incidentsLoading } =
+    useAdminIncidents(showToast);
 
+  // 🔥 CREATE OFFICER
   const {
     officerForm,
     setOfficerForm,
@@ -60,37 +60,18 @@ export default function AdminDashboard() {
     setOfficerPhoto,
     formLoading,
     handleCreateOfficer,
-  } = useCreateOfficer(showToast, () => {
-    setActiveView('officers');
-  });
+  } = useCreateOfficer(showToast, () => setActiveView('officers'));
 
+  // DELETE WRAPPER (UI ONLY)
   const handleDeleteConfirm = async (id: string) => {
-    const success = await handleDeleteUser(id);
-
-    if (success) {
-      setDeleteConfirm(null);
-      setSelectedUser(null);
-    }
+    await handleDeleteUser(id);
+    setDeleteConfirm(null);
+    setSelectedUser(null);
   };
-
-  useEffect(() => {
-    if (activeView === 'users' || activeView === 'officers') fetchUsers();
-  }, [activeView, fetchUsers]);
-
-  useEffect(() => {
-    if (activeView === 'incidents') fetchIncidents();
-  }, [activeView, fetchIncidents]);
-
-  useEffect(() => {
-    if (activeView === 'overview') {
-      fetchUsers();
-      fetchIncidents();
-    }
-  }, [activeView, fetchUsers, fetchIncidents]);
 
   return (
     <div className="flex h-screen bg-[#0a0e1a] text-gray-100 font-sans overflow-hidden">
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <DashboardSidebar
         activeView={activeView}
         sidebarOpen={sidebarOpen}
@@ -98,12 +79,13 @@ export default function AdminDashboard() {
         setActiveView={setActiveView}
       />
 
-      {/* Main */}
+      {/* MAIN */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Topbar */}
-        <DashboardHeader activeView={activeView} />
+        <DashboardHeader
+          activeView={activeView}
+          setSidebarOpen={setSidebarOpen}
+        />
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {/* OVERVIEW */}
           {activeView === 'overview' && (
@@ -111,10 +93,7 @@ export default function AdminDashboard() {
               <OverviewView users={users} incidents={incidents} />
 
               <div className="grid md:grid-cols-2 gap-4">
-                {/* Recent Users */}
                 <RecentUsersWidget users={users} />
-
-                {/* Recent Incidents */}
                 <RecentIncidentsWidget incidents={incidents} />
               </div>
             </div>
@@ -122,21 +101,17 @@ export default function AdminDashboard() {
 
           {/* USERS / OFFICERS */}
           {(activeView === 'users' || activeView === 'officers') && (
-            <div className="space-y-4">
-              {/* userView */}
-              <UsersView
-                users={users}
-                loading={loading}
-                activeView={activeView}
-                userFilters={userFilters}
-                setUserFilters={setUserFilters}
-                pagination={pagination}
-                fetchUsers={fetchUsers}
-                onSelectUser={setSelectedUser}
-                onToggleUser={handleToggleUser}
-                onDeleteUser={setDeleteConfirm}
-              />
-            </div>
+            <UsersView
+              users={users}
+              loading={loading}
+              activeView={activeView}
+              userFilters={userFilters}
+              setUserFilters={setUserFilters}
+              pagination={pagination}
+              onSelectUser={setSelectedUser}
+              onToggleUser={handleToggleUser}
+              onDeleteUser={setDeleteConfirm}
+            />
           )}
 
           {/* INCIDENTS */}
@@ -146,7 +121,6 @@ export default function AdminDashboard() {
               loading={incidentsLoading}
               incidentFilters={incidentFilters}
               setIncidentFilters={setIncidentFilters}
-              fetchIncidents={fetchIncidents}
             />
           )}
 
@@ -164,7 +138,7 @@ export default function AdminDashboard() {
         </div>
       </main>
 
-      {/* User Detail Modal */}
+      {/* MODALS */}
       <UserDetailsModal
         user={selectedUser}
         onClose={() => setSelectedUser(null)}
@@ -172,24 +146,30 @@ export default function AdminDashboard() {
         onDelete={setDeleteConfirm}
       />
 
-      {/* Delete Confirm Modal */}
       <DeleteUserModal
         userId={deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
         onConfirm={handleDeleteConfirm}
+        loading={isDeletingUser}
       />
 
-      {/* Toast */}
+      {/* TOAST */}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 px-4 py-3 rounded-xl text-sm font-medium shadow-xl z-50 flex items-center gap-2 ${
-            toast.type === 'success'
-              ? 'bg-emerald-500/15 border border-emerald-500/20 text-emerald-400'
-              : 'bg-red-500/15 border border-red-500/20 text-red-400'
-          }`}
+          className={`fixed bottom-4 right-4 left-4 sm:left-auto sm:right-6 sm:bottom-6 
+    px-4 py-3 rounded-xl text-sm font-medium shadow-xl z-50 flex items-center gap-2
+    animate-fade-in
+    ${
+      toast.type === 'success'
+        ? 'bg-emerald-500/15 border border-emerald-500/20 text-emerald-400'
+        : 'bg-red-500/15 border border-red-500/20 text-red-400'
+    }`}
         >
-          <span>{toast.type === 'success' ? '✓' : '✕'}</span>
-          {toast.msg}
+          <span className="flex-shrink-0">
+            {toast.type === 'success' ? '✓' : '✕'}
+          </span>
+
+          <span className="truncate">{toast.msg}</span>
         </div>
       )}
     </div>
