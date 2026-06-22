@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { adminService } from '../services/admin.services';
+import { useState, useEffect, useCallback } from 'react';
 import DashboardSidebar from '../components/layout/DashboardSidebar';
 import DashboardHeader from '../components/layout/DashboardHeader';
 import UserDetailsModal from '../components/modals/UserDetailsModal';
@@ -12,7 +11,7 @@ import IncidentsView from '../components/incidents/IncidentsView';
 import CreateOfficerView from '../components/officers/CreateOfficersView';
 import { useAdminUsers } from '../hooks/useAdminUsers';
 import { useAdminIncidents } from '../hooks/useAdminIncidents';
-import axios from 'axios';
+import { useCreateOfficer } from '../hooks/useCreateOfficers';
 
 import type { User, ActiveView, Department } from '../types/admin.types';
 
@@ -26,17 +25,6 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  // Create officer form
-  const [officerForm, setOfficerForm] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    department: 'Police' as Department,
-  });
-  const [officerPhoto, setOfficerPhoto] = useState<File | null>(null);
-  const [formLoading, setFormLoading] = useState(false);
 
   const showToast = useCallback((msg: string, type: 'success' | 'error') => {
     setToast({ msg, type });
@@ -65,6 +53,26 @@ export default function AdminDashboard() {
     fetchIncidents,
   } = useAdminIncidents(showToast);
 
+  const {
+    officerForm,
+    setOfficerForm,
+    officerPhoto,
+    setOfficerPhoto,
+    formLoading,
+    handleCreateOfficer,
+  } = useCreateOfficer(showToast, () => {
+    setActiveView('officers');
+  });
+
+  const handleDeleteConfirm = async (id: string) => {
+    const success = await handleDeleteUser(id);
+
+    if (success) {
+      setDeleteConfirm(null);
+      setSelectedUser(null);
+    }
+  };
+
   useEffect(() => {
     if (activeView === 'users' || activeView === 'officers') fetchUsers();
   }, [activeView, fetchUsers]);
@@ -79,36 +87,6 @@ export default function AdminDashboard() {
       fetchIncidents();
     }
   }, [activeView, fetchUsers, fetchIncidents]);
-
-  const handleCreateOfficer = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!officerPhoto) return showToast('Please select a photo', 'error');
-    setFormLoading(true);
-    const fd = new FormData();
-    Object.entries(officerForm).forEach(([k, v]) => fd.append(k, String(v)));
-    fd.append('officerPhoto', officerPhoto);
-    try {
-      await adminService.createOfficer(fd);
-      showToast('Officer created successfully', 'success');
-      setOfficerForm({
-        email: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        department: 'Police',
-      });
-      setOfficerPhoto(null);
-      setActiveView('officers');
-    } catch (err: unknown) {
-      const msg =
-        axios.isAxiosError(err) && err.response?.data?.message
-          ? err.response.data.message
-          : 'Failed to create officer';
-      showToast(msg, 'error');
-    } finally {
-      setFormLoading(false);
-    }
-  };
 
   return (
     <div className="flex h-screen bg-[#0a0e1a] text-gray-100 font-sans overflow-hidden">
@@ -198,7 +176,7 @@ export default function AdminDashboard() {
       <DeleteUserModal
         userId={deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
-        onConfirm={handleDeleteUser}
+        onConfirm={handleDeleteConfirm}
       />
 
       {/* Toast */}

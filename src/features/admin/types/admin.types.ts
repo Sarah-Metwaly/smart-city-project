@@ -17,11 +17,13 @@ export type IncidentPriority =
   | "MEDIUM"
   | "HIGH";
 
-export type IncidentType =
+type IncidentType =
   | "SMOKE_DETECTION"
   | "THEFT_DETECTION"
   | "FIRE_DETECTION"
-  | "INTRUSION_DETECTION";
+  | "INTRUSION_DETECTION"
+  | "CROWD_MANAGEMENT"
+  | "MEDICAL_EMERGENCY";
 
 export interface User {
   _id: string;

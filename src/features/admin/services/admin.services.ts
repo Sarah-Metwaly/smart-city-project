@@ -9,7 +9,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 const getAuthHeader = () => {
   return {
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OWVlYTljYzM5MTUwODA1ODBjNjk0NGIiLCJpYXQiOjE3ODE3OTEwNzEsImV4cCI6MTc4MTc5MTk3MX0.UXOs9rvzX4XOXZLO9jLjnsjuaPNLKWajvJvb_QstNys`,
+    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OWVlYTljYzM5MTUwODA1ODBjNjk0NGIiLCJpYXQiOjE3ODIxMzk2NzYsImV4cCI6MTc4MjE0MDU3Nn0.IOkBobgUJtkcfmMPj4SzhY_ZMA4-QNqUAyCJ-hSaEMQ`,
   };
 };
 

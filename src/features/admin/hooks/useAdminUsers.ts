@@ -1,11 +1,7 @@
 import { useState, useCallback } from 'react';
 import { adminService } from '../services/admin.services';
 
-import type {
-  User,
-  Pagination,
-  ActiveView,
-} from '../types/admin.types';
+import type { User, Pagination, ActiveView } from '../types/admin.types';
 
 export function useAdminUsers(
   activeView: ActiveView,
@@ -42,7 +38,7 @@ export function useAdminUsers(
     } finally {
       setLoading(false);
     }
-  }, [userFilters, activeView ]);
+  }, [userFilters, activeView]);
 
   const handleToggleUser = async (user: User) => {
     try {
@@ -64,14 +60,14 @@ export function useAdminUsers(
 
   const handleDeleteUser = async (id: string) => {
     try {
-          await adminService.deleteUser(id);
-          showToast('User permanently deleted', 'success');
-          //setDeleteConfirm(null);
-          //setSelectedUser(null);
-          fetchUsers();
-        } catch {
-          showToast('Delete failed', 'error');
-        }
+      await adminService.deleteUser(id);
+      showToast('User permanently deleted', 'success');
+      fetchUsers();
+      return true;
+    } catch {
+      showToast('Delete failed', 'error');
+      return false;
+    }
   };
 
   return {
@@ -83,6 +79,5 @@ export function useAdminUsers(
     fetchUsers,
     handleToggleUser,
     handleDeleteUser,
-
   };
 }

@@ -64,14 +64,14 @@ export const router = createBrowserRouter([
           </LazyWrapper>
         ),
       },
-      {
-        path: "admin",
-        element: (
-          <LazyWrapper>
-            <AdminPage />
-          </LazyWrapper>
-        ),
-      }
     ],
   },
+  {
+    path: "admin",
+      element: (
+        <LazyWrapper>
+          <AdminPage />
+        </LazyWrapper>
+      ),
+  }
 ]);

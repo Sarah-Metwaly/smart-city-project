@@ -1,4 +1,6 @@
 import type { User, Incident } from '../../types/admin.types';
+import { MdReportProblem } from "react-icons/md";
+import { TbUsers, TbUserCheck, TbAlertCircle, TbFlame } from "react-icons/tb";
 
 interface OverviewViewProps {
   users: User[];
@@ -24,25 +26,25 @@ export default function OverviewView({ users, incidents }: OverviewViewProps) {
             label: 'Total Users',
             value: users.length,
             color: 'blue',
-            icon: '◎',
+            icon: <TbUsers size={16} /> ,
           },
           {
             label: 'Active Users',
             value: activeUsers,
             color: 'emerald',
-            icon: '●',
+            icon: <TbUserCheck size={16} />,
           },
           {
             label: 'Active Incidents',
             value: activeIncidents,
             color: 'amber',
-            icon: '⚡',
+            icon: <TbAlertCircle size={16} />,
           },
           {
             label: 'High Priority',
             value: highPriority,
             color: 'red',
-            icon: '▲',
+            icon: <TbFlame size={16} />,
           },
         ].map((stat) => (
           <div

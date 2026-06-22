@@ -1,6 +1,5 @@
 import type { Incident } from '../../types/admin.types';
 import {
-  INCIDENT_ICON,
   PRIORITY_COLOR,
   STATUS_COLOR,
 } from '../../constants/admin.constants';
@@ -104,7 +103,7 @@ export default function IncidentsView({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span>{INCIDENT_ICON[inc.type] ?? '⚠️'}</span>
+                      {/* <span>{INCIDENT_ICON[inc.type] ?? '⚠️'}</span> */}
                       <span className="text-gray-300 text-xs">
                         {inc.type.replace(/_/g, ' ')}
                       </span>
