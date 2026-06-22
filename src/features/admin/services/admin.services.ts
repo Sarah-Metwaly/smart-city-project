@@ -1,68 +1,62 @@
-import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
-
-// const getAuthHeader = () => {
-//   const token = localStorage.getItem("accessToken");
-//   return { Authorization: `Bearer ${token}` };
-// };
-
-const getAuthHeader = () => {
-  return {
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OWVlYTljYzM5MTUwODA1ODBjNjk0NGIiLCJpYXQiOjE3ODIxMzk2NzYsImV4cCI6MTc4MjE0MDU3Nn0.IOkBobgUJtkcfmMPj4SzhY_ZMA4-QNqUAyCJ-hSaEMQ`,
-  };
-};
+import axiosInstance from "../../../shared/api/axiosInstance";
 
 export const adminService = {
-  //Users
+  // USERS
   getUsers: async (params: URLSearchParams) => {
-    return axios.get(
-      `${API_BASE}/api/v1/auth/admin/listUsers?${params.toString()}`,
+    const res = await axiosInstance.get(
+      "/api/v1/auth/admin/listUsers",
       {
-        headers: getAuthHeader(),
-      },
+        params: Object.fromEntries(params),
+      }
     );
+    return res.data;
   },
 
   activateUser: async (id: string) => {
-    return axios.patch(
-      `${API_BASE}/api/v1/auth/admin/activate/${id}`,
-      {},
-      { headers: getAuthHeader() },
+    const res = await axiosInstance.patch(
+      `/api/v1/auth/admin/activate/${id}`,
+      {}
     );
+    return res.data;
   },
 
   deactivateUser: async (id: string) => {
-    return axios.patch(
-      `${API_BASE}/api/v1/auth/admin/deactivate/${id}`,
-      {},
-      { headers: getAuthHeader() },
+    const res = await axiosInstance.patch(
+      `/api/v1/auth/admin/deactivate/${id}`,
+      {}
     );
+    return res.data;
   },
 
   deleteUser: async (id: string) => {
-    return axios.delete(`${API_BASE}/api/v1/auth/admin/delete/${id}`, {
-      headers: getAuthHeader(),
-    });
-  },
-
-  //Incidents
-  getIncidents: async (params: URLSearchParams) => {
-    return axios.get(
-      `${API_BASE}/api/v1/incidents/AdminIncidents?${params.toString()}`,
-      {
-        headers: getAuthHeader(),
-      },
+    const res = await axiosInstance.delete(
+      `/api/v1/auth/admin/delete/${id}`
     );
+    return res.data;
   },
 
-  //Officers
+  // INCIDENTS
+  getIncidents: async (params: URLSearchParams) => {
+    const res = await axiosInstance.get(
+      "/api/v1/incidents/AdminIncidents",
+      {
+        params: Object.fromEntries(params),
+      }
+    );
+    return res.data;
+  },
+
+  // OFFICERS
   createOfficer: async (formData: FormData) => {
-    return axios.post(`${API_BASE}/api/v1/auth/admin/createOfficer`, formData, {
-      headers: {
-        ...getAuthHeader(),
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const res = await axiosInstance.post(
+      "/api/v1/auth/admin/createOfficer",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res.data;
   },
 };

@@ -28,14 +28,18 @@ export default function CreateOfficerView({
   formLoading,
 }: CreateOfficerViewProps) {
   return (
-    <div className="w-full flex justify-center px-4">
+    <div className="w-full flex justify-center px-3 sm:px-4">
       <div className="w-full max-w-2xl">
-        <div className="bg-[#0d1120] border border-white/5 rounded-xl p-6">
+        <div className="bg-[#0d1120] border border-white/5 rounded-xl p-4 sm:p-6">
+
           <h2 className="text-base font-semibold text-white mb-5">
             New Officer Account
           </h2>
+
           <form onSubmit={handleCreateOfficer} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+
+            {/* First + Last Name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs text-gray-500 mb-1.5">
                   First Name
@@ -55,6 +59,7 @@ export default function CreateOfficerView({
                   placeholder="Jane"
                 />
               </div>
+
               <div>
                 <label className="block text-xs text-gray-500 mb-1.5">
                   Last Name
@@ -76,6 +81,7 @@ export default function CreateOfficerView({
               </div>
             </div>
 
+            {/* Email */}
             <div>
               <label className="block text-xs text-gray-500 mb-1.5">
                 Email
@@ -92,6 +98,7 @@ export default function CreateOfficerView({
               />
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-xs text-gray-500 mb-1.5">
                 Password
@@ -112,6 +119,7 @@ export default function CreateOfficerView({
               />
             </div>
 
+            {/* Department */}
             <div>
               <label className="block text-xs text-gray-500 mb-1.5">
                 Department
@@ -131,25 +139,32 @@ export default function CreateOfficerView({
               </select>
             </div>
 
+            {/* File Upload */}
             <div>
               <label className="block text-xs text-gray-500 mb-1.5">
                 Officer Photo{' '}
                 <span className="text-gray-600">(jpg/png, max 5MB)</span>
               </label>
-              <label className="flex items-center gap-3 w-full bg-[#0a0e1a] border border-dashed border-white/10 rounded-lg px-3 py-3 cursor-pointer hover:border-blue-500/30 transition-colors">
+
+              <label className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full bg-[#0a0e1a] border border-dashed border-white/10 rounded-lg px-3 py-3 cursor-pointer hover:border-blue-500/30 transition-colors">
                 <span className="text-blue-400 text-sm">📷</span>
-                <span className="text-sm text-gray-500">
+
+                <span className="text-sm text-gray-500 truncate">
                   {officerPhoto ? officerPhoto.name : 'Choose photo…'}
                 </span>
+
                 <input
                   type="file"
                   accept=".jpg,.jpeg,.png"
                   className="hidden"
-                  onChange={(e) => setOfficerPhoto(e.target.files?.[0] ?? null)}
+                  onChange={(e) =>
+                    setOfficerPhoto(e.target.files?.[0] ?? null)
+                  }
                 />
               </label>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={formLoading}
@@ -164,6 +179,7 @@ export default function CreateOfficerView({
                 'Create Officer'
               )}
             </button>
+
           </form>
         </div>
       </div>
