@@ -35,7 +35,7 @@ export default function AdminDashboard() {
     setTimeout(() => setToast(null), 3500);
   }, []);
 
-  // 🔥 USERS (React Query owns fetching)
+  //USERS (React Query owns fetching)
   const {
     users,
     pagination,
@@ -48,11 +48,11 @@ export default function AdminDashboard() {
     isDeletingUser,
   } = useAdminUsers(activeView);
 
-  // 🔥 INCIDENTS (React Query owns fetching)
+  // INCIDENTS (React Query owns fetching)
   const { incidents, incidentFilters, setIncidentFilters, incidentsLoading } =
     useAdminIncidents(showToast);
 
-  // 🔥 CREATE OFFICER
+  //CREATE OFFICER
   const {
     officerForm,
     setOfficerForm,
