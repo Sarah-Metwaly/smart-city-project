@@ -3,11 +3,20 @@ import { Link, useLocation } from 'react-router-dom';
 import { HiMenuAlt3, HiX } from 'react-icons/hi';
 import { TbUserShield } from 'react-icons/tb';
 import logo from '../../assets/logo.png';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { pathname } = useLocation();
   const [isScrolled, setisScrolled] = useState(false);
+  const { user, clearUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    clearUser();
+    navigate('/');
+  };
 
   useEffect(() => {
     const handlescrole = () => {
@@ -79,22 +88,38 @@ const Navbar = () => {
         </div> */}
 
         <div className="hidden md:flex items-center gap-4">
-          <Link
-            to="/login"
-            className="bg-aman-white text-aman-light px-6 py-2 rounded-lg font-semibold font-inter hover:bg-aman-teal hover:text-aman-white transition-all"
-          >
-            Sign In
-          </Link>
+          {user ? (
+            <>
+              {/* Sign out button */}
+              <button
+                onClick={handleSignOut}
+                className="bg-aman-white text-aman-light px-6 py-2 rounded-lg font-semibold font-inter hover:bg-aman-teal hover:text-aman-white transition-all"
+              >
+                Sign Out
+              </button>
 
-          <Link
-            to="/admin"
-            className="text-aman-white hover:text-aman-light transition-colors"
-            title="Admin Dashboard"
-          >
-            <div className="w-9 h-9 rounded-full bg-blue-500/20 flex items-center justify-center text-white-400">
-              <TbUserShield size={20} />
-            </div>
-          </Link>
+              {/* Admin icon — only visible to admins */}
+              {user.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="text-aman-white hover:text-aman-light transition-colors"
+                  title="Admin Dashboard"
+                >
+                  <div className="w-9 h-9 rounded-full bg-blue-500/20 flex items-center justify-center text-white-400">
+                    <TbUserShield size={20} />
+                  </div>
+                </Link>
+              )}
+            </>
+          ) : (
+            /* Not logged in — show Sign In */
+            <Link
+              to="/login"
+              className="bg-aman-white text-aman-light px-6 py-2 rounded-lg font-semibold font-inter hover:bg-aman-teal hover:text-aman-white transition-all"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
 
         {/* MOBILE TOGGLE */}

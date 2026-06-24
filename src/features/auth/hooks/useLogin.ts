@@ -16,7 +16,7 @@ export function useLogin() {
       const { accessToken, user } = response.data;
       tokenManager.setAccessToken(accessToken);
       setUser(user);
-      navigate("/admin", { replace: true });
+      navigate("/", { replace: true });
     },
   });
 
