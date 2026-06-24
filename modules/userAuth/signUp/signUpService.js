@@ -1,6 +1,6 @@
 const User = require('../userModel');
 const token = require('../utils/token');
-const { sendVerificationEmail } = require('../utils/email');
+// const { sendVerificationEmail } = require('../utils/email');
 const AppError = require('../../../shared/utils/AppError');
 
 exports.signUpUser = async ({email , password , firstName , lastName}) => {
@@ -22,8 +22,8 @@ exports.signUpUser = async ({email , password , firstName , lastName}) => {
         lastName,
         role:'citizen',
         isEmailVerfied: true,
-        emailVerficationToken: hashedToken,
-        emailVerificationExpires: expiresAt
+        // emailVerficationToken: hashedToken,
+        // emailVerificationExpires: expiresAt
     })
 
     // Send verification email

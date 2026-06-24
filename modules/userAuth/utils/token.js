@@ -6,13 +6,13 @@ exports.hashToken = (token) => {
     return crypto.createHash('sha256').update(token).digest('hex');
 };
 
-exports.generateEmailVerificationToken = () => { 
-    // Generate a random token, hash it, and set an expiration time for email verification
-    const token = crypto.randomBytes(32).toString('hex');
-    const hashedToken = exports.hashToken(token);
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-    return {rawToken: token, hashedToken, expiresAt };
-};
+// exports.generateEmailVerificationToken = () => { 
+//     // Generate a random token, hash it, and set an expiration time for email verification
+//     const token = crypto.randomBytes(32).toString('hex');
+//     const hashedToken = exports.hashToken(token);
+//     const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+//     return {rawToken: token, hashedToken, expiresAt };
+// };
 
 exports.generatePasswordResetToken = () =>{
     const token = crypto.randomBytes(32).toString('hex');
