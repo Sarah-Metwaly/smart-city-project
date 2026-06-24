@@ -14,10 +14,12 @@ import type {
 // ─── Auth Service ─────────────────────────────────────────────────────────────
 // Pure API functions — no side effects, no UI, no state management.
 
+const API = 'api/v1'
+
 export const authService = {
   async login(payload: LoginPayload): Promise<LoginResponse> {
     const { data } = await axiosInstance.post<LoginResponse>(
-      "/auth/login",
+      `${API}/auth/login`,
       payload
     );
     return data;
@@ -25,7 +27,7 @@ export const authService = {
 
   async signup(payload: SignupPayload): Promise<SignupResponse> {
     const { data } = await axiosInstance.post<SignupResponse>(
-      "/auth/signup",
+      `${API}/auth/signup`,
       payload
     );
     return data;
@@ -33,7 +35,7 @@ export const authService = {
 
   async verifyEmail(payload: VerifyEmailPayload): Promise<GenericAuthResponse> {
     const { data } = await axiosInstance.post<GenericAuthResponse>(
-      "/auth/verifyEmail",
+      `${API}/auth/verifyEmail`,
       payload
     );
     return data;
@@ -43,7 +45,7 @@ export const authService = {
     payload: ForgotPasswordPayload
   ): Promise<GenericAuthResponse> {
     const { data } = await axiosInstance.post<GenericAuthResponse>(
-      "/auth/forgotPassword",
+      `${API}/auth/forgotPassword`,
       payload
     );
     return data;
@@ -53,7 +55,7 @@ export const authService = {
     payload: ResetPasswordPayload
   ): Promise<GenericAuthResponse> {
     const { data } = await axiosInstance.post<GenericAuthResponse>(
-      "/auth/resetPassword",
+      `${API}/auth/resetPassword`,
       payload
     );
     return data;
@@ -61,7 +63,7 @@ export const authService = {
 
   async refreshToken(): Promise<RefreshTokenResponse> {
     const { data } = await axiosInstance.post<RefreshTokenResponse>(
-      "/auth/refreshToken"
+      `${API}/auth/refreshToken`
     );
     return data;
   },

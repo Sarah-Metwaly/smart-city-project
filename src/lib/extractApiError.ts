@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { ApiError } from "../features/auth/types/auth.types";
+import type { ApiError } from "../features/auth/types/auth.types";
 
 /**
  * Extracts a human-readable error message (and optional field errors) from an
