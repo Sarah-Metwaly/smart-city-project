@@ -49,7 +49,7 @@ export function SignupForm() {
         variant="success"
         message={
           successMessage ??
-          "Account created! Check your email to verify your account."
+          "Account created! You can now sign in."
         }
       />
     );

@@ -13,7 +13,7 @@ export function AuthCard({ title, subtitle, children }: AuthCardProps) {
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo / Brand mark */}
+        {/* Logo / Brand mark
         <div className="flex justify-center mb-8">
           <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
             <svg
@@ -30,7 +30,7 @@ export function AuthCard({ title, subtitle, children }: AuthCardProps) {
               />
             </svg>
           </div>
-        </div>
+        </div> */}
 
         {/* Card */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-2xl shadow-black/40">

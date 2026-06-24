@@ -80,7 +80,7 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-4">
           <Link
-            to="/signin"
+            to="/login"
             className="bg-aman-white text-aman-light px-6 py-2 rounded-lg font-semibold font-inter hover:bg-aman-teal hover:text-aman-white transition-all"
           >
             Sign In
