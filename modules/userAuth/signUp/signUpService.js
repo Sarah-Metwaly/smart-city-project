@@ -11,7 +11,7 @@ exports.signUpUser = async ({email , password , firstName , lastName}) => {
     }
 
     //generate email verification token
-    const {rawToken , hashedToken , expiresAt} = token.generateEmailVerificationToken();
+    // const {rawToken , hashedToken , expiresAt} = token.generateEmailVerificationToken();
 
 
     // Create the user
@@ -21,16 +21,16 @@ exports.signUpUser = async ({email , password , firstName , lastName}) => {
         firstName,
         lastName,
         role:'citizen',
-        isEmailVerfied: false,
+        isEmailVerfied: true,
         emailVerficationToken: hashedToken,
         emailVerificationExpires: expiresAt
     })
 
     // Send verification email
-    const verficationUrl=`${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
-    await sendVerificationEmail(user.email , verficationUrl).catch(err => {
-        console.error('Error sending verification email:', err);
-    });
+    // const verficationUrl=`${process.env.FRONTEND_URL}/verify-email?token=${rawToken}`;
+    // await sendVerificationEmail(user.email , verficationUrl).catch(err => {
+    //     console.error('Error sending verification email:', err);
+    // });
 
     return {
         id: user._id,

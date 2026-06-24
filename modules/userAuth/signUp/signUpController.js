@@ -9,7 +9,8 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
 
     res.status(201).json({
         status: 'success',
-        message: 'User registered successfully. Please check your email to verify your account.',
+        // message: 'User registered successfully. Please check your email to verify your account.',
+        message : 'User registered successfully' ,
         data: {
             user
         }
