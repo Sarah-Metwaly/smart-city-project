@@ -56,14 +56,14 @@ const BehaviorStats = [
         <StatCards stats={BehaviorStats} />
 
         {/* Row 2: Camera + Active Alerts  */}
-        <div className="grid grid-cols-12 gap-3 h-95">
+        <div className="grid grid-cols-12 gap-3 h-full">
           {/*Camera card*/}
-          <div className="col-span-9">
+          <div className="md:col-span-9 col-span-12">
             {/* Live Camera Feed */}
             <LiveStream/>
           </div>
           {/* Active Alerts */}
-          <div className="col-span-3 flex flex-col ">
+          <div className="md:col-span-3 col-span-12 flex flex-col ">
             <BehaviorActiveAlerts />
           </div>
         </div>
@@ -76,12 +76,13 @@ const BehaviorStats = [
           <BehaviorIncidents />
         </div>
 
-        {/* Row 4: Live Alerts + Chart */}
+        {/* Row 4: Live Alerts + Chart
+
         <div className="">
           <div className=" bg-[#1a2c2f] rounded-lg border border-slate-800 ">
             <DispatchBoard />
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

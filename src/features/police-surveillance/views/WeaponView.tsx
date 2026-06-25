@@ -60,14 +60,14 @@ const weaponStats = [
       <StatCards stats={weaponStats} />
 
       {/* 2. PRIMARY UNIT: CAMERA FEED & ALERTS SIDE-BY-SIDE */}
-      <div className="grid gap-2 lg:grid-cols-12 h-95">
+      <div className="grid gap-2 lg:grid-cols-12 h-full">
         {/* Live Camera Feed */}
-        <div className=" col-span-9"> 
+        <div className=" md:col-span-9 col-span-12"> 
           <LiveStream />
         </div>
 
         {/* Live Alerts (Match Queue) */}
-        <div className=" col-span-3">
+        <div className="col-span-12 md:col-span-3">
          
               <WeaponActiveAlerts/>
          
