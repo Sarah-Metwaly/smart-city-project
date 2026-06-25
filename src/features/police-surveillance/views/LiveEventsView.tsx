@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Activity, ShieldAlert, Siren, CheckCircle2,EyeOff,Eye} from "lucide-react";
-import StatCards from "../../../shared/ui/organisms/StatCards";
 import CitySurveillanceMap from "../../../shared/ui/organisms/CitySurveillanceMap";
 import ActiveAlertsSidebar from "../../../shared/ui/organisms/ActiveAlertsSidebar";
-// import IncidentTable from "../../../shared/ui/organisms/IncidentTable";
 import CameraFeed from "../../../shared/ui/organisms/CameraFeed";
 import LiveActiveAlerts from "../components/LiveEvents.tsx/LiveActiveAlerts";
 import { useIncidents } from "../../../shared/hooks/useIncidentTable";
 import IncidentsTable from "../components/LiveEvents.tsx/AllIncidents";
+import StatCards from "../../../shared/ui/organisms/StatCards";
+
 
 
  
@@ -19,7 +19,6 @@ import IncidentsTable from "../components/LiveEvents.tsx/AllIncidents";
 const LiveEventsView: React.FC = () => {
   
   const { Incidents, isLoading, isError } = useIncidents("/api/v1/incidents/DailyIncidents");
-  const [showGrid, setShowGrid] = useState<boolean>(false);
 
   const total    = Incidents?.length ?? 0;
   const high     = Incidents?.filter((i) => i.priority === "HIGH").length ?? 0;
@@ -74,12 +73,12 @@ const surveillanceStats = [
         {/* MIDDLE SECTION: MAP + ALERTS */}
         <div className="grid grid-cols-12  gap-3">
           {/* MAP CONTAINER */}
-          <div className="col-span-12 md:col-span-8 flex flex-col overflow-hidden border shadow-lg bg-aman-teal border-aman-teal rounded-2xl min-h-100">
+          <div className="col-span-12 md:col-span-8 order-2 md:order-1 flex flex-col overflow-hidden border shadow-lg bg-aman-teal border-aman-teal rounded-2xl min-h-100">
             <CitySurveillanceMap />
           </div>
 
           {/* ALERTS SIDEBAR */}
-          <div className="md:col-span-4 col-span-12">
+          <div className="md:col-span-4 col-span-12 order-1 md:order-2">
             <LiveActiveAlerts/>
           </div>
         </div>

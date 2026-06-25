@@ -236,7 +236,7 @@ function AirQualityUI({ data }: { data: SensorData }) {
   const showCorrelation = data.co >= 7 && data.smoke === "High";
 
   return (
-    <div className="bg-[#0A0E14] py-10 px-3 rounded-2xl flex flex-col gap-4">
+    <div className="bg-[#0A0E14] py-10 px-5 mx-5 rounded-2xl flex flex-col gap-4">
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -288,7 +288,7 @@ function AirQualityUI({ data }: { data: SensorData }) {
       </div>
 
       {/* 3 Sensor Cards */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <SensorCard
           label="MQ135" sub="Air quality sensor"
           value={data.mq135} unit="ppm CO"
