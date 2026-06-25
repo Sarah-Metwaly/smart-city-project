@@ -38,6 +38,7 @@ app.use(cors({
   origin: (origin, callback) => {
     const allowed = [
       "http://localhost:5173",
+      "http://localhost:5175",
       "https://your-production-domain.com",
     ];
     if (!origin || allowed.includes(origin)) {
