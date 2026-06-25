@@ -67,7 +67,7 @@ const init = () => {
         
         const payload = message.toString().trim();
 
-        console.log("RAW:", payload);
+        //console.log("RAW:", payload);
 
         if (!payload) {
         console.log("⚠️ Empty payload received");
