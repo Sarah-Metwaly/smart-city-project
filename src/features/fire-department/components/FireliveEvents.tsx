@@ -4,17 +4,34 @@ import { Flame, Thermometer, Wind, AlertCircle } from 'lucide-react';
 import CameraFeed from '../../../shared/ui/organisms/CameraFeed';
 import FireAlertsPage from './FireActiveAlerts';
 import { Sensors } from './Sensors';
+import { useActivePower } from '../../energy-optimization/hooks/useActivePower';
+import { useFlameSensor } from '../hooks/useFlame';
+import { useIncidents } from '../../../shared/hooks/useIncidentTable';
+
+
+
 
 
 
 
 
 const FireLiveEvents: React.FC = () => {
-   
+  const { BMB180Value } = useActivePower();
+  const { flameSensorData, isFlameDetected } = useFlameSensor();
+
+  const { Incidents } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
+
+
+  const high = Incidents?.filter((i) => i.priority === "HIGH").length ?? 0;
+  const active = Incidents?.filter((i) => i.status?.toUpperCase() === "ACTIVE").length ?? 0;
+
+
+
+
   const surveillanceStats = [
     {
-      title: 'Critical Heat Zones',
-      value: '04',
+      title: 'Critical Alerts',
+      value: high,
       icon: Flame,
       badge: 'CRITICAL',
       colorClass: {
@@ -24,27 +41,27 @@ const FireLiveEvents: React.FC = () => {
     },
     {
       title: 'Thermal Level',
-      value: '92°C',
+      value: `${BMB180Value?.temperature ?? 0}°C`,
       icon: Thermometer,
-      badge: 'DANGER',
+      badge: 'Temperature',
       colorClass: {
         text: 'text-orange-500',
         bg: 'bg-orange-600',
       },
     },
     {
-      title: 'Air Toxicity',
-      value: 'High',
+      title: 'Flame detection',
+      value: flameSensorData?.status,
       icon: Wind,
-      badge: 'SMOKE',
+      badge: flameSensorData?.risk_level,
       colorClass: {
         text: 'text-amber-500',
         bg: 'bg-amber-600',
       },
     },
     {
-      title: 'Evacuation Plan',
-      value: 'Active',
+      title: 'Active alerts',
+      value: active,
       icon: AlertCircle,
       badge: 'URGENT',
       colorClass: {
@@ -52,32 +69,31 @@ const FireLiveEvents: React.FC = () => {
         bg: 'bg-yellow-600',
       },
     },
+
   ];
   return (
     <>
       <div className="flex flex-col gap-6 py-5 font-mono text-aman-white sm:px-6 ">
         {/* 1.Cards */}
         <StatCards stats={surveillanceStats} />
-        {/* 2. MASTER FEED (Main Screen) */}
-        <div className="relative rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]flex gap-2 grid grid-cols-12">
-          <div className="h-100 ">
-            <CameraFeed location="Main Square - Gate 4" status="PROCESSING" />
+        <div className="grid grid-cols-12 gap-4">
+          {/* 2. (Main Screen) */}
+          <div className=" col-span-12 md:col-span-8 relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]">
+           <CameraFeed />
+           </div>
+          <div className="col-span-12 md:col-span-4">
+            <FireAlertsPage />
           </div>
         </div>
-        {/***Activealerts + SensorsOverview*** */}
-        <div className="grid grid-cols-12 gap-7 ">
-          <div className="col-span-8 flex-col justify-">
-            <Sensors/>
+     
 
-          </div>
-          <div className="col-span-3">
-          <FireAlertsPage/>
-          </div>
-          
+      {/***SensorsOverview*** */}
+     <div className="w-full">
+          <Sensors />
         </div>
-          
-        </div>
-    </>
+      </div>
+
+     </>
   );
 };
 

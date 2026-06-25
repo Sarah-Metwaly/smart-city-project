@@ -174,10 +174,10 @@ const FirePage = () => {
         <FireLiveEvents/>
         <FireIncidents/>
         <AirQuality/>
-        <div className="grid grid-cols-2 gap-5 bg-aman-teal mt-7">
+        {/* <div className="grid grid-cols-2 gap-5 bg-aman-teal mt-7">
          <CitySurveillanceMap/>
          <CitySurveillanceMap/>
-        </div>
+        </div> */}
         
        
       </main>

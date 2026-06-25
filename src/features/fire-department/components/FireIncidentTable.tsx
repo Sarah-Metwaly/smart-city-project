@@ -7,7 +7,7 @@ export default function FireIncidents() {
   const { Incidents, isLoading, isError } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
 
   return (
-    <div className="mb-5">
+    <div className="m-5 ">
       <IncidentTable
         incidents={Incidents}
         isLoading={isLoading}
