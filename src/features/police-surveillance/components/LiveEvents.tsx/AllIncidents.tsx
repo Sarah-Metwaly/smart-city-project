@@ -3,18 +3,18 @@ import { Flame } from "lucide-react";
 import { useIncidents } from "../../../../shared/hooks/useIncidentTable";
 import IncidentTable from "../../../../shared/ui/atoms/IncidentsTable";
 
-export default function BehaviorIncidents() {
-  const { Incidents, isLoading, isError } = useIncidents("/api/v1/incidents/DailyIncidents?type=MEDICAL_EMERGENCY&type=CROWD_MANAGEMENT&type=THEFT_DETECTION&type=BEHAVIOR_ANOMALY");
+export default function IncidentsTable() {
+  const { Incidents, isLoading, isError } = useIncidents("/api/v1/incidents/DailyIncidents");
 
   return (
-    <div className="min-h-screen p-6">
+    
       <IncidentTable
         incidents={Incidents}
         isLoading={isLoading}
         isError={isError}
-        title="Behavior INCIDENTS REPORT"
+        title=" INCIDENTS REPORT"
         icon={<Flame size={14} />}
       />
-    </div>
+   
   );
 }

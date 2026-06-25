@@ -1,11 +1,8 @@
-import { useState } from 'react';
 import fire from '../assets/images/Fire/fire.jfif';
 import FireLiveEvents from '../features/fire-department/components/FireliveEvents';
 import AirQuality from '../features/fire-department/components/AirQuality';
-import IncidentTable from '../shared/ui/organisms/IncidentTable';
-import CitySurveillanceMap from '../shared/ui/organisms/CitySurveillanceMap';ذ
-
-
+import CitySurveillanceMap from '../shared/ui/organisms/CitySurveillanceMap';
+import FireIncidents from '../features/fire-department/components/FireIncidentTable';
 
 
 
@@ -14,7 +11,7 @@ const FirePage = () => {
   
 
   return (
-    <div className="min-h-screen bg-[#0A0E14] bg-[radial-gradient(circle_at_top,_rgba(230,57,70,0.05)_0%,_transparent_50%)] relative">
+    <div className="min-h-screen bg-gradient-to-b from-[#0f1a1f] to-[#1e3a46] border border-white/5 shadow-2xl relative">
       <div
         className="relative w-full overflow-hidden"
         style={{ height: '280px' }}
@@ -173,10 +170,10 @@ const FirePage = () => {
   `}</style>
       </div>
 
-      <main className="p-6 px-25">
+      <main className="p-6 md:px-30">
         <FireLiveEvents/>
+        <FireIncidents/>
         <AirQuality/>
-        <IncidentTable/>
         <div className="grid grid-cols-2 gap-5 bg-aman-teal mt-7">
          <CitySurveillanceMap/>
          <CitySurveillanceMap/>

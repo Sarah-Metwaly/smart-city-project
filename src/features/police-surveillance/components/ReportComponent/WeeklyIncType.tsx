@@ -50,7 +50,7 @@ export default function WeeklyType() {
           '& .MuiChartsAxis-tickLabel': { fill: GREY },
           
         }}
-        height={200}
+        height={300}
       />
     </Box>
   );
