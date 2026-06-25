@@ -25,7 +25,8 @@ export interface DHT11Data {
 
 const fetchDHT11Value = async (): Promise<DHT11Data> => {
   const res = await axios.get(`${BASE_URL}/api/v1/dht11/latest`);
-  return res.data.data[0]; 
+ return res.data.data[0] || { temperature: 0, humidity: 0, status: '0', power: 0 }; 
+ 
 };
 
 ///////BMB180/////
@@ -35,6 +36,7 @@ export interface BMB180DATA {
   altitude: number;
   status: string;
   power: number;
+  timeStamp: string;
 }
 const fetchBMB180Value = async (): Promise<BMB180DATA> => {
   const res = await axios.get(`${BASE_URL}/api/v1/bmp180/latest`);
@@ -59,7 +61,7 @@ const fetchMQ135Value = async (): Promise<MQ135DATA> => {
   const res = await axios.get(`${BASE_URL}/api/v1/mq135/latest`);
   console.log(res.data);
   
-  return res.data.data[0]; 
+ return res.data.data[0] || { _id: '', nh3: 0, benzene: 0, alcohol: 0, smoke: 0, co2: 0, co: 0, air_quality: '0', status: '0', power: 0 };
 };
 
 //custom hook TANQUERY
@@ -88,7 +90,7 @@ const getPercent = (value: number = 0) => {
 
   // FETCH DHT11 API
   const { 
-    data: DHT11Value,    
+    data: DHT11Value ,    
     isLoading: isDHT11Loading, 
     isError: isDHT11Error 
   } = useQuery<DHT11Data>({
@@ -128,7 +130,7 @@ const getPercent = (value: number = 0) => {
 
   
   return {
-    LDRValue,  
+    LDRValue ,  
     BMB180Value,      
     DHT11Value,  
     MQ135Value, 

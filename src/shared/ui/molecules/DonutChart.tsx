@@ -11,8 +11,8 @@ interface ChartSlice {
 
 interface DonutChartProps {
   data: ChartSlice[];
-  total?: number;         // لو مش موجود بيحسبها تلقائي
-  totalLabel?: string;    // النص تحت الرقم، default "TOTAL"
+  total?: number;          
+  totalLabel?: string;    
   width?: number;
   height?: number;
 }
@@ -36,13 +36,17 @@ export default function DonutChart({
   const cy = 125; // matches PieChart's default cy anchor
   const computedTotal = total ?? data.reduce((sum, d) => sum + d.value, 0);
 
+  const chartData = computedTotal === 0 
+    ? [{ id: -1, value: 1, color: '#1e293b', label: 'No Data' }] // لون رمادي غامق متناسق مع الـ Dark Mode
+    : data;
+
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Chart */}
       <PieChart
         series={[{
-          data,
-          innerRadius: 60,
+          data: chartData, 
+          innerRadius: 80,
           outerRadius: 100,
           cx,
           cy,
@@ -53,6 +57,7 @@ export default function DonutChart({
         height={height}
         slotProps={{ legend: { hidden: true } }}
       >
+        
         <CenterText x={cx} y={cy - 8} fontSize={22} fontWeight="bold" fill="#e2e8f0">
           {computedTotal}
         </CenterText>

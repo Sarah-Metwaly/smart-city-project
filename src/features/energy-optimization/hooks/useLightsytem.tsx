@@ -38,7 +38,7 @@ export const useLightSystem = () => {
 }, [data]);
   
 
-  // وظيفة إضافية جوه الهوك لحساب النسبة المئوية
+ 
   const getPercentage = (value: number | undefined): number => {
   if (!data || !data.total || data.total === 0) return 0;
   const Percentage = ((value || 0) / data.total) * 100;

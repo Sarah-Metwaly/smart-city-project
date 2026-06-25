@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import StatCards from '../../../shared/ui/organisms/StatCards';
 import { Flame, Thermometer, Wind, AlertCircle } from 'lucide-react';
 import CameraFeed from '../../../shared/ui/organisms/CameraFeed';
-import ActiveAlerts from '../../police-surveillance/components/BehaviorComponent/ActiveAlerts';
-import SensorsOverview from './Sensors';
-import FireAlerts from './FireAlerts';
-import AirQuality from './AirQuality';
+import FireAlertsPage from './FireActiveAlerts';
+import { Sensors } from './Sensors';
+
+
+
+
 
 const FireLiveEvents: React.FC = () => {
+   
   const surveillanceStats = [
     {
       title: 'Critical Heat Zones',
@@ -56,21 +59,24 @@ const FireLiveEvents: React.FC = () => {
         {/* 1.Cards */}
         <StatCards stats={surveillanceStats} />
         {/* 2. MASTER FEED (Main Screen) */}
-        <div className="relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]">
-          <div className="h-100">
+        <div className="relative rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]flex gap-2 grid grid-cols-12">
+          <div className="h-100 ">
             <CameraFeed location="Main Square - Gate 4" status="PROCESSING" />
           </div>
         </div>
         {/***Activealerts + SensorsOverview*** */}
-        <div className="flex flex-3 gap-4">
-          <div className="flex-2">
-            <FireAlerts />
+        <div className="grid grid-cols-12 gap-7 ">
+          <div className="col-span-8 flex-col justify-">
+            <Sensors/>
+
           </div>
-          <div className="flex-1 ">
-            <SensorsOverview />
+          <div className="col-span-3">
+          <FireAlertsPage/>
           </div>
+          
         </div>
-      </div>
+          
+        </div>
     </>
   );
 };

@@ -14,8 +14,8 @@ const ReportsView = () => {
               <div className="col-span-3 row-span-1 p-5 shadow-sm bg-aman-teal rounded-xl"><TimeResponseChart /></div>
               <div className="col-span-3 row-span-1 p-5 shadow-sm bg-aman-teal rounded-xl"><Crimetype /></div>
               <div className="col-span-3 row-span-1 shadow-sm bg-aman-teal rounded-xl"><CitySurveillanceMap /></div>
-              <div className="col-span-4 row-span-1 p-5 shadow-sm bg-aman-dark rounded-xl"><WeeklyType /></div>
-              <div className="col-span-2 row-span-1 p-4 shadow-sm bg-aman-teal rounded-xl"><CrimeStatus /></div>
+              <div className="col-span-4 row-span-1 m-4 shadow-sm bg-aman-dark rounded-xl"><WeeklyType /></div>
+              <div className="col-span-2 row-span-1 p-4 shadow-sm "><CrimeStatus /></div>
             </section>  )
 }
 
