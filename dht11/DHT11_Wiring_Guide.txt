@@ -1,0 +1,49 @@
+DHT11 Sensor Wiring Guide :)
+
+Components:
+
+Raspberry Pi
+DHT11 Temperature and Humidity Sensor
+Jumper Wires
+10kΩ Resistor (if required)
+
+Wiring Connections:
+
+VCC -->3.3(RASPBERRY PI)
+DATA-->GPIO4(PIN7)
+GND-->GND
+
+Description :)
+
+The DHT11 sensor is used to measure temperature and humidity. 
+The sensor communicates with the Raspberry Pi through the DATA pin connected to GPIO4.
+
+Pin Functions :)
+
+VCC: Supplies power to the sensor (3.3V).
+DATA: Transfers temperature and humidity data to the Raspberry Pi.
+GND: Ground connection.
+
+Software Configuration
+
+The sensor is configured in Python using the following line:
+
+dhtDevice = adafruit_dht.DHT11(board.D4)***
+
+
+This means the DHT11 data pin is connected to GPIO4.
+
+Output Data :))
+
+The sensor provides:
+
+Temperature (°C)
+Humidity (%)
+Sensor Status (NORMAL, HIGH_TEMP, HIGH_HUMIDITY, or FAULTY)
+
+Notes :))
+
+Ensure all wiring connections are secure.
+If using a bare DHT11 sensor, connect a 10kΩ pull-up resistor between VCC and DATA.
+Allow the sensor a few seconds to stabilize after powering on.
+
