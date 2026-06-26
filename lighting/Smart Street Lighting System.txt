@@ -1,0 +1,134 @@
+Smart Street Lighting System:))
+
+Components:
+
+Raspberry Pi
+PIR Motion Sensor
+LDR (Light Dependent Resistor)
+ADS1115 Analog-to-Digital Converter
+LED Lamp
+Jumper Wires
+
+Wiring Connections
+
+ADS1115 to Raspberry Pi:
+
+VDD-->3.3V
+GND-->GND
+SDA-->GPIO2 (Pin 3)
+SCL-->GPIO3 (Pin 5)
+
+LDR to ADS1115:
+Voltage Divider:
+3.3V
+ |
+[LDR]
+ |
+ +------ A0 (ADS1115)
+ |
+[10kΩ]
+ |
+GND
+
+PIR Sensor to Raspberry Pi
+
+• VCC → 5V (Raspberry Pi)
+ • GND → GND
+ • OUT → GPIO27 (Pin 13)
+
+LED to Raspberry Pi:
+
+ • GPIO18 (Pin 12) → 220Ω →  LED->vcc
+ • LED → GND
+
+System Description
+
+The Smart Street Lighting System automatically controls street light brightness based on ambient light intensity and motion detection.
+
+The LDR sensor measures environmental light levels, while the PIR sensor detects nearby movement. The Raspberry Pi processes the sensor data and adjusts the LED brightness using PWM control.
+
+The system sends real-time data to the Smart City platform through MQTT communication.
+
+MQTT Configuration
+
+Broker: EMQX Cloud
+Port: 8883
+Topic: smartcity/streetlight1
+
+Lighting Logic
+
+Day Mode
+
+LDR Value > 750
+Street light is turned OFF.
+Brightness = 0%
+
+Night Mode
+
+LDR Value < 400
+Street light remains ON at 25% brightness.
+
+Motion Detected
+
+PIR detects movement.
+Brightness increases to 100%.
+Full brightness remains active for 15 seconds after the last detected movement.
+
+Status Classification
+
+OFF
+
+Daytime operation.
+Street light is turned off.
+
+ON
+
+Nighttime operation.
+Street light is operating normally.
+
+FAULTY
+
+Sensor or system failure detected.
+Street light is switched off for safety.
+
+Power Calculation
+
+The system estimates power consumption using:
+
+Power = (Brightness / 100) × 12.5
+
+Examples:
+Brightness-->Power
+0%-->0 W
+25%-->3.12 W
+100%-->12.5 W
+
+JSON Data Format
+
+Example:
+
+{
+“sensor_id”: “LDR1”,
+“ldr_value”: 320,
+“status”: “ON”,
+“power”: 12.5
+}
+
+System Features
+
+Automatic day/night detection
+Motion-based brightness control
+PWM dimming control
+Real-time MQTT communication
+Power consumption monitoring
+Fault detection support
+
+Polling Rate
+
+The system updates sensor readings and publishes data every 1 second.
+
+
+
+
+
+

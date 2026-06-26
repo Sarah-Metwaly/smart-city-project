@@ -1,0 +1,110 @@
+import time
+import json
+import paho.mqtt.client as mqtt
+import RPi.GPIO as GPIO
+import board
+import busio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+
+# --- GPIO Setup ---
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+PIR_PIN = 27
+LED_PIN = 18
+GPIO.setup(PIR_PIN, GPIO.IN)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+# تردد عالي لمنع أي رعشة بصرية
+pwm = GPIO.PWM(LED_PIN, 1000)
+pwm.start(0)
+
+# --- Sensors Setup ---
+try:
+    i2c = busio.I2C(board.SCL, board.SDA)
+    ads = ADS.ADS1115(i2c)
+    ldr = AnalogIn(ads, 0)
+    system_faulty = False
+except Exception as e:
+    print("Sensor init error:", e)
+    system_faulty = True
+
+# --- MQTT Setup ---
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+client.username_pw_set("powerpuffgirls", "SCE2026grad")
+client.tls_set(ca_certs="/etc/ssl/certs/ca-certificates.crt")
+client.connect("i5111178.ala.eu-central-1.emqxsl.com", 8883)
+client.loop_start()
+
+# --- الثوابت الذهبية (عشان الاستقرار) ---
+NIGHT_START = 400   # الليد هتقيد 25% لو القراءة نزلت عن 400
+DAY_START = 750     # الليد هتطفي تماماً (0%) لو القراءة زادت عن 750
+HOLD_TIME = 15      # مدة الـ 100% بعد الحركة
+
+last_motion_time = 0
+is_night = False
+ldr_raw = 0
+motion = 0
+
+print("System Started - Logic Fixed: Stable Night Mode")
+
+try:
+    while True:
+        # 1. قراءة البيانات
+        if not system_faulty:
+            try:
+                ldr_raw = int((ldr.value / 32767) * 1023)
+                motion = GPIO.input(PIR_PIN)
+            except:
+                system_faulty = True
+
+        now = time.time()
+
+        # 2. منطق الليل والنهار (حل مشكلة القيد والفصل المتكرر)
+        if ldr_raw < NIGHT_START:
+            is_night = True
+        elif ldr_raw > DAY_START:
+            is_night = False
+
+        # 3. تحديد السطوع والحالة (Status)
+        if system_faulty:
+            current_status = "FAULTY"
+            brightness = 0
+        elif not is_night:
+            # وضع النهار: طفي كل حاجة
+            current_status = "OFF"
+            brightness = 0
+        else:
+            # وضع الليل: ممنوع الصفر (إما 25% أو 100%)
+            current_status = "ON"
+            if motion == 1:
+                last_motion_time = now
+                brightness = 100
+            elif (now - last_motion_time) < HOLD_TIME:
+                brightness = 100
+            else:
+                brightness = 25 # الإضاءة الثابتة في الظلمة
+
+        # 4. تنفيذ السطوع وحساب الطاقة (Section 3 format)
+        pwm.ChangeDutyCycle(brightness)
+        calculated_power = round((brightness / 100.0) * 12.5, 2)
+
+        # 5. تجهيز الـ JSON للباك اند بالظبط
+        payload = {
+            "sensor_id": "LDR1",
+            "ldr_value": ldr_raw,
+            "status": current_status,
+            "power": calculated_power
+        }
+
+        # 6. الإرسال والطباعة
+        client.publish("smartcity/streetlight1", json.dumps(payload))
+        print("Sent ->", json.dumps(payload))
+
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    print("\nSystem stopped by user")
+    pwm.stop()
+    GPIO.cleanup()
+    client.disconnect()
