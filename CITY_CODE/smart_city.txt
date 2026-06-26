@@ -1,0 +1,470 @@
+import time
+import json
+import ssl
+
+import board
+import busio
+import adafruit_dht
+
+import RPi.GPIO as GPIO
+
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+
+import paho.mqtt.client as mqtt
+
+
+# ==================================================
+# MQTT CONFIG
+# ==================================================
+MQTT_BROKER = "i5111178.ala.eu-central-1.emqxsl.com"
+MQTT_PORT = 8883
+MQTT_USER = "powerpuffgirls"
+MQTT_PASS = "SCE2026grad"
+
+AIR_TOPIC = "smartcity/mq135"
+FLAME_TOPIC = "smartcity/flame"
+LIGHT_TOPIC = "smartcity/streetlight1"
+DHT_TOPIC = "smartcity/dht11"
+
+
+# ==================================================
+# MQTT CLIENT
+# ==================================================
+client = mqtt.Client()
+
+client.username_pw_set(
+    MQTT_USER,
+    MQTT_PASS
+)
+
+client.tls_set(cert_reqs=ssl.CERT_NONE)
+client.tls_insecure_set(True)
+
+client.connect(
+    MQTT_BROKER,
+    MQTT_PORT,
+    60
+)
+
+client.loop_start()
+print("MQTT Connected")
+
+# ==================================================
+# GPIO SETUP
+# ==================================================
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
+PIR_PIN = 27
+LED_PIN = 18
+
+GPIO.setup(PIR_PIN, GPIO.IN)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+pwm = GPIO.PWM(LED_PIN, 1000)
+pwm.start(0)
+
+
+# ==================================================
+# DHT11
+# ==================================================
+dht = adafruit_dht.DHT11(board.D4)
+
+
+# ==================================================
+# ADS1115
+# ==================================================
+i2c = busio.I2C(
+    board.SCL,
+    board.SDA
+)
+
+ads = ADS.ADS1115(i2c)
+
+ldr = AnalogIn(ads, 0)
+flame_sensor = AnalogIn(ads, 1)
+mq2 = AnalogIn(ads, 2)
+mq135 = AnalogIn(ads, 3)
+
+
+# ==================================================
+# AIR QUALITY CALIBRATION
+# ==================================================
+def get_average(sensor, samples=20):
+
+    total = 0
+
+    for _ in range(samples):
+
+        total += sensor.value
+        time.sleep(0.05)
+
+    return total / samples
+
+
+print("Calibrating Air Quality Sensors...")
+
+baseline_mq2 = get_average(mq2)
+baseline_mq135 = get_average(mq135)
+
+mq2_buffer = []
+mq135_buffer = []
+
+
+def smooth(buffer, value):
+
+    buffer.append(value)
+
+    if len(buffer) > 5:
+        buffer.pop(0)
+
+    return sum(buffer) / len(buffer)
+
+
+def percent_from_ratio(ratio):
+
+    percent = (ratio - 1) * 100
+
+    return max(0, min(percent, 100))
+
+
+# ==================================================
+# LIGHTING VARIABLES
+# ==================================================
+NIGHT_START = 400
+DAY_START = 750
+HOLD_TIME = 15
+
+last_motion_time = 0
+is_night = False
+
+
+# ==================================================
+# FLAME FUNCTION
+# ==================================================
+def process_flame(value):
+
+    if value < 12000:
+
+        return (
+            "FLAME DETECTED",
+            "DANGER",
+            True
+        )
+
+    elif value < 15000:
+
+        return (
+            "SMALL FLAME",
+            "WARNING",
+            False
+        )
+
+    else:
+
+        return (
+            "NO FLAME",
+            "SAFE",
+            False
+        )
+
+
+# ==================================================
+# DHT STATUS
+# ==================================================
+def get_dht_status(temp, hum):
+
+    if temp is None or hum is None:
+        return "FAULTY"
+
+    elif temp >= 28:
+        return "HIGH_TEMP"
+
+    elif hum > 70:
+        return "HIGH_HUMIDITY"
+
+    else:
+        return "NORMAL"
+
+
+# ==================================================
+# TIMERS
+# ==================================================
+last_air_time = 0
+last_flame_time = 0
+last_light_time = 0
+last_dht_time = 0
+
+
+print("Smart City System Started")
+
+
+try:
+
+    while True:
+
+        now = time.time()
+
+        # ==========================================
+        # FLAME SENSOR
+        # ==========================================
+        if now - last_flame_time >= 0.2:
+
+            raw_value = flame_sensor.value
+
+            status, risk, detected = process_flame(
+                raw_value
+            )
+
+            if status == "FLAME DETECTED":
+                power = 5.0
+
+            elif status == "SMALL FLAME":
+                power = 3.8
+
+            else:
+                power = 2.3
+
+            flame_payload = {
+
+                "sensor_id": "flame_sensor",
+                "status": status,
+                "risk_level": risk,
+                "is_flame_detected": detected,
+                "power": power
+
+            }
+
+            client.publish(
+                FLAME_TOPIC,
+                json.dumps(flame_payload)
+            )
+            print("\n=== FLAME SENT ===")
+            print(json.dumps(flame_payload, indent=4))
+
+            last_flame_time = now
+
+
+        # ==========================================
+        # LIGHTING SYSTEM
+        # ==========================================
+        if now - last_light_time >= 1:
+
+            ldr_raw = int(
+                (ldr.value / 32767) * 1023
+            )
+
+            motion = GPIO.input(PIR_PIN)
+
+            if ldr_raw < NIGHT_START:
+                is_night = True
+
+            elif ldr_raw > DAY_START:
+                is_night = False
+
+            if not is_night:
+
+                status = "OFF"
+                brightness = 0
+
+            else:
+
+                status = "ON"
+
+                if motion == 1:
+
+                    last_motion_time = now
+                    brightness = 100
+
+                elif (now - last_motion_time) < HOLD_TIME:
+
+                    brightness = 100
+
+                else:
+
+                    brightness = 25
+
+            pwm.ChangeDutyCycle(
+                brightness
+            )
+
+            power = round(
+                (brightness / 100) * 12.5,
+                2
+            )
+
+            light_payload = {
+
+                "sensor_id": "LDR1",
+                "ldr_value": ldr_raw,
+                "status": status,
+                "power": power
+
+            }
+
+            client.publish(
+                LIGHT_TOPIC,
+                json.dumps(light_payload)
+            )
+
+            print("\n=== LIGHTING SENT ===")
+            print(json.dumps(light_payload, indent=4))
+
+            last_light_time = now
+
+
+        # ==========================================
+        # DHT11
+        # ==========================================
+        if now - last_dht_time >= 2:
+
+            try:
+
+                temperature = dht.temperature
+                humidity = dht.humidity
+
+            except Exception:
+
+                temperature = None
+                humidity = None
+
+            dht_payload = {
+
+                "sensor_id": "DHT1",
+                "temperature": temperature,
+                "humidity": humidity,
+                "status": get_dht_status(
+                    temperature,
+                    humidity
+                ),
+                "power": 0.013
+
+            }
+
+            client.publish(
+                DHT_TOPIC,
+                json.dumps(dht_payload)
+            )
+            print("\n=== DHT11 SENT ===")
+            print(json.dumps(dht_payload, indent=4))
+            last_dht_time = now
+
+
+        # ==========================================
+        # AIR QUALITY
+        # ==========================================
+        if now - last_air_time >= 3:
+
+            smoke_ratio = smooth(
+                mq2_buffer,
+                mq2.value / baseline_mq2
+            )
+
+            gas_ratio = smooth(
+                mq135_buffer,
+                mq135.value / baseline_mq135
+            )
+
+            smoke_percent = percent_from_ratio(
+                smoke_ratio
+            )
+
+            gas_percent = percent_from_ratio(
+                gas_ratio
+            )
+
+            aqi = int(
+                (smoke_percent + gas_percent) / 2
+            )
+
+            co = round(
+                smoke_percent / 10,
+                2
+            )
+
+            co2 = int(
+                400 + (gas_percent * 20)
+            )
+
+            if smoke_percent < 10:
+                smoke_status = "Low"
+            elif smoke_percent < 40:
+                smoke_status = "Medium"
+            else:
+                smoke_status = "High"
+
+            if gas_percent < 20:
+                benzene_status = "Normal"
+            elif gas_percent < 50:
+                benzene_status = "Warning"
+            else:
+                benzene_status = "High"
+
+            if aqi < 20:
+                air_level = "GOOD AIR"
+            elif aqi < 50:
+                air_level = "MODERATE AIR"
+            else:
+                air_level = "POLLUTED AIR"
+
+            if smoke_percent > 40:
+                system_status = "DANGER"
+            elif gas_percent > 40:
+                system_status = "WARNING"
+            else:
+                system_status = "SAFE"
+
+            air_payload = {
+
+                "device_id": "pi_device",
+
+                "sensors": [
+
+                    {
+                        "sensor_id": "mq2_sensor",
+                        "type": "mq-2",
+                        "co": co,
+                        "smoke": smoke_status,
+                        "power": 0.85
+                    },
+
+                    {
+                        "sensor_id": "mq135_sensor",
+                        "type": "mq-135",
+                        "co2": co2,
+                        "benzene": benzene_status,
+                        "power": 0.60
+                    }
+
+                ],
+
+                "air_quality": {
+                    "aqi": aqi,
+                    "level": air_level
+                },
+
+                "status": system_status,
+
+                "power": 1.45
+
+            }
+
+            client.publish(
+                AIR_TOPIC,
+                json.dumps(air_payload)
+            )
+            print("\n=== AIR QUALITY SENT ===")
+            print(json.dumps(air_payload, indent=4))
+
+            last_air_time = now
+
+        time.sleep(0.05)
+
+except KeyboardInterrupt:
+
+    pwm.stop()
+
+    GPIO.cleanup()
+
+    client.disconnect()
