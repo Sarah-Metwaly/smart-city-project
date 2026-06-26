@@ -1,0 +1,172 @@
+# Air Quality Monitoring System - Wiring Guide
+
+## Components
+- Raspberry Pi
+- ADS1115 ADC
+- MQ-2 Gas Sensor
+- MQ-135 Air Quality Sensor
+
+---
+
+# Wiring
+
+## ADS1115 → Raspberry Pi
+
+| ADS1115 Pin | Raspberry Pi Pin |
+|-------------|------------------|
+| VDD         | 3.3V             |
+| GND         | GND              |
+| SDA         | GPIO2 (SDA)      |
+| SCL         | GPIO3 (SCL)      |
+
+---
+
+## MQ-2 Sensor
+
+| MQ-2 Pin   | ADS1115  |
+|----------- |----------|
+| AO         |     A2   |
+| VCC        |     5V   |
+| GND        |     GND  |
+
+---
+
+## MQ-135 Sensor
+
+| MQ-135 Pin | ADS1115  |
+|------------|----------|
+| AO         | A3       |
+| VCC        | 5V       |
+| GND        | GND      |
+
+---
+
+# MQTT Configuration
+
+Broker:i5111178.ala.eu-central-1.emqxsl.com
+
+Port:8883
+
+Topic:smartcity/mq135
+
+Protocol:MQTT over TLS
+
+---
+
+# JSON Payload
+
+Example:
+{
+  "device_id": "pi_device",
+  "sensors": [
+    {
+      "sensor_id": "mq2_sensor",
+      "type": "mq-2",
+      "co": 2.5,
+      "smoke": "Low",
+      "power": 0.85
+    },
+    {
+      "sensor_id": "mq135_sensor",
+      "type": "mq-135",
+      "co2": 520,
+      "benzene": "Normal",
+      "power": 0.60
+    }
+  ],
+  "air_quality": {
+    "aqi": 18,
+    "level": "GOOD AIR"
+  },
+  "status": "SAFE",
+  "power": 1.45
+}
+
+---
+
+# Code Explanation
+
+## 1. MQTT Configuration
+
+The code connects the Raspberry Pi to the EMQX MQTT broker using a secure TLS connection.
+
+---
+
+## 2. ADS1115 Initialization
+
+The ADS1115 ADC is initialized through the I2C interface to read analog values from the MQ sensors.
+
+- MQ-2 → Channel A2
+- MQ-135 → Channel A3
+
+---
+
+## 3. Baseline Calibration
+
+The system waits 10 seconds after startup.
+
+Average readings are calculated to create a baseline reference for both sensors.
+
+---
+
+## 4. Noise Filtering
+
+A moving average filter keeps the last five readings to reduce sensor noise and improve stability.
+
+---
+
+## 5. Gas Percentage Calculation
+
+Current sensor values are compared with the baseline to estimate:
+
+- Smoke level
+- Air pollution level
+
+---
+
+## 6. Air Quality Calculations
+
+The system estimates:
+
+- CO concentration
+- CO₂ concentration
+- AQI (Air Quality Index)
+
+---
+
+## 7. Status Classification
+
+Smoke Level:
+- Low
+- Medium
+- High
+
+Benzene Level:
+- Normal
+- Warning
+- High
+
+Air Quality:
+- GOOD AIR
+- MODERATE AIR
+- POLLUTED AIR
+
+System Status:
+- SAFE
+- WARNING
+- DANGER
+
+---
+
+## 8. MQTT Publishing
+
+The sensor data is converted to JSON and published every 3 seconds to:
+smartcity/mq135
+
+The payload contains:
+
+- Device ID
+- Sensor readings
+- Air Quality Index
+- Overall system status
+- Total power consumption
