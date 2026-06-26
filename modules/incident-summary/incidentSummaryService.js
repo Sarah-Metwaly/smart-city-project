@@ -165,27 +165,57 @@ const getWeeklyTrend = async () => {
     days.push(d.toISOString().split('T')[0]);
   }
 
-  const summaries = await IncidentSummary.aggregate([
-    { $match: { date: { $in: days } } },
-    { $group: {
-        _id: '$date',
-        total:          { $sum: '$total' },
-        highPriority:   { $sum: '$highPriority' },
-        mediumPriority: { $sum: '$mediumPriority' },
-        lowPriority:    { $sum: '$lowPriority' },
-    }},
+  const startOfWeek = new Date();
+  startOfWeek.setDate(startOfWeek.getDate() - 7);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const summaries = await Incident.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startOfWeek }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Africa/Cairo" }
+        },
+        total: { $sum: 1 },
+        highPriority: {
+          $sum: { $cond: [{ $eq: ["$priority", "HIGH"] }, 1, 0] }
+        },
+        mediumPriority: {
+          $sum: { $cond: [{ $eq: ["$priority", "MEDIUM"] }, 1, 0] }
+        },
+        lowPriority: {
+          $sum: { $cond: [{ $eq: ["$priority", "LOW"] }, 1, 0] }
+        }
+      }
+    },
     { $sort: { _id: 1 } }
-  ]);
+  ]) || [];
 
   return days.map(day => {
-    const found = summaries.find(s => s._id === day);
-    return found || {
-      _id: day, total: 0,
-      highPriority: 0, mediumPriority: 0, lowPriority: 0
+    const found = summaries.find(s => s && s._id === day);
+    return found ? {
+      _id: found._id,
+      total: found.total || 0,
+      highPriority: found.highPriority || 0,
+      mediumPriority: found.mediumPriority || 0,
+      lowPriority: found.lowPriority || 0
+    } : {
+      _id: day, 
+      total: 0,
+      highPriority: 0, 
+      mediumPriority: 0, 
+      lowPriority: 0
     };
   });
 };
 
+module.exports = {
+  getWeeklyTrend
+};
 
 // get average response time for incidents created on a given date (default to today)
 const getAvgResponseTime = async (dateStr) => {
