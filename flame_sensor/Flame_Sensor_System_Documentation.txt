@@ -1,0 +1,102 @@
+Flame Sensor Wiring and Operation Guide
+
+Components
+
+Raspberry Pi
+ADS1115 Analog-to-Digital Converter
+Flame Sensor
+Jumper Wires
+
+Wiring Connections
+
+ADS1115 to Raspberry Pi
+
+###########
+ADS1115
+###########
+GPIO2 (Pin 3) SDA-->SDA
+GPIO3 (Pin 5) SCL-->SCL
+3.3V (Pin 1)-->VDD
+GND (Pin 6)-->GND
+
+Flame Sensor to ADS1115 :)
+
+###########
+Flame Sensor
+ADS1115
+###########
+
+VCC--->3.3V أو 5V
+GND-->GND
+AO (Analog Output)-->A1
+
+System Description
+
+The Flame Sensor continuously monitors the environment for the presence of flames. The sensor output is read through the ADS1115 analog-to-digital converter and processed by the Raspberry Pi.
+
+The system sends real-time data to the MQTT broker for monitoring and visualization in the Smart City platform.
+
+MQTT Configuration
+
+Broker: EMQX Cloud
+Port: 8883
+Topic: smartcity/flame
+
+Flame Detection Logic
+
+The system classifies flame conditions into three levels:
+
+Flame Detected
+
+Analog Value < 12000
+Risk Level: DANGER
+Flame Detected: True
+
+Small Flame
+
+Analog Value between 12000 and 20000
+Risk Level: WARNING
+Flame Detected: False
+
+No Flame
+
+Analog Value > 20000
+Risk Level: SAFE
+Flame Detected: False
+
+Power Calculation
+
+The system calculates power consumption using:
+
+Power = Base Power + (Maximum Sensor Power × Power Factor)
+
+Where:
+
+Base Power = 2.0 W
+Maximum Sensor Power = 3.0 W
+
+***********JSON Data Format*************
+
+Example:
+
+{
+“sensor_id”: “flame_sensor”,
+“status”: “FLAME DETECTED”,
+“risk_level”: “DANGER”,
+“is_flame_detected”: true,
+“power”: 5.0
+}
+
+System Features
+
+Real-time flame monitoring
+MQTT communication
+Risk level classification
+Power consumption calculation
+Smart City integration
+
+Polling Rate
+
+The sensor is sampled every 0.2 seconds to provide near real-time detection and response.
+
+
