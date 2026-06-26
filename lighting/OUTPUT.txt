@@ -1,0 +1,17 @@
+STATE [OFF] : 
+
+{"sensor_id": "LDR1", "ldr_value": 821, "status": "OFF", "power": 0.0}
+
+STATE [ON]&[NO MOTION] :
+
+
+
+{"sensor_id": "LDR1", "ldr_value": 98, "status": "ON", "power": 3.12}
+
+STATE [ON]&[MOTION] :
+
+{"sensor_id": "LDR1", "ldr_value": 103, "status": "ON", "power": 12.5}
+
+STATE [OFF] &[ find error connection ]: 
+
+ {"sensor_id": "LDR1", "ldr_value": 817, "status": "FAULTY", "power": 0.0}

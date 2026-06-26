@@ -1,0 +1,110 @@
+import time
+import json
+import paho.mqtt.client as mqtt
+import RPi.GPIO as GPIO
+import board
+import busio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
+
+# --- GPIO Setup ---
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+PIR_PIN = 27
+LED_PIN = 18
+GPIO.setup(PIR_PIN, GPIO.IN)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+# High PWM frequency to prevent visible flickering
+pwm = GPIO.PWM(LED_PIN, 1000)
+pwm.start(0)
+
+# --- Sensors Setup ---
+try:
+    i2c = busio.I2C(board.SCL, board.SDA)
+    ads = ADS.ADS1115(i2c)
+    ldr = AnalogIn(ads, 0)
+    system_faulty = False
+except Exception as e:
+    print("Sensor init error:", e)
+    system_faulty = True
+
+# --- MQTT Setup ---
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+client.username_pw_set("powerpuffgirls", "SCE2026grad")
+client.tls_set(ca_certs="/etc/ssl/certs/ca-certificates.crt")
+client.connect("i5111178.ala.eu-central-1.emqxsl.com", 8883)
+client.loop_start()
+
+# --- System Thresholds ---
+NIGHT_START = 400   # brightness led is (25%) if readig is 400
+DAY_START = 750     # brightness led is (0%) if ldr reading is750
+HOLD_TIME = 15      # keep the led brightness (100%)  for 15 s after motion is detected
+
+last_motion_time = 0
+is_night = False
+ldr_raw = 0
+motion = 0
+
+print("System Started - Logic Fixed: Stable Night Mode")
+
+try:
+    while True:
+        # 1. read Data
+        if not system_faulty:
+            try:
+                ldr_raw = int((ldr.value / 32767) * 1023)
+                motion = GPIO.input(PIR_PIN)
+            except:
+                system_faulty = True
+
+        now = time.time()
+
+        # 2.  Day/Night Detection Logic
+        if ldr_raw < NIGHT_START:
+            is_night = True
+        elif ldr_raw > DAY_START:
+            is_night = False
+
+        # 3. Determine LED brightness and system status
+        if system_faulty:
+            current_status = "FAULTY"
+            brightness = 0
+        elif not is_night:
+            #  # Day mode: Turn the LED OFF
+            current_status = "OFF"
+            brightness = 0
+        else:
+            # Night mode :Keep the LED at either 25% or 100% brightness
+            current_status = "ON"
+            if motion == 1:
+                last_motion_time = now
+                brightness = 100
+            elif (now - last_motion_time) < HOLD_TIME:
+                brightness = 100
+            else:
+                brightness = 25 # # No motion: Maintain minimum night brightness
+
+        # 4. Apply LED brightness and calculate power consumption (Section 3 format)
+        pwm.ChangeDutyCycle(brightness)
+        calculated_power = round((brightness / 100.0) * 12.5, 2)
+
+        # 5.  Prepare the JSON payload for the backend
+        payload = {
+            "sensor_id": "LDR1",
+            "ldr_value": ldr_raw,
+            "status": current_status,
+            "power": calculated_power
+        }
+
+        # 6.  Publish the data and print it for debugging
+        client.publish("smartcity/streetlight1", json.dumps(payload))
+        print("Sent ->", json.dumps(payload))
+
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    print("\nSystem stopped by user")
+    pwm.stop()
+    GPIO.cleanup()
+    client.disconnect()
