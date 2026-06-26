@@ -80,25 +80,58 @@ const generateSummary = async () => {
     await Promise.all(savePromises);
     console.log(`✅ Incident summary generated for ${date}`);
 };
-
 const getCountsByDate = async (dateStr) => {
-  const [result] = await IncidentSummary.aggregate([
+  const todayStr = new Date().toLocaleDateString('en-CA'); 
+
+  // if it's today bypass the stored summary and calculate directly from live incidents
+  if (dateStr === todayStr) {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const liveIncidents = await Incident.find({
+      createdAt: { $gte: start, $lte: end },
+      status: { $ne: 'FALSE_ALARM' }
+    });
+
+    let weapon = 0, fire = 0, behavior = 0;
+    liveIncidents.forEach(inc => {
+      if (inc.type === 'WEAPON_DETECTION') {
+        weapon++;
+      } else if (['THEFT_DETECTION', 'CROWD_MANAGEMENT', 'MEDICAL_EMERGENCY'].includes(inc.type)) {
+        behavior++;
+      } else if (['FIRE_DETECTION', 'SMOKE_DETECTION'].includes(inc.type)) {
+        fire++;
+      }
+    });
+
+    return { weapon, fire, behavior };
+  }
+
+  // if it's yesterday (or past dates), read from the fast summary collection as usual
+  const result = await IncidentSummary.aggregate([
     { $match: { date: dateStr } },
     {
       $group: {
         _id: null,
-        weapon: { $sum: { $ifNull: ['$weaponIncidents', 0] } },
-        fire: { $sum: { $ifNull: ['$fireIncidents', 0] } },
+        weapon:   { $sum: { $ifNull: ['$weaponIncidents',   0] } },
+        fire:     { $sum: { $ifNull: ['$fireIncidents',     0] } },
         behavior: { $sum: { $ifNull: ['$behaviorIncidents', 0] } },
       }
     }
   ]);
 
-  return {
-    weapon: result?.weapon || 0,
-    fire: result?.fire || 0,
-    behavior: result?.behavior || 0,
-  };
+  if (result.length > 0) {
+    return {
+      weapon:   result[0].weapon    || 0,    
+      fire:     result[0].fire   ||   0,
+      behavior: result[0].behavior || 0,
+    };
+  }
+
+  return { weapon: 0, fire: 0, behavior: 0 };
 };
 
 // Additional function to get comparative stats for today's incidents vs yesterday's incidents
