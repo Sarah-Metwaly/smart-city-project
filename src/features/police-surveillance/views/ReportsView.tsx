@@ -9,17 +9,15 @@ const ReportsView = () => {
   return (
     <section className="flex flex-col w-full gap-4 px-2 mt-6 md:gap-6 md:mt-10 md:px-0">
       
-      {/* first row */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-        <div className="shadow-sm rounded-xl">
-          <IncidentChart />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:gap-6">
+        <div className="shadow-sm md:col-span-4 rounded-xl">
+          <WeeklyType />
         </div>
-        <div className="shadow-sm rounded-xl">
-          <TimeResponseChart />
+        <div className="shadow-sm md:col-span-2 rounded-xl">
+          <CrimeStatus />
         </div>
       </div>
 
-      {/* second row */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
         <div className="shadow-sm rounded-xl">
           <Crimetype />
@@ -29,13 +27,12 @@ const ReportsView = () => {
         </div>
       </div>
 
-      {/* third row */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:gap-6">
-        <div className="shadow-sm md:col-span-4 rounded-xl">
-          <WeeklyType />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
+        <div className="shadow-sm rounded-xl">
+          <IncidentChart />
         </div>
-        <div className="shadow-sm md:col-span-2 rounded-xl">
-          <CrimeStatus />
+        <div className="shadow-sm rounded-xl">
+          <TimeResponseChart />
         </div>
       </div>
 

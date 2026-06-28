@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { useWeeklyTrend } from '../../hooks/useWeeklyTrend';
-import { useRef, useEffect, useState } from 'react';
 
 const GREY = '#9CA3AF';
 
@@ -16,29 +15,12 @@ function CustomMark(props: any) {
 
 export default function WeeklyIncType() {
   const { data, isLoading, isError } = useWeeklyTrend();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [chartWidth, setChartWidth] = useState(500);
-  const [chartHeight, setChartHeight] = useState(260);
 
-  useEffect(() => {
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setChartWidth(entry.contentRect.width);
-        setChartHeight(entry.contentRect.height);
-      }
-    });
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const stateUI = (content: React.ReactNode) => (
+  const renderStateUI = (content: React.ReactNode) => (
     <Box
-      className="relative flex flex-col w-full overflow-hidden rounded-2xl"
+      className="relative flex flex-col items-center justify-center w-full rounded-2xl"
       style={{
         height: 340,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         background: 'linear-gradient(150deg, #1E3A46 0%, #182B31 55%, #0d1e27 100%)',
         boxShadow: '0 0 0 1px rgba(88,113,125,0.18), 0 24px 60px rgba(0,0,0,0.5)',
       }}
@@ -47,8 +29,8 @@ export default function WeeklyIncType() {
     </Box>
   );
 
-  if (isLoading) return stateUI(<span style={{ color: GREY, fontSize: 12 }}>Loading...</span>);
-  if (isError || !data?.length) return stateUI(<span style={{ color: '#E05A5A', fontSize: 12 }}>Failed to load data</span>);
+  if (isLoading) return renderStateUI(<span style={{ color: GREY, fontSize: 12 }}>Loading...</span>);
+  if (isError || !data?.length) return renderStateUI(<span style={{ color: '#E05A5A', fontSize: 12 }}>Failed to load data</span>);
 
   const WData = data.map((d: any) => Number(d.highPriority)  || 0);
   const BData = data.map((d: any) => Number(d.mediumPriority) || 0);
@@ -66,9 +48,9 @@ export default function WeeklyIncType() {
       style={{
         background: 'linear-gradient(150deg, #1E3A46 0%, #182B31 55%, #0d1e27 100%)',
         boxShadow: '0 0 0 1px rgba(88,113,125,0.18), 0 24px 60px rgba(0,0,0,0.5)',
-        padding: '20px 16px 16px 16px',
-        boxSizing: 'border-box',
         height: 340,
+        padding: '20px 0px 12px 0px',
+        boxSizing: 'border-box',
       }}
     >
       <div className="absolute top-0 left-0 right-0 h-px"
@@ -76,7 +58,7 @@ export default function WeeklyIncType() {
       <div className="pointer-events-none absolute inset-0 opacity-[0.018]"
         style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,#fff 3px,#fff 4px)' }} />
 
-      <div className="flex items-center justify-between w-full mb-3" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="flex items-center justify-between w-full px-5 mb-3" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#E05A5A]" />
           <span className="text-white font-medium text-[15px] tracking-wide">Weekly Incident Analysis</span>
@@ -89,16 +71,15 @@ export default function WeeklyIncType() {
           <span className="text-xs font-bold text-white">{totalIncidents}</span>
         </div>
       </div>
-
-      <div className="w-full h-px mb-4"
+      <div className="h-px mx-5 mb-4"
         style={{ background: 'linear-gradient(90deg, rgba(88,113,125,0.25), transparent)', position: 'relative', zIndex: 1 }} />
 
-      <div ref={containerRef} className="relative flex-1 w-full min-h-0">
+      <div className="relative flex-1 w-full min-h-0">
         <LineChart
           series={[
             { data: WData, label: 'Weapon',   color: '#E05A5A', curve: 'linear', showMark: true },
             { data: BData, label: 'Behavior', color: '#3B82F6', curve: 'linear', showMark: true },
-            { data: LData, label: 'Fire',     color: '#14B8A6', curve: 'linear', showMark: true },
+            { data: LData, label: 'Fire',      color: '#14B8A6', curve: 'linear', showMark: true },
           ]}
           xAxis={[{
             scaleType: 'point',
@@ -116,13 +97,15 @@ export default function WeeklyIncType() {
           }]}
           slots={{ mark: CustomMark }}
           slotProps={{ legend: { sx: { display: 'none' } } }}
-          margin={{ top: 15, right: 25, bottom: 30, left: 0 }}
-          sx={{
+          
+          margin={{ top: 15, right: 40, bottom: 30, left: 0 }}
+                    sx={{
             zIndex: 1,
+            width: '100%',
+            height: '100%',
             '& .MuiChartsAxis-tickLabel tspan': { fill: '#94A3B8 !important' },
+            '& .MuiChartsWrapper-root': { width: '100%', height: '100%' }
           }}
-          width={chartWidth || 500}
-          height={chartHeight || 260}
         />
       </div>
     </div>
