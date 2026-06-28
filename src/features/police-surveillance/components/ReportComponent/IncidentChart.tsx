@@ -1,5 +1,5 @@
 import { BarChart } from "@mui/x-charts/BarChart";
-import { useWeeklyTrend } from '../../../../../useWeeklyTrend';
+import { useWeeklyTrend } from '../../hooks/useWeeklyTrend';
 
 const GREY = '#9CA3AF';
 
@@ -9,92 +9,131 @@ const getDayName = (dateStr: string) => {
   return date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
 };
 
+const getColor = (total: number) => {
+  if (total >= 15) return '#C85353'; // high
+  if (total >= 10) return '#D29442'; // medium
+  return '#9FB3C2';                  // low
+};
+
 export default function WeeklyType() {
   const { data, isLoading, isError } = useWeeklyTrend();
 
-  if (isLoading) return (
-    <div style={{ height: 230, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ color: GREY, fontSize: 12 }}>Loading...</span>
+  const loadingOrErrorUI = (content: React.ReactNode) => (
+    <div
+      className="relative flex flex-col overflow-hidden rounded-2xl"
+      style={{
+        height: 340,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 8,
+        background: 'linear-gradient(150deg, #1E3A46 0%, #182B31 55%, #0d1e27 100%)',
+        boxShadow: '0 0 0 1px rgba(88,113,125,0.18), 0 24px 60px rgba(0,0,0,0.5)',
+      }}
+    >
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg,transparent,rgba(180,195,204,0.35) 40%,rgba(88,113,125,0.4) 60%,transparent)' }} />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.018]"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,#fff 3px,#fff 4px)' }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>{content}</div>
     </div>
   );
 
-  if (isError) return (
-    <div style={{ height: 230, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ color: '#E05A5A', fontSize: 12 }}>{isError}</span>
-    </div>
-  );
+  if (isLoading) return loadingOrErrorUI(<span style={{ color: GREY, fontSize: 12 }}>Loading...</span>);
+  if (isError)   return loadingOrErrorUI(<span style={{ color: '#E05A5A', fontSize: 12 }}>Error loading data</span>);
 
-  const dataset = data && data.length > 0 
+  const dataset = data && data.length > 0
     ? data.map((d: any) => ({
-        day: d._id && d._id.includes('-') ? getDayName(d._id) : d._id, 
-        low:    d.lowPriority || 0,
-        medium: d.mediumPriority || 0,
-        high:   d.highPriority || 0,
+        day:   d._id?.includes('-') ? getDayName(d._id) : d._id,
+        total: d.total || 0,
       }))
     : [];
 
-  const hasData = data && data.length > 0 && data.some((d: any) => d.total > 0);
+  const totalIncidents = dataset.reduce((acc, d) => acc + d.total, 0);
+  const hasData = dataset.some((d) => d.total > 0);
 
-  if (!hasData) return (
-    <div style={{ height: 230, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 }}>
-      <span style={{ color: GREY, fontSize: 13 }}>No incidents this week</span>
-      <span style={{ color: GREY, fontSize: 11, opacity: 0.6 }}>Data will appear when incidents are recorded</span>
-    </div>
-  );
+  if (!hasData) return loadingOrErrorUI(<span style={{ color: GREY, fontSize: 13 }}>No incidents this week</span>);
+
+  const maxVal = Math.max(...dataset.map(d => d.total));
+  const yMax   = Math.ceil(maxVal * 1.3);
+
+  const series = dataset.map((item, index) => ({
+    id: `bar-${index}`,
+    data: dataset.map((_, i) => (i === index ? item.total : null)),
+    color: getColor(item.total),
+    valueFormatter: (v: number | null) => (v != null ? `${v}` : ''),
+    stack: 'total',
+    label: item.day,
+  }));
 
   return (
-    <div className="w-full h-full" style={{ display: 'flex', justifyContent: 'center', padding: '0px' }}>
-      <BarChart
-        dataset={dataset}
-        height={230}
-        width={420}
-        xAxis={[{
-          scaleType: 'band',
-          dataKey: 'day',
-          disableTicks: true,
-          disableLine: true,
-          tickLabelStyle: { fill: GREY, fontSize: 11 },
-        }]}
-        yAxis={[{
-          disableTicks: true,
-          disableLine: true,
-          tickLabelStyle: { fill: GREY, fontSize: 11 },
-        }]}
-        series={[
-          {
-            dataKey: 'low',
-            label: 'Low Priority',
-            color: '#B4C3CC',
-            valueFormatter: (v) => (v != null ? `${v}` : ''),
-            stack: 'total',
-          },
-          {
-            dataKey: 'medium',
-            label: 'Medium Priority',
-            color: '#E09A3D',
-            valueFormatter: (v) => (v != null ? `${v}` : ''),
-            stack: 'total',
-          },
-          {
-            dataKey: 'high',
-            label: 'High Priority',
-            color: '#E05A5A',
-            valueFormatter: (v) => (v != null ? `${v}` : ''),
-            stack: 'total',
-          },
-        ]}
-        borderRadius={6}
-        slotProps={{
-          legend: { sx: { display: 'none' } },
-        }}
-        margin={{ top: 15, right: 10, bottom: 25, left: 25 }}
-        sx={{
-          '& .MuiChartsAxis-tickLabel tspan': {
-            fill: '#94A3B8 !important',
-            fontSize: '11px',
-          },
-        }}
-      />
+    <div
+      className="relative flex flex-col w-full overflow-hidden h-[270px] rounded-2xl"
+      style={{
+        background: 'linear-gradient(150deg, #1E3A46 0%, #182B31 55%, #0d1e27 100%)',
+        boxShadow: '0 0 0 1px rgba(88,113,125,0.18), 0 24px 60px rgba(0,0,0,0.5)',
+        padding: '20px 16px 16px 16px',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg,transparent,rgba(180,195,204,0.35) 40%,rgba(88,113,125,0.4) 60%,transparent)' }} />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.018]"
+        style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,#fff 3px,#fff 4px)' }} />
+
+      {/* Header */}
+      <div className="flex items-center justify-between w-full mb-1" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+          <span className="text-white font-medium text-[15px] tracking-wide">Weekly Incident Trend</span>
+        </div>
+        <div
+          className="flex items-center gap-2 px-2.5 py-0.5 rounded-lg"
+          style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(88,113,125,0.15)' }}
+        >
+          <span className="text-[10px] tracking-widest text-[#94A3B8] uppercase font-semibold">Total</span>
+          <span className="text-xs font-bold text-white">{totalIncidents}</span>
+        </div>
+      </div>
+
+      <div className="w-full h-px mb-6"
+        style={{ background: 'linear-gradient(90deg, rgba(88,113,125,0.25), transparent)' }} />
+
+      {/* Chart */}
+      <div className="relative flex items-center justify-center flex-1 w-full min-h-0">
+        <BarChart
+          dataset={dataset}
+          height={230}
+          width={520}
+          xAxis={[{
+            scaleType: 'band',
+            dataKey: 'day',
+            disableTicks: true,
+            disableLine: true,
+            tickLabelStyle: { fill: '#94A3B8', fontSize: 11, fontWeight: 500 },
+          }]}
+          yAxis={[{
+            disableTicks: true,
+            disableLine: true,
+            tickLabelStyle: { fill: '#94A3B8', fontSize: 11 },
+            min: 0,
+            max: yMax,
+          }]}
+          series={series}
+          borderRadius={6}
+          slotProps={{
+            legend: { sx: { display: 'none' } },
+          }}
+          margin={{ top: 25, right: 30, bottom: 25, left: 0 }}
+          sx={{
+            zIndex: 1,
+            '& .MuiChartsAxis-tickLabel tspan': {
+              fill: '#94A3B8 !important',
+            },
+          }}
+        />
+      </div>
     </div>
   );
 }
