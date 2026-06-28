@@ -1,5 +1,6 @@
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useWeeklyTrend } from '../../hooks/useWeeklyTrend';
+import { useRef, useEffect, useState } from 'react';
 
 const GREY = '#9CA3AF';
 
@@ -10,19 +11,31 @@ const getDayName = (dateStr: string) => {
 };
 
 const getColor = (total: number) => {
-  if (total >= 15) return '#C85353'; // high
-  if (total >= 10) return '#D29442'; // medium
-  return '#9FB3C2';                  // low
+  if (total >= 15) return '#C85353';
+  if (total >= 10) return '#D29442';
+  return '#9FB3C2';
 };
 
 export default function WeeklyType() {
   const { data, isLoading, isError } = useWeeklyTrend();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(520);
 
-  const loadingOrErrorUI = (content: React.ReactNode) => (
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setChartWidth(entry.contentRect.width);
+      }
+    });
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const stateUI = (content: React.ReactNode) => (
     <div
       className="relative flex flex-col overflow-hidden rounded-2xl"
       style={{
-        height: 340,
+        height: 270,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -40,8 +53,8 @@ export default function WeeklyType() {
     </div>
   );
 
-  if (isLoading) return loadingOrErrorUI(<span style={{ color: GREY, fontSize: 12 }}>Loading...</span>);
-  if (isError)   return loadingOrErrorUI(<span style={{ color: '#E05A5A', fontSize: 12 }}>Error loading data</span>);
+  if (isLoading) return stateUI(<span style={{ color: GREY, fontSize: 12 }}>Loading...</span>);
+  if (isError)   return stateUI(<span style={{ color: '#E05A5A', fontSize: 12 }}>Error loading data</span>);
 
   const dataset = data && data.length > 0
     ? data.map((d: any) => ({
@@ -53,7 +66,7 @@ export default function WeeklyType() {
   const totalIncidents = dataset.reduce((acc, d) => acc + d.total, 0);
   const hasData = dataset.some((d) => d.total > 0);
 
-  if (!hasData) return loadingOrErrorUI(<span style={{ color: GREY, fontSize: 13 }}>No incidents this week</span>);
+  if (!hasData) return stateUI(<span style={{ color: GREY, fontSize: 13 }}>No incidents this week</span>);
 
   const maxVal = Math.max(...dataset.map(d => d.total));
   const yMax   = Math.ceil(maxVal * 1.3);
@@ -69,8 +82,9 @@ export default function WeeklyType() {
 
   return (
     <div
-      className="relative flex flex-col w-full overflow-hidden h-[270px] rounded-2xl"
+      className="relative flex flex-col w-full overflow-hidden rounded-2xl"
       style={{
+        height: 270,
         background: 'linear-gradient(150deg, #1E3A46 0%, #182B31 55%, #0d1e27 100%)',
         boxShadow: '0 0 0 1px rgba(88,113,125,0.18), 0 24px 60px rgba(0,0,0,0.5)',
         padding: '20px 16px 16px 16px',
@@ -82,7 +96,6 @@ export default function WeeklyType() {
       <div className="pointer-events-none absolute inset-0 opacity-[0.018]"
         style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,#fff 3px,#fff 4px)' }} />
 
-      {/* Header */}
       <div className="flex items-center justify-between w-full mb-1" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#38BDF8]" />
@@ -100,12 +113,11 @@ export default function WeeklyType() {
       <div className="w-full h-px mb-6"
         style={{ background: 'linear-gradient(90deg, rgba(88,113,125,0.25), transparent)' }} />
 
-      {/* Chart */}
-      <div className="relative flex items-center justify-center flex-1 w-full min-h-0">
+      <div ref={containerRef} className="relative flex items-center justify-center flex-1 w-full min-h-0">
         <BarChart
           dataset={dataset}
-          height={230}
-          width={520}
+          height={200}
+          width={chartWidth || 520}
           xAxis={[{
             scaleType: 'band',
             dataKey: 'day',
@@ -122,15 +134,11 @@ export default function WeeklyType() {
           }]}
           series={series}
           borderRadius={6}
-          slotProps={{
-            legend: { sx: { display: 'none' } },
-          }}
+          slotProps={{ legend: { sx: { display: 'none' } } }}
           margin={{ top: 25, right: 30, bottom: 25, left: 0 }}
           sx={{
             zIndex: 1,
-            '& .MuiChartsAxis-tickLabel tspan': {
-              fill: '#94A3B8 !important',
-            },
+            '& .MuiChartsAxis-tickLabel tspan': { fill: '#94A3B8 !important' },
           }}
         />
       </div>
