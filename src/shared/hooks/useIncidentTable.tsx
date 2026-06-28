@@ -52,16 +52,11 @@ export const useIncidents = (endpoint: string = "/api/v1/incidents/DailyIncident
   const extractedIncidents = Array.isArray(data) 
     ? data 
     : (data?.data && Array.isArray(data.data) ? data.data : []);
-    
-return {
-    Incidents: extractedIncidents,
+
+   return {
+    Incidents: data?.data || [],
     isLoading,
     isError,
-  };
-  // return {
-  //   Incidents: data?.data || [],
-  //   isLoading,
-  //   isError,
    
-  // };
+  };
 };

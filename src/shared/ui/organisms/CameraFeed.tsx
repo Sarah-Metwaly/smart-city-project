@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useHighestPriorityIncident } from '../../../shared/hooks/useHighestPriorityIncident';
-import LiveStream from './../atoms/LiveStream';
+import LiveStream from './LiveStream';
 
 const PRIORITY_ORDER: Record<string, number> = {
   HIGH: 3,
@@ -10,24 +9,18 @@ const PRIORITY_ORDER: Record<string, number> = {
 };
 
 const CameraFeed: React.FC = () => {
-  const {
-    priorityIncidents,
-    highestPriorityIncident,
-    hasActiveAlert,
-  } = useHighestPriorityIncident();
+  const { priorityIncidents, highestPriorityIncident, hasActiveAlert } =
+    useHighestPriorityIncident();
 
   const [viewMode, setViewMode] = useState<'single' | 'grid'>('single');
 
   // Highest priority level
   const highestValue =
-    PRIORITY_ORDER[
-      highestPriorityIncident?.priority?.toUpperCase() || ''
-    ] || 0;
+    PRIORITY_ORDER[highestPriorityIncident?.priority?.toUpperCase() || ''] || 0;
 
   const highPriorityCameras = priorityIncidents.filter((incident) => {
     return (
-      (PRIORITY_ORDER[incident.priority?.toUpperCase()] || 0) ===
-      highestValue
+      (PRIORITY_ORDER[incident.priority?.toUpperCase()] || 0) === highestValue
     );
   });
 
@@ -83,14 +76,10 @@ const CameraFeed: React.FC = () => {
           p-3
           bg-black/60
           border-b
-          ${
-            hasActiveAlert
-              ? 'border-red-500/20'
-              : 'border-cyan-500/10'
-          }
+          ${hasActiveAlert ? 'border-red-500/20' : 'border-cyan-500/10'}
         `}
       >
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+        <div className="flex flex-wrap items-center min-w-0 gap-2 sm:gap-3">
           <div
             className={`flex items-center gap-2 px-2 py-1 border rounded text-[9px] font-bold whitespace-nowrap
               ${
@@ -109,7 +98,6 @@ const CameraFeed: React.FC = () => {
                 }
               `}
             />
-
             AI SURVEILLANCE:
             {hasActiveAlert
               ? ` ${highPriorityCameras.length} ALERTS_ACTIVE`
@@ -138,11 +126,7 @@ const CameraFeed: React.FC = () => {
         {hasActiveAlert && highPriorityCameras.length > 1 && (
           <button
             onClick={() =>
-              setViewMode(
-                viewMode === 'single'
-                  ? 'grid'
-                  : 'single'
-              )
+              setViewMode(viewMode === 'single' ? 'grid' : 'single')
             }
             className="
               px-2
@@ -164,24 +148,18 @@ const CameraFeed: React.FC = () => {
               sm:self-auto
             "
           >
-            {viewMode === 'single'
-              ? '➔ Show All Cameras'
-              : '➔ Focus Mode'}
+            {viewMode === 'single' ? '➔ Show All Cameras' : '➔ Focus Mode'}
           </button>
         )}
       </div>
 
       {/* ================= VIEWPORT ================= */}
-      <div
-        className={`flex-1 min-h-0 overflow-hidden bg-black ${gridClass}`}
-      >
+      <div className={`flex-1 min-h-0 overflow-hidden bg-black ${gridClass}`}>
         {hasActiveAlert ? (
           camerasToRender.map((incident) => {
-            const lat =
-              incident?.location?.coordinates?.[1] || 30.0444;
+            const lat = incident?.location?.coordinates?.[1] || 30.0444;
 
-            const lng =
-              incident?.location?.coordinates?.[0] || 31.2357;
+            const lng = incident?.location?.coordinates?.[0] || 31.2357;
 
             const currentStreamUrl =
               incident?.media?.liveFeedUrl ||
@@ -243,12 +221,9 @@ const CameraFeed: React.FC = () => {
             muted
             loop
             playsInline
-            className="w-full h-full object-cover opacity-40 grayscale"
+            className="object-cover w-full h-full opacity-40 grayscale"
           >
-            <source
-              src="/assets/videos/city-live.mp4"
-              type="video/mp4"
-            />
+            <source src="/assets/videos/city-live.mp4" type="video/mp4" />
           </video>
         )}
       </div>
@@ -272,9 +247,7 @@ const CameraFeed: React.FC = () => {
       >
         <span className="break-words">
           VIEW MODE: {viewMode.toUpperCase()} | PRIORITY LEVEL:{' '}
-          {hasActiveAlert
-            ? highestPriorityIncident?.priority
-            : 'NONE'}
+          {hasActiveAlert ? highestPriorityIncident?.priority : 'NONE'}
         </span>
 
         <span>
