@@ -14,6 +14,17 @@ export interface Incident {
     name: string;
     coordinates: [number, number];
   };
+  aiData: {
+    incident_image_url: string | null;
+    confidence: number;
+    danger_level: string;
+    priority: string;
+  };
+  media: {
+    images: string[];
+    videos: string[];
+    liveFeedUrl: string | null;
+  };
   sensorData: {
     timestamp: string;
   };

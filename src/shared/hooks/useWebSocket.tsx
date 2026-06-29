@@ -10,66 +10,71 @@ const useWebSocket = () => {
   useEffect(() => {
     const wsUrl = import.meta.env.VITE_WS_URL;
     console.log('🔌 Connecting to WebSocket:', wsUrl);
-
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => console.log('✅ WebSocket connected');
 
     ws.onmessage = (event) => {
       console.log(' Raw WS Message:', event.data);
-
       try {
         const parsed = JSON.parse(event.data);
         console.log(' Parsed WS Data:', parsed);
-
         const { topic, data } = parsed;
 
-        //  Incident events
-
-        // Initial list of active incidents to display when opening or refreshing the page
+        // 🚨 INCIDENT EVENTS
         if (topic === 'active_incidents') {
           console.log('📥 Initial Active Incidents List Received:', data);
-          setActiveIncidents(data);
+          
+          // 1. Update the local Zustand store for backward compatibility
+          setActiveIncidents(data); 
+
+          // 2. Directly seed the initial bulk array into TanStack Query caches
+          const formattedPayload = { status: 'success', length: data.length, data: data };
+          queryClient.setQueryData(['ActiveAlerts'], formattedPayload);
+          queryClient.setQueryData(['Incidents', '/api/v1/incidents/DailyIncidents'], formattedPayload);
+
         } else if (
           topic === 'incident:created' ||
-          topic === 'incident:updated'
-        ) {
-          addOrUpdateIncident(data);
-        } else if (
+          topic === 'incident:updated' ||
           topic === 'incident:resolved' ||
           topic === 'incident:AI CLEARED-AWAITING CONFIRMATION'
         ) {
-          console.log(
-            ' Incident Resolved/Cleared, removing from view:',
-            data?._id || data?.incidentId,
-          );
+          console.log(`🔄 Incident change detected (${topic}) -> Syncing caches...`);
 
-          const targetId = data?._id || data?.incidentId;
-          if (targetId) {
-            removeIncident(targetId);
+          // 1. Update the local Zustand store state
+          if (topic === 'incident:created' || topic === 'incident:updated') {
+            addOrUpdateIncident(data);
+          } else {
+            const targetId = data?._id || data?.incidentId;
+            if (targetId) removeIncident(targetId);
           }
+
+          // 2. Invalidate active query keys to trigger immediate background API refetches.
+          // This keeps the UI perfectly synced, sorted, and filtered by the database.
+          queryClient.invalidateQueries({ queryKey: ['ActiveAlerts'] });
+          queryClient.invalidateQueries({ queryKey: ['Incidents'] });
         }
 
-        //  Sensor events
+        // 📊 SENSOR EVENTS — written straight into the cache, no refetch
         else if (topic === 'ldr') {
-          queryClient.invalidateQueries({ queryKey: ['LDRValue'] });
-          queryClient.invalidateQueries({ queryKey: ['lightStatus'] });
+          queryClient.setQueryData(['LDRValue'], data);       // ✅ raw ldr data fits LDRValue cache
+          queryClient.invalidateQueries({ queryKey: ['lightStatus'] }); // ✅ forces a fresh fetch from /api/v1/ldr/status
         } else if (topic === 'dht11') {
-          queryClient.invalidateQueries({ queryKey: ['DHT11Value'] });
+          queryClient.setQueryData(['DHT11Value'], data);
         } else if (topic === 'bmp180') {
-          queryClient.invalidateQueries({ queryKey: ['BMB180Value'] });
+          queryClient.setQueryData(['BMB180Value'], data);
         } else if (topic === 'mq135') {
-          queryClient.invalidateQueries({ queryKey: ['MQ135Value'] });
+          queryClient.setQueryData(['MQ135Value'], data);
         } else if (topic === 'flame') {
-          queryClient.invalidateQueries({ queryKey: ['FlameValue'] });
+          queryClient.setQueryData(['FlameValue'], data);
         }
 
-        //  Summaries update
+        // 📈 SUMMARIES — invalidated since the WS payload doesn't carry the aggregated values
         const allSensors = ['ldr', 'dht11', 'bmp180', 'mq135', 'flame'];
         if (allSensors.includes(topic)) {
           queryClient.invalidateQueries({ queryKey: ['weeklySummary'] });
           queryClient.invalidateQueries({ queryKey: ['TotalData'] });
-          console.log(`✅ Updated ${topic} and Summaries`);
+          console.log(`✅ Updated ${topic} cache + invalidated Summaries`);
         }
       } catch (err) {
         console.error('❌ Error in WS Message:', err);
