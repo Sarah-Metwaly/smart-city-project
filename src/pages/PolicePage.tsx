@@ -6,7 +6,8 @@ import LiveEventsView from "../features/police-surveillance/views/LiveEventsView
 import WeaponView from "../features/police-surveillance/views/WeaponView";
 import ReportsView from "../features/police-surveillance/views/ReportsView";
 import Behavior from "../features/police-surveillance/views/Behavior";
-
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const navLinks = [
   { name: 'Live Events', id: 'LiveEvents', path: '/live' },
@@ -16,7 +17,14 @@ const navLinks = [
 ];
 
 const PolicePage = () => {
-  const [activeView, setActiveView] = useState('LiveEvents');
+ const [activeView, setActiveView] = useState('LiveEvents');
+  const [searchParams] = useSearchParams();
+ 
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'weapon')   setActiveView('weapon');
+    if (tab === 'behavior') setActiveView('behavior');
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-aman-black">

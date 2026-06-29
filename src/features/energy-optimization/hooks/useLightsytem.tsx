@@ -37,8 +37,8 @@ export const useLightSystem = () => {
   }
 }, [data]);
   
+const isLightsOn = data ? data.on >= 1 : true;
 
- 
   const getPercentage = (value: number | undefined): number => {
   if (!data || !data.total || data.total === 0) return 0;
   const Percentage = ((value || 0) / data.total) * 100;
@@ -49,6 +49,7 @@ export const useLightSystem = () => {
  
   return {
     sensorData: data,
+    isLightsOn,
     isLoading,
     isError,
     getPercentage
