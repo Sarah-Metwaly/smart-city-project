@@ -27,8 +27,8 @@ const PolicePage = () => {
             alt="Police Background"
             className="absolute inset-0 object-cover object-center w-full h-full -m-10 scale-105"
           />
-          <header className="relative z-10 flex  md:items-end justify-between h-full p-8 ">
-            <div className="flex flex-col sm:justify-center gap-5">
+          <header className="relative z-10 flex justify-between h-full p-8 md:items-end ">
+            <div className="flex flex-col gap-5 sm:justify-center">
               <div className="flex items-center gap-2 bg-[#00C8A01F] border border-[#00C8A033] px-3 py-1 rounded-[20px] backdrop-blur-md w-fit">
                 <div className="relative flex w-2 h-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C8A0] opacity-75"></span>
@@ -62,7 +62,6 @@ const PolicePage = () => {
           {activeView === 'weapon' && <WeaponView />}
           {activeView === 'Reports' && <ReportsView />}
           {activeView === 'behavior' && <Behavior />}
-
         </main>
       </div>
     </div>

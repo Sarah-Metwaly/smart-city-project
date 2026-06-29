@@ -2,6 +2,7 @@ import React from "react";
 import { type BehaviorActiveAlert, type Severity } from "../../../../types/fireAlert.types";
 import { useActiveAlerts } from "../../../fire-department/hooks/useActiveAlerts";
 import ActiveAlertsSidebar from "../../../../shared/ui/organisms/ActiveAlertsSidebar";
+import { useHighestPriorityIncident } from "../../../../shared/hooks/useHighestPriorityIncident";
 
 
 const behaviorTypes = [
@@ -51,11 +52,12 @@ export const BehaviorAlertsContainer: React.FC<BehaviorAlertsContainerProps> = (
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function BehaviorActiveAlerts() {
   const { fireIncidents, isLoading, isError } = useActiveAlerts();
-
+  const { priorityIncidents } = useHighestPriorityIncident();
+  
   if (isLoading) {
     return (
       <div
-        className="flex items-center justify-center p-10 text-sm font-mono"
+        className="flex items-center justify-center p-10 font-mono text-sm"
         style={{ color: "#444" }}
       >
         Loading alerts...
@@ -66,7 +68,7 @@ export default function BehaviorActiveAlerts() {
   if (isError) {
     return (
       <div
-        className="flex items-center justify-center p-10 text-sm font-mono"
+        className="flex items-center justify-center p-10 font-mono text-sm"
         style={{ color: "#ff4433" }}
       >
         Error fetching alerts.
@@ -74,10 +76,13 @@ export default function BehaviorActiveAlerts() {
     );
   }
 
-  const alerts: BehaviorActiveAlert[] = (fireIncidents || [])
-  .filter((incident: any) => behaviorTypes.includes(incident.type))
-  .map(mapIncidentToAlert);
+ const source = priorityIncidents.length > 0
+  ? priorityIncidents.filter((incident: any) => incident.type === "SOME_TYPE")
+  : (fireIncidents || []).filter((incident: any) => incident.type === "SOME_TYPE");
 
+const alerts = source.map(mapIncidentToAlert);
+
+// Alerts sorted by priority then time, filtered for SOME_TYPE
 
 return <BehaviorAlertsContainer alerts={alerts} />;
 }

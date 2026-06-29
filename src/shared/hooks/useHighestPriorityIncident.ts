@@ -29,7 +29,7 @@ export const useHighestPriorityIncident = () => {
     return timeB - timeA; 
   });
 
-  // the top priority incident that will show on the camera
+  // Highest priority incident for display
   const highestPriorityIncident = priorityIncidents[0] || null;
 
   return {

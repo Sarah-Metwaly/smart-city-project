@@ -8,7 +8,7 @@ import PinsLayer    from './PinsLayer';
 type ViewMode = 'heat' | 'pins' | 'both';
 
 interface CitySurveillanceMapProps {
-  filterType?: string; // لو مش موجود = كل الـ types
+  filterType?: string;
 }
 
 const CitySurveillanceMap: React.FC<CitySurveillanceMapProps> = ({ filterType }) => {
@@ -18,7 +18,6 @@ const CitySurveillanceMap: React.FC<CitySurveillanceMapProps> = ({ filterType })
   const { data: zoneData, isLoading, isError } = useDangerZones();
   const heatZones = zoneData ? mapZonesToDisplay(zoneData) : [];
 
-  // ── Pins data (Zustand - WebSocket) ──
   const { activeIncidents } = useLiveIncidentStore();
   const pins = mapIncidentsToPins(activeIncidents);
 
@@ -77,7 +76,7 @@ const CitySurveillanceMap: React.FC<CitySurveillanceMapProps> = ({ filterType })
 
         {/* Loading */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
             <span className="text-[9px] text-aman-gray tracking-widest animate-pulse">
               LOADING ZONE DATA...
             </span>
@@ -86,7 +85,7 @@ const CitySurveillanceMap: React.FC<CitySurveillanceMapProps> = ({ filterType })
 
         {/* Error */}
         {isError && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
             <span className="text-[9px] text-red-500 tracking-widest">
               FAILED TO LOAD ZONES
             </span>
