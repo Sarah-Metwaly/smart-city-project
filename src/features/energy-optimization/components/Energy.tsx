@@ -1,5 +1,5 @@
 import { useWeeklySummary } from '../hooks/useEnergy';
-import LineChart from './../../../shared/ui/molecules/LineChart';
+import LineChart from '../../../shared/ui/molecules/LineChart';
 
 const Energy = () => {
   // Fetching data from the custom hook
