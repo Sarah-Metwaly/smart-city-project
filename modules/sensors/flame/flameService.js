@@ -14,7 +14,8 @@ exports.saveReading = async (data) => {
         sensor_id: data.sensor_id,
         status: data.status,
         risk_level: data.risk_level,
-        is_flame_detected: data.is_flame_detected
+        is_flame_detected: data.is_flame_detected,
+        power : data.power
     });
     return await reading.save();
 }
