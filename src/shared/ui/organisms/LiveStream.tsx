@@ -54,10 +54,10 @@ export default function LiveStream({ streamUrl }: LiveStreamProps) {
   }, [streamUrl]); // Trigger re-run whenever streamUrl updates dynamically
 
   return (
-    <div className="w-full h-full bg-black rounded-lg overflow-hidden relative">
+    <div className="relative w-full h-full overflow-hidden bg-black rounded-lg">
       <video
         ref={videoRef}
-        className="w-full h-full object-cover"
+        className="object-cover w-full h-full"
         muted 
         controls={false} 
         playsInline
