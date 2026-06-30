@@ -5,6 +5,7 @@ import { TbUserShield } from 'react-icons/tb';
 import logo from '../../assets/logo.png';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import NavbarActiveAlerts from '../../shared/ui/organisms/NavbarActiveAlerts';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -88,6 +89,8 @@ const Navbar = () => {
         </div> */}
 
         <div className="hidden md:flex items-center gap-4">
+           {/* navbar active alerts (bell icon + dropdown )to show real-time alerts */}
+           <NavbarActiveAlerts />
           {user ? (
             <>
               {/* Sign out button */}
