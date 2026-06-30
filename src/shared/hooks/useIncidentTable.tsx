@@ -60,7 +60,11 @@ export const useIncidents = (endpoint: string = "/api/v1/incidents/DailyIncident
     staleTime: 0, 
   });
 
-  return {
+  const extractedIncidents = Array.isArray(data) 
+    ? data 
+    : (data?.data && Array.isArray(data.data) ? data.data : []);
+
+   return {
     Incidents: data?.data || [],
     isLoading,
     isError,
