@@ -45,7 +45,8 @@ const init = () => {
     client = mqtt.connect(BROKER_URL, {
         username: process.env.MQTT_USERNAME,
         password: process.env.MQTT_PASSWORD,
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        clean: true,
     });
 
     client.on('connect', () => {

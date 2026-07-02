@@ -34,29 +34,72 @@ exports.createFromManual = async (manualPayload, userId) => {
 };
 
 
+// exports.upsertFromSensor = async (data) => {
+//     const payloadWithSource = {
+//     ...data,
+//     source: { type: 'SENSOR', deviceId: data.sensorId },
+//   };
+
+//   const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
+//   const payload = buildIncidentPayload(payloadWithSource, initialSnapshot);
+  
+//   const deviceId=payload.source.deviceId;
+
+//   if (hasActiveIncident(deviceId, payload.type)){
+//       const hasChanged = checkAiCachedData(deviceId, payload.type, initialSnapshot);
+//       if (hasChanged) {  // FIX: Only update if data actually changed
+//           const incidentId = getIncidentId(deviceId, payload.type);
+//           await exports.updateFromSensor(incidentId, initialSnapshot);  // FIX: Use getIncidentId + await
+//       }
+//   }
+//   else{
+//       const incident = await exports.createFromSensor(payload);
+//       addIncident(deviceId, payload.type, incident._id.toString());
+//       addAiCachedData(deviceId, payload.type, initialSnapshot);
+//   }
+// };
+
 exports.upsertFromSensor = async (data) => {
     const payloadWithSource = {
-    ...data,
-    source: { type: 'SENSOR', deviceId: data.sensorId },
-  };
+        ...data,
+        source: { type: 'SENSOR', deviceId: data.sensorId },
+    };
 
-  const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
-  const payload = buildIncidentPayload(payloadWithSource, initialSnapshot);
-  
-  const deviceId=payload.source.deviceId;
+    //Build a temporary key BEFORE any await
+    const tempDeviceId = data.sensorId;
+    const tempType = data.type;
 
-  if (hasActiveIncident(deviceId, payload.type)){
-      const hasChanged = checkAiCachedData(deviceId, payload.type, initialSnapshot);
-      if (hasChanged) {  // FIX: Only update if data actually changed
-          const incidentId = getIncidentId(deviceId, payload.type);
-          await exports.updateFromSensor(incidentId, initialSnapshot);  // FIX: Use getIncidentId + await
-      }
-  }
-  else{
-      const incident = await exports.createFromSensor(payload);
-      addIncident(deviceId, payload.type, incident._id.toString());
-      addAiCachedData(deviceId, payload.type, initialSnapshot);
-  }
+    //Check cache and pending BEFORE any await
+    if (hasActiveIncident(tempDeviceId, tempType)) {
+        // already exists — just update snapshot
+        const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
+        const payload = buildIncidentPayload(payloadWithSource, initialSnapshot);
+        const deviceId = payload.source.deviceId;
+        const hasChanged = checkAiCachedData(deviceId, payload.type, initialSnapshot);
+        if (hasChanged) {
+            const incidentId = getIncidentId(deviceId, payload.type);
+            await exports.updateFromSensor(incidentId, initialSnapshot);
+        }
+        return;
+    }
+
+    // Check pending BEFORE any await
+    if (isPending(tempDeviceId, tempType)) return;
+
+    //Mark pending BEFORE any await
+    addPending(tempDeviceId, tempType);
+
+    try {
+        const initialSnapshot = await sensorSnapshotService.getLatestSnapshot();
+        const payload = buildIncidentPayload(payloadWithSource, initialSnapshot);
+        const deviceId = payload.source.deviceId;
+
+        const incident = await exports.createFromSensor(payload);
+        addIncident(deviceId, payload.type, incident._id.toString());
+        addAiCachedData(deviceId, payload.type, initialSnapshot);
+    } finally {
+        removePending(tempDeviceId, tempType);
+    }
 };
 
 exports.updateFromSensor = async (IncidentId , snapShot) =>{
@@ -98,40 +141,84 @@ exports.resolveFromSensor = async (sensorId, type) => {
   return resolved;
 };
 
+// exports.upsertFromAi = async (aiPayload) => {
+//     let sensorSnap = {};
+//     if (aiPayload.type === 'FIRE_DETECTION') {
+//         sensorSnap = await sensorSnapshotService.getLatestSnapshot();
+//     }
+//     const payload = buildIncidentPayload(aiPayload, sensorSnap);
+
+//     const deviceId = aiPayload.source.deviceId;
+//     const aiData = payload.aiData;
+
+//     if (hasActiveIncident(deviceId, payload.type)) {
+//         const hasChanged = checkAiCachedData(deviceId, payload.type, aiData);
+//         if (hasChanged) {  // FIX: Only update if data actually changed
+//             const incidentId = getIncidentId(deviceId, payload.type);
+//             await exports.updateFromAi(incidentId, aiData);  // FIX: Use getIncidentId + await
+//         }
+//         return; // Exit after handling existing incident, no need to create a new one
+//       }
+//     // } else {
+//     //     const incident = await exports.createFromAI(payload);
+//     //     addIncident(deviceId, payload.type, incident._id.toString());
+//     //     addAiCachedData(deviceId, payload.type, aiData);
+//     // }
+//     if(isPending(deviceId, payload.type)) return; // Exit if incident is already pending
+
+//     addPending(deviceId, payload.type); // Mark as pending to prevent duplicate incidents while processing
+
+//     try {
+//         const incident = await exports.createFromAI(payload);
+//         addIncident(deviceId, payload.type, incident._id.toString());
+//         addAiCachedData(deviceId, payload.type, aiData);
+//     }
+//     finally {
+//       removePending(deviceId, payload.type); // Ensure pending status is cleared regardless of success or failure
+//     }
+// };
+
 exports.upsertFromAi = async (aiPayload) => {
-    let sensorSnap = {};
-    if (aiPayload.type === 'FIRE_DETECTION') {
-        sensorSnap = await sensorSnapshotService.getLatestSnapshot();
-    }
-    const payload = buildIncidentPayload(aiPayload, sensorSnap);
-
     const deviceId = aiPayload.source.deviceId;
-    const aiData = payload.aiData;
+    const type = aiPayload.type;
 
-    if (hasActiveIncident(deviceId, payload.type)) {
-        const hasChanged = checkAiCachedData(deviceId, payload.type, aiData);
-        if (hasChanged) {  // FIX: Only update if data actually changed
-            const incidentId = getIncidentId(deviceId, payload.type);
-            await exports.updateFromAi(incidentId, aiData);  // FIX: Use getIncidentId + await
+    //All synchronous checks FIRST, before any await
+    if (hasActiveIncident(deviceId, type)) {
+        // handle update path — await is fine here since we're not creating
+        let sensorSnap = {};
+        if (type === 'FIRE_DETECTION') {
+            sensorSnap = await sensorSnapshotService.getLatestSnapshot();
         }
-        return; // Exit after handling existing incident, no need to create a new one
-      }
-    // } else {
-    //     const incident = await exports.createFromAI(payload);
-    //     addIncident(deviceId, payload.type, incident._id.toString());
-    //     addAiCachedData(deviceId, payload.type, aiData);
-    // }
-    if(isPending(deviceId, payload.type)) return; // Exit if incident is already pending
+        const payload = buildIncidentPayload(aiPayload, sensorSnap);
+        const aiData = payload.aiData;
+        const hasChanged = checkAiCachedData(deviceId, type, aiData);
+        if (hasChanged) {
+            const incidentId = getIncidentId(deviceId, type);
+            await exports.updateFromAi(incidentId, aiData);
+        }
+        return;
+    }
 
-    addPending(deviceId, payload.type); // Mark as pending to prevent duplicate incidents while processing
+    //isPending check — synchronous, before any await
+    if (isPending(deviceId, type)) return;
+
+    //addPending — synchronous, before any await
+    addPending(deviceId, type);
 
     try {
+        // Now it's safe to await
+        let sensorSnap = {};
+        if (type === 'FIRE_DETECTION') {
+            sensorSnap = await sensorSnapshotService.getLatestSnapshot();
+        }
+        const payload = buildIncidentPayload(aiPayload, sensorSnap);
+        const aiData = payload.aiData;
+
         const incident = await exports.createFromAI(payload);
-        addIncident(deviceId, payload.type, incident._id.toString());
-        addAiCachedData(deviceId, payload.type, aiData);
-    }
-    finally {
-      removePending(deviceId, payload.type); // Ensure pending status is cleared regardless of success or failure
+        addIncident(deviceId, type, incident._id.toString());
+        addAiCachedData(deviceId, type, aiData);
+    } finally {
+        removePending(deviceId, type);
     }
 };
 
