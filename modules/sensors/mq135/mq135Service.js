@@ -52,10 +52,10 @@ exports.checkThresholds = async (data) => {
   if (data.air_quality.level === 'POLLUTION HIGH' || data.status === 'DANGER') {
     await incidentService.upsertFromSensor({
       type: 'POOR_AIR_QUALITY',
-      sensorId: data.sensor_id,
+      sensorId: data.device_id,
       readings: { air_quality: data.air_quality.level },
     });
   } else {
-    await incidentService.resolveFromSensor(data.sensor_id, 'POOR_AIR_QUALITY');
+    await incidentService.resolveFromSensor(data.device_id , 'POOR_AIR_QUALITY');
   }
 };
