@@ -1,6 +1,21 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLiveIncidentStore } from '../../store/useLiveIncidentStore';
+import { type SensorData } from '../../features/air-quality/types/airQuality';
+import {
+  toMQ135Data,
+  toBMP180Data,
+  toDHT11Data,
+} from '../../features/air-quality/services/airQuality.mappers';
+
+const AIR_QUALITY_TOPICS = new Set(['mq135', 'bmp180', 'dht11']);
+
+const OTHER_SENSOR_QUERY_MAP: Record<string, string[]> = {
+  ldr: ['LDRValue', 'lightStatus'],
+  flame: ['FlameValue'],
+};
+
+const SUMMARY_KEYS = ['weeklySummary', 'TotalData'];
 
 const useWebSocket = () => {
   const queryClient = useQueryClient();
@@ -8,82 +23,58 @@ const useWebSocket = () => {
     useLiveIncidentStore();
 
   useEffect(() => {
-    const wsUrl = import.meta.env.VITE_WS_URL;
-    console.log('🔌 Connecting to WebSocket:', wsUrl);
+    const invalidate = (keys: string[]) =>
+      keys.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
 
-    const ws = new WebSocket(wsUrl);
-
-    ws.onopen = () => console.log('✅ WebSocket connected');
-
-    ws.onmessage = (event) => {
-      console.log(' Raw WS Message:', event.data);
-
+    const handleMessage = ({ data: raw }: MessageEvent) => {
+      let topic: string, data: any;
       try {
-        const parsed = JSON.parse(event.data);
-        console.log(' Parsed WS Data:', parsed);
+        ({ topic, data } = JSON.parse(raw));
+      } catch {
+        return console.error('❌ Failed to parse WS message');
+      }
+      if (!topic) return;
 
-        const { topic, data } = parsed;
-
-        //  Incident events
-
-        // Initial list of active incidents to display when opening or refreshing the page
-        if (topic === 'active_incidents') {
-          console.log('📥 Initial Active Incidents List Received:', data);
-          setActiveIncidents(data);
-        } else if (
-          topic === 'incident:created' ||
-          topic === 'incident:updated'
-        ) {
-          addOrUpdateIncident(data);
-        } else if (
-          topic === 'incident:resolved' ||
-          topic === 'incident:AI CLEARED-AWAITING CONFIRMATION'
-        ) {
-          console.log(
-            ' Incident Resolved/Cleared, removing from view:',
-            data?._id || data?.incidentId,
-          );
-
-          const targetId = data?._id || data?.incidentId;
-          if (targetId) {
-            removeIncident(targetId);
-          }
+      // incident events
+      switch (topic) {
+        case 'active_incidents': return setActiveIncidents(data);
+        case 'incident:created':
+        case 'incident:updated': return addOrUpdateIncident(data);
+        case 'incident:resolved':
+        case 'incident:ai_cleared': {
+          const id = data?._id || data?.incidentId;
+          return id && removeIncident(id);
         }
+      }
 
-        //  Sensor events
-        else if (topic === 'ldr') {
-          queryClient.invalidateQueries({ queryKey: ['LDRValue'] });
-          queryClient.invalidateQueries({ queryKey: ['lightStatus'] });
-        } else if (topic === 'dht11') {
-          queryClient.invalidateQueries({ queryKey: ['DHT11Value'] });
-        } else if (topic === 'bmp180') {
-          queryClient.invalidateQueries({ queryKey: ['BMB180Value'] });
-        } else if (topic === 'mq135') {
-          queryClient.invalidateQueries({ queryKey: ['MQ135Value'] });
-        } else if (topic === 'flame') {
-          queryClient.invalidateQueries({ queryKey: ['FlameValue'] });
-        }
+      // air quality sensors - direct update to the React Query cache
+      if (AIR_QUALITY_TOPICS.has(topic)) {
+        queryClient.setQueryData<SensorData>(['air-quality'], (old) => {
+          if (!old) return old;
+          if (topic === 'mq135') return { ...old, mq135: toMQ135Data(data) };
+          if (topic === 'bmp180') return { ...old, bmp180: toBMP180Data(data) };
+          return { ...old, dht11: toDHT11Data(data) };
+        });
+        return invalidate(SUMMARY_KEYS);
+      }
 
-        //  Summaries update
-        const allSensors = ['ldr', 'dht11', 'bmp180', 'mq135', 'flame'];
-        if (allSensors.includes(topic)) {
-          queryClient.invalidateQueries({ queryKey: ['weeklySummary'] });
-          queryClient.invalidateQueries({ queryKey: ['TotalData'] });
-          console.log(`✅ Updated ${topic} and Summaries`);
-        }
-      } catch (err) {
-        console.error('❌ Error in WS Message:', err);
+      // Other sensors
+      if (OTHER_SENSOR_QUERY_MAP[topic]) {
+        invalidate(OTHER_SENSOR_QUERY_MAP[topic]);
+        invalidate(SUMMARY_KEYS);
       }
     };
 
-    ws.onclose = () => console.log('⚠️ WebSocket disconnected');
-    ws.onerror = (error) => console.log('❌ WebSocket error:', error);
+    // WebSocket connection
+    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+    ws.onmessage = handleMessage;
+    ws.onerror = (err) => console.error('❌ WebSocket error:', err);
 
     return () => {
-      console.log('🔌 Closing WebSocket connection');
       ws.close();
     };
-  }, [queryClient, setActiveIncidents, addOrUpdateIncident, removeIncident]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 };
 
 export default useWebSocket;
