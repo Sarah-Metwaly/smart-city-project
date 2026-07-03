@@ -9,6 +9,7 @@ dotenv.config({ path: './config.env' });
 const app = require('./app');
 const mqtt = require('./config/mqtt');
 const websocket = require('./config/webSocket');
+require('./modules/actuators/ledControlService'); 
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {

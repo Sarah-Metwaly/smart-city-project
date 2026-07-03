@@ -124,4 +124,12 @@ const init = () => {
     });
 };
 
-module.exports = { init , latestData };
+const publish = (topic, payload) => {
+  if (!client || !client.connected) {
+    console.log('MQTT not connected, cannot publish', topic);
+    return;
+  }
+  client.publish(topic, JSON.stringify(payload));
+};
+
+module.exports = { init , latestData , publish };
