@@ -44,7 +44,7 @@ export const WeaponAlertsContainer: React.FC<WeaponAlertsContainerProps> = ({
 // Calls the hook, maps data, renders the container.
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function WeaponActiveAlerts() {
-  const { fireIncidents, isLoading, isError } = useActiveAlerts();
+  const { policeIncidents, isLoading, isError } = useActiveAlerts();
 
   if (isLoading) {
     return (
@@ -68,7 +68,7 @@ export default function WeaponActiveAlerts() {
     );
   }
 
-  const alerts: WeaponActiveAlert[] = (fireIncidents || [])
+  const alerts: WeaponActiveAlert[] = (policeIncidents || [])
   .filter((incident: any) => incident.type === "WEAPON_DETECTION")
   .map(mapIncidentToAlert);
 

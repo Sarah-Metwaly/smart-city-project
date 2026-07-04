@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface FlameSensorData {
   _id: string;
-  sensor_id: string; // Added to match standard sensor payloads
+  sensor_id: string; 
   status: string;
   risk_level: "DANGER" | "SAFE" | string;
   is_flame_detected: boolean;
-  power?: number; // Kept optional in case GET omits it
+  power: number; // Changed to required to match your active power calculations
   timeStamp: string;
 }
 
@@ -18,25 +18,30 @@ interface ApiResponse {
   data: FlameSensorData[];
 }
 
-const fetchFlameSensor = async (): Promise<FlameSensorData[]> => {
+// 1. Updated type from FlameSensorData[] to FlameSensorData
+const fetchFlameSensor = async (): Promise<FlameSensorData> => {
   const res = await axios.get<ApiResponse>(`${BASE_URL}/api/v1/flame/latest`);
-  console.log(res.data.data);
+  console.log("power of flame ", res.data.data[0]?.power);
   
-  return res.data.data;
+  return res.data.data[0] || {
+    _id: '',
+    sensor_id: 'FLAME_01',
+    status: 'UNKNOWN',
+    risk_level: 'SAFE',
+    is_flame_detected: false,
+    power: 0,
+    timeStamp: ''
+  };
 };
 
 export const useFlameSensor = () => {
-  const { data, isLoading, isError, error } = useQuery<FlameSensorData[]>({
+  const { data: flameSensorData, isLoading, isError, error } = useQuery<FlameSensorData>({
     queryKey: ["flameSensorStatus"],
     queryFn: fetchFlameSensor,
   });
 
-  // Extract the latest reading safely
-  const flameSensorData: FlameSensorData | null = data && data.length > 0 ? data[0] : null;
-
   return {
     flameSensorData,
-    rawList: data ?? [],
     isFlameDetected: flameSensorData?.is_flame_detected ?? false,
     isLoading,
     isError,

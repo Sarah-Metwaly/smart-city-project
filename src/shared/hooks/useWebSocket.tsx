@@ -1,92 +1,103 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLiveIncidentStore } from '../../store/useLiveIncidentStore';
+
+// Map MQTT/broadcast topic -> the query key it should populate
+const SENSOR_QUERY_KEY_MAP: Record<string, string[]> = {
+  ldr: ['LDRValue'],
+  dht11: ['DHT11Value'],
+  bmp180: ['BMP180Value'],
+  mq135: ['MQValue'],
+  flame: ['flameSensorStatus'],
+};
 
 const useWebSocket = () => {
   const queryClient = useQueryClient();
   const { setActiveIncidents, addOrUpdateIncident, removeIncident } =
     useLiveIncidentStore();
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const wsUrl = import.meta.env.VITE_WS_URL;
-    console.log('🔌 Connecting to WebSocket:', wsUrl);
-    const ws = new WebSocket(wsUrl);
 
-    ws.onopen = () => console.log('✅ WebSocket connected');
+    const connect = () => {
+      console.log('🔌 Connecting to WebSocket:', wsUrl);
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-    ws.onmessage = (event) => {
-      console.log(' Raw WS Message:', event.data);
-      try {
-        const parsed = JSON.parse(event.data);
-        console.log(' Parsed WS Data:', parsed);
-        const { topic, data } = parsed;
+      ws.onopen = () => console.log('✅ WebSocket connected');
 
-        // 🚨 INCIDENT EVENTS
-        if (topic === 'active_incidents') {
-          console.log('📥 Initial Active Incidents List Received:', data);
-          
-          // 1. Update the local Zustand store for backward compatibility
-          setActiveIncidents(data); 
+      ws.onmessage = (event) => {
+        try {
+          const parsed = JSON.parse(event.data);
+          const { topic, data } = parsed;
 
-          // 2. Directly seed the initial bulk array into TanStack Query caches
-          const formattedPayload = { status: 'success', length: data.length, data: data };
-          queryClient.setQueryData(['ActiveAlerts'], formattedPayload);
-          queryClient.setQueryData(['Incidents', '/api/v1/incidents/DailyIncidents'], formattedPayload);
-
-        } else if (
-          topic === 'incident:created' ||
-          topic === 'incident:updated' ||
-          topic === 'incident:resolved' ||
-          topic === 'incident:AI CLEARED-AWAITING CONFIRMATION'
-        ) {
-          console.log(`🔄 Incident change detected (${topic}) -> Syncing caches...`);
-
-          // 1. Update the local Zustand store state
-          if (topic === 'incident:created' || topic === 'incident:updated') {
-            addOrUpdateIncident(data);
-          } else {
-            const targetId = data?._id || data?.incidentId;
-            if (targetId) removeIncident(targetId);
+          if (!topic) {
+            console.warn('⚠️ WS message missing topic:', parsed);
+            return;
           }
 
-          // 2. Invalidate active query keys to trigger immediate background API refetches.
-          // This keeps the UI perfectly synced, sorted, and filtered by the database.
-          queryClient.invalidateQueries({ queryKey: ['ActiveAlerts'] });
-          queryClient.invalidateQueries({ queryKey: ['Incidents'] });
-        }
+          // 🚨 INCIDENT EVENTS
+          if (topic === 'active_incidents') {
+            setActiveIncidents(data);
+            const formattedPayload = { status: 'success', length: data.length, data };
+            queryClient.setQueryData(['ActiveAlerts'], formattedPayload);
+            queryClient.setQueryData(['Incidents', '/api/v1/incidents/DailyIncidents'], formattedPayload);
+            return;
+          }
 
-        // 📊 SENSOR EVENTS — written straight into the cache, no refetch
-        else if (topic === 'ldr') {
-          queryClient.setQueryData(['LDRValue'], data);       // ✅ raw ldr data fits LDRValue cache
-          queryClient.invalidateQueries({ queryKey: ['lightStatus'] }); // ✅ forces a fresh fetch from /api/v1/ldr/status
-        } else if (topic === 'dht11') {
-          queryClient.setQueryData(['DHT11Value'], data);
-        } else if (topic === 'bmp180') {
-          queryClient.setQueryData(['BMB180Value'], data);
-        } else if (topic === 'mq135') {
-          queryClient.setQueryData(['MQ135Value'], data);
-        } else if (topic === 'flame') {
-          queryClient.setQueryData(['FlameValue'], data);
-        }
+          if (
+            topic === 'incident:created' ||
+            topic === 'incident:updated' ||
+            topic === 'incident:resolved' ||
+            topic === 'incident:AI CLEARED-AWAITING CONFIRMATION'
+          ) {
+            if (topic === 'incident:created' || topic === 'incident:updated') {
+              addOrUpdateIncident(data);
+            } else {
+              const targetId = data?._id || data?.incidentId;
+              if (targetId) removeIncident(targetId);
+            }
+            queryClient.invalidateQueries({ queryKey: ['ActiveAlerts'] });
+            queryClient.invalidateQueries({ queryKey: ['Incidents'] });
+            return;
+          }
 
-        // 📈 SUMMARIES — invalidated since the WS payload doesn't carry the aggregated values
-        const allSensors = ['ldr', 'dht11', 'bmp180', 'mq135', 'flame'];
-        if (allSensors.includes(topic)) {
-          queryClient.invalidateQueries({ queryKey: ['weeklySummary'] });
-          queryClient.invalidateQueries({ queryKey: ['TotalData'] });
-          console.log(`✅ Updated ${topic} cache + invalidated Summaries`);
+          // 📊 SENSOR EVENTS
+          const queryKey = SENSOR_QUERY_KEY_MAP[topic];
+          if (queryKey) {
+            queryClient.setQueryData(queryKey, data);
+
+            if (topic === 'ldr') {
+              queryClient.invalidateQueries({ queryKey: ['lightStatus'] });
+            }
+
+            queryClient.invalidateQueries({ queryKey: ['weeklySummary'] });
+            queryClient.invalidateQueries({ queryKey: ['TotalData'] });
+            console.log(`✅ Updated ${topic} cache + invalidated summaries`);
+          }
+        } catch (err) {
+          console.error('❌ Error in WS Message:', err);
         }
-      } catch (err) {
-        console.error('❌ Error in WS Message:', err);
-      }
+      };
+
+      ws.onclose = () => {
+        console.log('⚠️ WebSocket disconnected, retrying in 3s...');
+        reconnectTimeout.current = setTimeout(connect, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.log('❌ WebSocket error:', error);
+        ws.close(); // triggers onclose -> reconnect
+      };
     };
 
-    ws.onclose = () => console.log('⚠️ WebSocket disconnected');
-    ws.onerror = (error) => console.log('❌ WebSocket error:', error);
+    connect();
 
     return () => {
-      console.log('🔌 Closing WebSocket connection');
-      ws.close();
+      clearTimeout(reconnectTimeout.current);
+      wsRef.current?.close();
     };
   }, [queryClient, setActiveIncidents, addOrUpdateIncident, removeIncident]);
 };

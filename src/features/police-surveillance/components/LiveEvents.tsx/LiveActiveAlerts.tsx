@@ -44,7 +44,7 @@ export const LiveAlertsContainer: React.FC<LiveAlertsContainerProps> = ({
 // Calls the hook, maps data, renders the container.
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function LiveActiveAlerts() {
-  const { fireIncidents, isLoading, isError } = useActiveAlerts();
+  const { policeIncidents, isLoading, isError } = useActiveAlerts();
 
   if (isLoading) {
     return (
@@ -68,7 +68,7 @@ export default function LiveActiveAlerts() {
     );
   }
 
-  const alerts: LiveActiveAlert[] = (fireIncidents || []).map(mapIncidentToAlert);
+  const alerts: LiveActiveAlert[] = (policeIncidents || []).map(mapIncidentToAlert);
 
 
 return <LiveAlertsContainer alerts={alerts} />;

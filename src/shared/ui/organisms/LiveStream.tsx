@@ -57,7 +57,7 @@ export default function LiveStream({ streamUrl }: LiveStreamProps) {
     <div className="relative w-full h-full overflow-hidden bg-black rounded-lg">
       <video
         ref={videoRef}
-        className="object-cover w-full h-full"
+        className="object-contain w-full h-full"
         muted 
         controls={false} 
         playsInline
