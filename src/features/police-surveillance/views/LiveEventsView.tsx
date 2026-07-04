@@ -56,9 +56,9 @@ const surveillanceStats = [
       <StatCards stats={surveillanceStats} />
 
         {/* 2. MASTER FEED (Main Screen) */}
-        <div className="relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]">
+        <div className="relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)] aspect-video h-[350px] md:h-[400px]">
     
-  {/* <CameraFeed /> */}
+      {/* <CameraFeed /> */}
       <LiveStream streamUrl="http://20.233.89.255:8888/camera/index.m3u8" />
         </div>
 

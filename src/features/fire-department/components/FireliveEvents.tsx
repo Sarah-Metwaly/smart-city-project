@@ -7,6 +7,8 @@ import { Sensors } from './Sensors';
 import { useActivePower } from '../../energy-optimization/hooks/useActivePower';
 import { useFlameSensor } from '../hooks/useFlame';
 import { useIncidents } from '../../../shared/hooks/useIncidentTable';
+import LiveStream from '../../../shared/ui/organisms/LiveStream';
+
 
 
 
@@ -16,7 +18,7 @@ import { useIncidents } from '../../../shared/hooks/useIncidentTable';
 
 
 const FireLiveEvents: React.FC = () => {
-  const { BMB180Value } = useActivePower();
+  const { DHT11Value } = useActivePower();
   const { flameSensorData, isFlameDetected } = useFlameSensor();
 
   const { Incidents } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
@@ -41,7 +43,7 @@ const FireLiveEvents: React.FC = () => {
     },
     {
       title: 'Thermal Level',
-      value: `${BMB180Value?.temperature ?? 0}°C`,
+      value: `${DHT11Value?.temperature ?? 0}°C`,
       icon: Thermometer,
       badge: 'Temperature',
       colorClass: {
@@ -78,8 +80,8 @@ const FireLiveEvents: React.FC = () => {
         <StatCards stats={surveillanceStats} />
         <div className="grid grid-cols-12 gap-4">
           {/* 2. (Main Screen) */}
-          <div className=" col-span-12 md:col-span-8 relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)]">
-           <CameraFeed />
+          <div className=" col-span-12 md:col-span-8 relative bg-aman-teal border border-aman-teal rounded-2xl overflow-hidden shadow-[0_0_24px_rgba(30,58,70,0.45)] h-[350px] md:h-[400px]">
+           <LiveStream streamUrl="http://20.233.89.255:8888/camera/index.m3u8" />
            </div>
           <div className="col-span-12 md:col-span-4">
             <FireAlertsPage />

@@ -13,6 +13,8 @@ import Card from "../shared/ui/atoms/Card";
 import Energy from "../features/energy-optimization/components/Energy";
 import { useLightSystem } from "../features/energy-optimization/hooks/useLightsytem";
 import { useTotalData } from "../shared/hooks/useTotalData";
+import { useActivePower } from "../features/energy-optimization/hooks/useActivePower";
+
 
 const renderTrend = (comment?: string) => {
   const status = comment?.toUpperCase();
@@ -41,6 +43,7 @@ const renderTrend = (comment?: string) => {
 const EnergyPage = () => {
   const { sensorData, isLoading, isError, getPercentage } = useLightSystem();
   const { Total, trend, isTotalLoading, isTotalError } = useTotalData();
+  
 
   //function to get trend style
 
