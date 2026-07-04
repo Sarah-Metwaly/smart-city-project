@@ -7,6 +7,13 @@ import {ErrorBoundary} from '../../shared/utils/appUtils';
 import './CityModel.css';
 import {onPointerDown, onPointerMove, onPointerUp} from "../../shared/utils/threeUtils.tsx";
 import { useLightSystem } from '../../features/energy-optimization/hooks/useLightsytem.tsx';
+import { useActiveAlerts } from '../../features/fire-department/hooks/useActiveAlerts.tsx';
+import { useIncidents } from '../../shared/hooks/useIncidentTable.tsx';
+
+
+
+
+
 
 
 function Model({color, rotation, lights}: {color: string, rotation: [number, number, number], lights: boolean}) {
@@ -45,7 +52,12 @@ function CityModel() {
     const last = useRef<[number, number]>([0, 0]);
     const [alarm, setAlarm] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
     const { isLightsOn, isLoading, isError } = useLightSystem();
+    const {hasActiveAlarm} = useActiveAlerts();
+    const { Incidents } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
+
+    const Fireactive = (Incidents?.filter((i) => i.status?.toUpperCase() === "ACTIVE").length ?? 0) > 0;     
 
     useEffect(() => {
         const el = containerRef.current;

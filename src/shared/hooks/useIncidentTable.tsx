@@ -5,11 +5,11 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- Interfaces ---
 export interface Incident {
-  id: string;
+  _id: string;
   incidentId: string;
   type: string;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  status: 'ACTIVE' | 'RESOLVED' | 'DISPATCHED';
+  status: 'ACTIVE' | 'RESOLVED' | 'DISPATCHED' | 'FALSE_ALARM' | 'AI CLEARED-AWAITING CONFIRMATION';
   location: {
     name: string;
     coordinates: [number, number];
@@ -17,7 +17,7 @@ export interface Incident {
   aiData: {
     incident_image_url: string | null;
     confidence: number;
-    danger_level: string;
+    danger_level?: string;
     priority: string;
   };
   media: {
@@ -25,10 +25,9 @@ export interface Incident {
     videos: string[];
     liveFeedUrl: string | null;
   };
-  sensorData: {
+  sensorData?: {
     timestamp: string;
   };
-  notes: string;
   createdAt: string;
 }
 
@@ -44,6 +43,8 @@ export interface IncidentData {
  */
 const fetchIncidents = async (endpoint: string): Promise<IncidentData> => {
   const res = await axios.get(`${BASE_URL}${endpoint}`);
+  console.log("the data of incident",res.data);
+  
   return res.data;
 };
 
@@ -60,9 +61,7 @@ export const useIncidents = (endpoint: string = "/api/v1/incidents/DailyIncident
     staleTime: 0, 
   });
 
-  const extractedIncidents = Array.isArray(data) 
-    ? data 
-    : (data?.data && Array.isArray(data.data) ? data.data : []);
+  
 
    return {
     Incidents: data?.data || [],

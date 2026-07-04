@@ -6,7 +6,9 @@ import MonthlyCrimeChart from '../components/WeaponComponent/MonthlyCrimeChart';
 import WeaponActiveAlerts from '../components/WeaponComponent/WeaponActiveAlerts';
 import WeaponIncidents from '../components/WeaponComponent/WeaponTable';
 import { useIncidents } from '../../../shared/hooks/useIncidentTable';
-import LiveStream from '../../../shared/ui/organisms/CameraFeed';
+import LiveStream from '../../../shared/ui/organisms/LiveStream';
+
+
 
 const WeaponView: React.FC = () => {
   const { Incidents, isLoading, isError } = useIncidents(
@@ -59,8 +61,8 @@ const WeaponView: React.FC = () => {
       {/* 2. PRIMARY UNIT: CAMERA FEED & ALERTS SIDE-BY-SIDE */}
       <div className="grid h-full gap-2 lg:grid-cols-12">
         {/* Live Camera Feed */}
-        <div className="col-span-12 md:col-span-9">
-          <LiveStream />
+        <div className="col-span-12 md:col-span-9  h-[350px] md:h-[400px]">
+          <LiveStream streamUrl="http://20.233.89.255:8888/camera/index.m3u8" />
         </div>
         {/* Live Alerts (Match Queue) */}
         <div className="col-span-12 md:col-span-3">
