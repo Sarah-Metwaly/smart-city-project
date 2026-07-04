@@ -1,14 +1,15 @@
-import {Suspense, useEffect, useRef, useState, memo, useMemo} from 'react';
+import { Suspense, useEffect, useRef, useState, memo } from 'react';
 // @ts-ignore
-import {Canvas} from '@react-three/fiber';
-import {PerspectiveCamera, useGLTF} from "@react-three/drei";
-import {MeshStandardMaterial} from 'three';
-import {ErrorBoundary} from '../../shared/utils/appUtils';
+import { Canvas } from '@react-three/fiber';
+import { PerspectiveCamera, useGLTF } from "@react-three/drei";
+import { MeshStandardMaterial } from 'three';
+import { ErrorBoundary } from '../../shared/utils/appUtils';
 import './CityModel.css';
-import {onPointerDown, onPointerMove, onPointerUp} from "../../shared/utils/threeUtils.tsx";
+import { onPointerDown, onPointerMove, onPointerUp } from "../../shared/utils/threeUtils.tsx";
 import { useLightSystem } from '../../features/energy-optimization/hooks/useLightsytem.tsx';
-import { useLiveIncidentStore } from '../../store/useLiveIncidentStore';
-import { useAlarmSystem, useSyncAlarm } from './useAlarmSystem';
+import { useActiveAlerts } from '../../features/fire-department/hooks/useActiveAlerts.tsx';
+import { useIncidents } from '../../shared/hooks/useIncidentTable.tsx';
+import { Siren, Flame, Lightbulb } from 'lucide-react';
 
 // Types
 interface ModelProps {
@@ -49,13 +50,12 @@ const Model = memo(function Model({
     fireAlarm,
     policeAlarm
 }: ModelProps) {
-    const {materials, scene} = useGLTF('/models/city-model.glb');
+    const { materials, scene } = useGLTF('/models/city-model.glb');
     const streetColor = materials["[Color_001]4"] as MeshStandardMaterial;
     const fireWarningLight = materials["fire_warning"] as MeshStandardMaterial;
     const policeWarningLight = materials["police_warning1"] as MeshStandardMaterial;
     const modelRef = useRef(null);
 
-    // Color states for each alarm type
     const [streetCurrentColor, setStreetCurrentColor] = useState('#eadb60');
     const [fireCurrentColor, setFireCurrentColor] = useState('#ff0000');
     const [policeCurrentColor, setPoliceCurrentColor] = useState('#0000ff');
@@ -66,16 +66,16 @@ const Model = memo(function Model({
         if (streetAlarm && lights) {
             const runBlinkEffect = async () => {
                 while (!cancelled) {
-                    setStreetCurrentColor("#ff0000");  // Red
+                    setStreetCurrentColor("#ff0000");
                     await new Promise(r => setTimeout(r, 500));
                     if (cancelled) break;
-                    setStreetCurrentColor("#eadb60");  // Yellow
+                    setStreetCurrentColor("#eadb60");
                     await new Promise(r => setTimeout(r, 500));
                 }
             };
             runBlinkEffect();
         } else {
-            setStreetCurrentColor("#eadb60");  // Reset to yellow
+            setStreetCurrentColor("#eadb60");
         }
         return () => { cancelled = true; };
     }, [streetAlarm, lights]);
@@ -86,16 +86,16 @@ const Model = memo(function Model({
         if (fireAlarm) {
             const runBlinkEffect = async () => {
                 while (!cancelled) {
-                    setFireCurrentColor("#ff0000");  // Bright red
+                    setFireCurrentColor("#ff0000");
                     await new Promise(r => setTimeout(r, 500));
                     if (cancelled) break;
-                    setFireCurrentColor("#8B0000");  // Dark red
+                    setFireCurrentColor("#8B0000");
                     await new Promise(r => setTimeout(r, 500));
                 }
             };
             runBlinkEffect();
         } else {
-            setFireCurrentColor("#ff0000");  // Reset to bright red
+            setFireCurrentColor("#ff0000");
         }
         return () => { cancelled = true; };
     }, [fireAlarm]);
@@ -106,74 +106,44 @@ const Model = memo(function Model({
         if (policeAlarm) {
             const runBlinkEffect = async () => {
                 while (!cancelled) {
-                    setPoliceCurrentColor("#0000ff");  // Bright blue
+                    setPoliceCurrentColor("#0000ff");
                     await new Promise(r => setTimeout(r, 500));
                     if (cancelled) break;
-                    setPoliceCurrentColor("#00008B");  // Dark blue
+                    setPoliceCurrentColor("#00008B");
                     await new Promise(r => setTimeout(r, 500));
                 }
             };
             runBlinkEffect();
         } else {
-            setPoliceCurrentColor("#0000ff");  // Reset to bright blue
+            setPoliceCurrentColor("#0000ff");
         }
         return () => { cancelled = true; };
     }, [policeAlarm]);
 
-    // Street lights effect - always semi-transparent when on
+    // Street lights effect
     useEffect(() => {
         if (!streetColor) return;
-
         const config: MaterialConfig = lights
-            ? {
-                opacity: 0.35,  // Always semi-transparent when lights are on
-                emissiveIntensity: 1.2,  // Consistent intensity
-                color: streetCurrentColor  // Color changes based on alarm
-            }
-            : {
-                opacity: 0.0,
-                emissiveIntensity: 0.0,
-                color: streetCurrentColor
-            };
-
+            ? { opacity: 0.35, emissiveIntensity: 1.2, color: streetCurrentColor }
+            : { opacity: 0.0, emissiveIntensity: 0.0, color: streetCurrentColor };
         updateMaterial(streetColor, config);
     }, [streetCurrentColor, streetColor, lights]);
 
-    // Fire warning light effect - semi-transparent when active, blinks when alarm is on
+    // Fire warning light effect
     useEffect(() => {
         if (!fireWarningLight) return;
-
         const config: MaterialConfig = fireAlarm
-            ? {
-                opacity: 0.8,  // Semi-transparent
-                emissiveIntensity: 2.0,
-                color: fireCurrentColor  // Color blinks between bright and dark red
-            }
-            : {
-                opacity: 0.0,
-                emissiveIntensity: 0.0,
-                color: fireCurrentColor
-            };
-
+            ? { opacity: 0.8, emissiveIntensity: 2.0, color: fireCurrentColor }
+            : { opacity: 0.0, emissiveIntensity: 0.0, color: fireCurrentColor };
         updateMaterial(fireWarningLight, config);
     }, [fireAlarm, fireWarningLight, fireCurrentColor]);
 
-    // Police warning light effect - semi-transparent when active, blinks when alarm is on
+    // Police warning light effect
     useEffect(() => {
         if (!policeWarningLight) return;
-
         const config: MaterialConfig = policeAlarm
-            ? {
-                opacity: 0.8,  // Semi-transparent
-                emissiveIntensity: 2.0,
-                color: policeCurrentColor  // Color blinks between bright and dark blue
-            }
-            : {
-                opacity: 0.0,
-                emissiveIntensity: 0.0,
-                color: policeCurrentColor
-            };
-
+            ? { opacity: 0.8, emissiveIntensity: 2.0, color: policeCurrentColor }
+            : { opacity: 0.0, emissiveIntensity: 0.0, color: policeCurrentColor };
         updateMaterial(policeWarningLight, config);
     }, [policeAlarm, policeWarningLight, policeCurrentColor]);
 
@@ -181,31 +151,21 @@ const Model = memo(function Model({
 });
 
 function CityModel() {
-    const [rotation, setRotation] = useState<[number, number, number]>([Math.PI/8, Math.PI/6, 0]);
+    const [rotation, setRotation] = useState<[number, number, number]>([Math.PI / 8, Math.PI / 6, 0]);
     const [zoom, setZoom] = useState(4);
     const dragging = useRef<boolean>(false);
     const last = useRef<[number, number]>([0, 0]);
     const containerRef = useRef<HTMLDivElement>(null);
-    
-    // Alarm system hook
-    const { alarms, setAlarm, toggleAlarm } = useAlarmSystem();
-    
-    // Monitor live incidents from WebSocket
-    const { activeIncidents } = useLiveIncidentStore();
-
-    const memoIncident = useMemo(() => activeIncidents, [activeIncidents]);
-
-    const fireIncident = useMemo(() => memoIncident?.filter((incident:{type: string}) => incident.type === "FIRE_DETECTION"), [memoIncident]);
 
     const { isLightsOn, isLoading, isError } = useLightSystem();
+    const { hasActiveAlarm, policeIncidents } = useActiveAlerts();
+    const { Incidents: fireIncidents } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
 
-    // Sync fire alarm with WebSocket-based active incidents
-    useSyncAlarm('fire', fireIncident, setAlarm, 3000);
+    const fireActiveCount = fireIncidents?.filter((i) => i.status?.toUpperCase() === "ACTIVE").length ?? 0;
+    const Fireactive = fireActiveCount > 0;
+    const policeActiveCount = policeIncidents?.length ?? 0;
 
-    // Sync police alarm with Websocket-based active incidents
-    useSyncAlarm('police', memoIncident, setAlarm, 2000);
-
-    // Handle-wheel zoom
+    // Handle-wheel zoom — re-attaches once loading finishes and the container mounts
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
@@ -213,48 +173,41 @@ function CityModel() {
             e.preventDefault();
             setZoom(z => Math.max(1, Math.min(20, z + e.deltaY * 0.01)));
         };
-        el.addEventListener('wheel', handleWheel, {passive: false});
+        el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    }, []);
-
+    }, [isLoading]);
 
     if (isLoading) return <div>Loading Light System Data...</div>;
     if (isError) return <div>Error loading data</div>;
 
     return (
-        <div className="h-full flex flex-col justify-start gap-10 items-center">
-            <div className='w-full flex justify-center items-center gap-4 flex-wrap'>
-                <button
-                    onClick={() => toggleAlarm('street')}
-                    className={`${
-                        alarms.street 
-                            ? "bg-red-600 text-white" 
-                            : "bg-white text-gray-800"
-                    } px-6 py-2 rounded-lg font-semibold font-inter hover:bg-red-500 hover:text-white transition-all border-2 border-red-600`}
-                >
-                    {alarms.street ? "🚨 Stop Street Alarm" : "Start Street Alarm"}
-                </button>
-                
-                <button
-                    className={`${
-                        alarms.police 
-                            ? "bg-blue-600 text-white" 
-                            : "bg-white text-gray-800"
-                    } px-6 py-2 rounded-lg font-semibold font-inter hover:bg-blue-500 hover:text-white transition-all border-2 border-blue-600`}
-                >
-                    Police Alarm: {alarms.police ? `ACTIVE (${activeIncidents.length} incident${activeIncidents.length !== 1 ? 's' : ''})` : "OFF"}
-                </button>
-
-                <div className={`${
-                    alarms.fire ? "bg-red-100 border-red-600 text-red-800" : "bg-slate-200 border-slate-400 text-gray-800"
-                } px-6 py-2 rounded-lg font-semibold font-inter border-2 transition-all`}>
-                    🔥 Fire Alarm: {alarms.fire ? `ACTIVE (${fireIncident.length} incident${fireIncident.length !== 1 ? 's' : ''})` : "OFF"}
-                </div>
-
-                <div className={`px-6 py-2 rounded-lg font-semibold font-inter bg-slate-200 border-2 border-slate-400`}>
-                    💡 System Lights: {isLightsOn ? "ON" : "OFF"}
-                </div>
+        <div className="h-full flex flex-col justify-start gap-6 items-center">
+            {/* Status strip — read-only, no interactive controls */}
+            <div className="w-full flex justify-center items-center gap-3 flex-wrap">
+                <StatusChip
+                    icon={<Siren className="h-3.5 w-3.5" />}
+                    label="Police"
+                    active={hasActiveAlarm}
+                    detail={hasActiveAlarm ? `${policeActiveCount} active` : "Normal"}
+                    color="#3B82F6"
+                />
+                <StatusChip
+                    icon={<Flame className="h-3.5 w-3.5" />}
+                    label="Fire"
+                    active={Fireactive}
+                    detail={Fireactive ? `${fireActiveCount} active` : "Normal"}
+                    color="#EF4444"
+                />
+                <StatusChip
+                    icon={<Lightbulb className="h-3.5 w-3.5" />}
+                    label="Street Lights"
+                    active={isLightsOn}
+                    detail={isLightsOn ? "On" : "Off"}
+                    color="#EAB308"
+                    neutralWhenOff
+                />
             </div>
+
             <ErrorBoundary>
                 <div
                     ref={containerRef}
@@ -263,24 +216,77 @@ function CityModel() {
                     onMouseUp={() => onPointerUp(dragging)}
                     onMouseLeave={() => onPointerUp(dragging)}
                     onMouseMove={e => onPointerMove(dragging, last, e, setRotation)}
-                    style={{touchAction: 'none'}}
+                    style={{ touchAction: 'none' }}
                 >
                     <Canvas>
-                        <PerspectiveCamera makeDefault position={[0.5, 0, zoom]} rotation={[0, 0, 0]}/>
-                        <ambientLight intensity={1}/>
-                        <pointLight position={[3, 0, 12]} intensity={500}/>
-                        <Suspense fallback={<mesh><boxGeometry/><meshStandardMaterial color="orange"/></mesh>}>
+                        <PerspectiveCamera makeDefault position={[0.5, 0, zoom]} rotation={[0, 0, 0]} />
+                        <ambientLight intensity={1} />
+                        <pointLight position={[3, 0, 12]} intensity={500} />
+                        <Suspense fallback={<mesh><boxGeometry /><meshStandardMaterial color="orange" /></mesh>}>
                             <Model
                                 rotation={rotation}
                                 lights={isLightsOn}
-                                streetAlarm={alarms.street}
-                                fireAlarm={alarms.fire}
-                                policeAlarm={alarms.police}
+                                streetAlarm={false}
+                                fireAlarm={Fireactive}
+                                policeAlarm={hasActiveAlarm}
                             />
                         </Suspense>
                     </Canvas>
                 </div>
             </ErrorBoundary>
+        </div>
+    );
+}
+
+function StatusChip({
+    icon,
+    label,
+    active,
+    detail,
+    color,
+    neutralWhenOff = false,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    active: boolean;
+    detail: string;
+    color: string;
+    neutralWhenOff?: boolean;
+}) {
+    // "neutralWhenOff" panels (like street lights) don't need a red/alert
+    // treatment when inactive — off is a normal state, not a warning.
+    const isAlert = active && !neutralWhenOff;
+
+    return (
+        <div
+            className={`flex items-center gap-2.5 px-3.5 py-2 rounded-lg border transition-all ${
+                isAlert
+                    ? 'bg-white/5 border-white/10'
+                    : 'bg-aman-teal/40 border-aman-teal'
+            }`}
+        >
+            <span
+                className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 ${
+                    isAlert ? 'animate-pulse' : ''
+                }`}
+                style={{
+                    backgroundColor: active ? `${color}22` : 'rgba(255,255,255,0.05)',
+                    color: active ? color : '#58717D',
+                }}
+            >
+                {icon}
+            </span>
+            <div className="flex flex-col leading-tight">
+                <span className="text-[9.5px] uppercase tracking-wider text-aman-blue">
+                    {label}
+                </span>
+                <span
+                    className="text-[12px] font-mono font-semibold"
+                    style={{ color: active ? color : '#F4FEFE' }}
+                >
+                    {detail}
+                </span>
+            </div>
         </div>
     );
 }

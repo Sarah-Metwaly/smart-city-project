@@ -18,15 +18,15 @@ export const Sensors: React.FC = () => {
   } = useFlameSensor();
 
   const {
-    BMB180Value,
-    isLoading: isBMB180Loading,
-    isError: isBMB180Error,
+    DHT11Value,
+    isLoading: isDHT11Loading ,
+    isError: isDHT11Error,
   } = useActivePower();
 
   const DANGER_THRESHOLD = 45;
 
-  const isDangerous = BMB180Value
-    ? BMB180Value.temperature > DANGER_THRESHOLD
+  const isDangerous = DHT11Value
+    ? DHT11Value.temperature > DANGER_THRESHOLD
     : false;
 
   const flameRiskColor =
@@ -183,11 +183,11 @@ export const Sensors: React.FC = () => {
           />
 
           <div className="p-4 sm:p-5 lg:p-6">
-            {isBMB180Loading ? (
+            {isDHT11Loading ? (
               <p className="py-12 text-center text-sm font-mono text-aman-light/40 animate-pulse">
                 Loading Temperature Telemetry...
               </p>
-            ) : isBMB180Error || !BMB180Value ? (
+            ) : isDHT11Error || !DHT11Value ? (
               <p className="py-12 text-center text-sm font-mono text-red-400">
                 Failed to read Temperature Sensor.
               </p>
@@ -253,7 +253,7 @@ export const Sensors: React.FC = () => {
                             : 'text-aman-white'
                         }`}
                     >
-                      {BMB180Value.temperature}°C
+                      {DHT11Value.temperature}°C
                     </span>
                   </div>
 
@@ -272,7 +272,7 @@ export const Sensors: React.FC = () => {
                     >
                       {isDangerous
                         ? 'CRITICAL OVERHEAT'
-                        : BMB180Value.status}
+                        : DHT11Value.status}
                     </span>
                   </div>
                 </div>
@@ -285,7 +285,7 @@ export const Sensors: React.FC = () => {
 
                   <span className="text-[10px] font-mono text-aman-blue/40 break-all">
                     {new Date(
-                      BMB180Value.timeStamp
+                      DHT11Value.timeStamp
                     ).toLocaleString()}
                   </span>
                 </div>

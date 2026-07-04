@@ -4,7 +4,7 @@ import { Activity, ShieldAlert, Siren, CheckCircle2,EyeOff,Eye} from "lucide-rea
 import BehaviorActiveAlerts from '../components/BehaviorComponent/BehaviorActiveAlerts';
 import BehaviorIncidents from '../components/BehaviorComponent/BehaviorTable';
 import { useIncidents } from '../../../shared/hooks/useIncidentTable';
-import LiveStream from '../../../shared/ui/organisms/CameraFeed';
+import LiveStream from '../../../shared/ui/organisms/LiveStream';
 
 
 
@@ -58,10 +58,9 @@ const BehaviorStats = [
         {/* Row 2: Camera + Active Alerts  */}
         <div className="grid grid-cols-12 gap-3 h-full">
           {/*Camera card*/}
-          <div className="md:col-span-9 col-span-12">
-            {/* Live Camera Feed */}
-            <LiveStream/>
-          </div>
+           <div className="col-span-12 md:col-span-9  h-[350px] md:h-[400px]">
+                    <LiveStream streamUrl="http://20.233.89.255:8888/camera/index.m3u8" />
+                  </div>
           {/* Active Alerts */}
           <div className="md:col-span-3 col-span-12 flex flex-col ">
             <BehaviorActiveAlerts />
