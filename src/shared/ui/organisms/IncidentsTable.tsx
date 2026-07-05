@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import IncidentModal from "./IncidentModel";
+import IncidentModal from "../../../shared/ui/atoms/IncidentModel";
 
 // ─── Global keyframes ─────────────────────────────────────────────────────────
 const STYLES = `

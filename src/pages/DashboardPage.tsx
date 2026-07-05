@@ -5,6 +5,7 @@ import { EnergyMonitoringPanel } from '../features/dashboard/components/EnergyMo
 import { EnvironmentalPanel } from '../features/dashboard/components/EnvironmentalPanel';
 import { ReportsAnalyticsPanel } from '../features/dashboard/components/ReportsAnalyticsPanel';
 import SmartSensorsPanel from '../features/dashboard/components/SmartSensorsPanel';
+import { WeeklyIncidentTrendPanel } from '../features/dashboard/components/Weeklyincidenttrendpanel';
 
 
  export function HomePage() {
@@ -23,7 +24,7 @@ import SmartSensorsPanel from '../features/dashboard/components/SmartSensorsPane
         
         <div className="flex flex-col gap-4 h-full min-h-0 order-2 lg:order-1">
           <div className="flex-1 min-h-0"><ActiveIncidentsPanel /></div>
-           <div className="flex-1 min-h-0"><ReportsAnalyticsPanel /></div>
+           <div className="flex-1 min-h-0"><WeeklyIncidentTrendPanel/></div>
           <div className="flex-1 min-h-0"><DangerZonesPanel /></div> 
         </div>
 

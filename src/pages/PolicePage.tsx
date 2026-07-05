@@ -1,8 +1,8 @@
 import policebg from "../assets/police bg.png";
 import radar from "../assets/radar.png";
 import PageNavbar from "../shared/ui/atoms/PageNavbar";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import LiveEventsView from "../features/police-surveillance/views/LiveEventsView";
 import WeaponView from "../features/police-surveillance/views/WeaponView";
 import ReportsView from "../features/police-surveillance/views/ReportsView";
@@ -16,19 +16,11 @@ const navLinks = [
 ];
 
 const PolicePage = () => {
- const [activeView, setActiveView] = useState('LiveEvents');
-  const [searchParams] = useSearchParams();
- 
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'weapon')   setActiveView('weapon');
-    if (tab === 'behavior') setActiveView('behavior');
-  }, [searchParams]);
   const location = useLocation();
   const navigate = useNavigate();
 
   const queryView = new URLSearchParams(location.search).get("view");
-  // const activeView = queryView || "LiveEvents";
+  const activeView = queryView || "LiveEvents";
 
   const handleViewChange = (view: string) => {
     navigate(`/police?view=${view}`, { replace: true });

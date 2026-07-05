@@ -1,6 +1,5 @@
 import fire from '../assets/images/Fire/fire.jfif';
 import FireLiveEvents from '../features/fire-department/components/FireliveEvents';
-import AirQuality from '../features/fire-department/components/AirQuality';
 import FireIncidents from '../features/fire-department/components/FireIncidentTable';
 
 const FirePage = () => {
@@ -168,7 +167,6 @@ const FirePage = () => {
       <main className="p-6 md:px-30">
         <FireLiveEvents/>
         <FireIncidents/>
-        <AirQuality/>
         {/* <div className="grid grid-cols-2 gap-5 bg-aman-teal mt-7">
          <CitySurveillanceMap/>
          <CitySurveillanceMap/>
