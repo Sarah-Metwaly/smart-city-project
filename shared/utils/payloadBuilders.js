@@ -13,7 +13,7 @@ const SOURCE_TYPE_MAP = {
   LOW_PRESSURE:     'SENSOR',
   HIGH_TEMPERATURE: 'SENSOR',
   ENERGY_ANOMALY:   'SENSOR',
-  SMOKE_DETECTION:  'SENSOR',
+  FLAME_DETECTION:  'SENSOR',
   WEAPON_DETECTION: 'AI',
   BEHAVIOR_ANOMALY: 'AI',
   CITIZEN_CALL:     'CITIZEN',
@@ -147,11 +147,11 @@ const builders = {
     notes: `Sensor is ${data.readings?.status}`,
   }),
 
-  SMOKE_DETECTION: (data, snapshot) => ({
+  FLAME_DETECTION: (data, snapshot) => ({
     ...basePayload(data),
     priority: getPriority(), //Need to determine priority later based on a check
     sensorData: snapshot,
-    notes: `Smoke detected with risk level ${data.readings?.risk_level}`,
+    notes: `Flame detected with risk level ${data.readings?.risk_level}`,
   }), 
 
   MANUAL_REPORT: (data) => ({

@@ -24,7 +24,7 @@ mongoose
     websocket.init(server);
 
     // Run daily summary every day at midnight
-    cron.schedule(' 0 0 * * *', async () => { // First 0 is for minutes, second 0 is for hours, * for every day of month, * for every month, * for every day of week
+    cron.schedule('0 0 * * *', async () => { // First 0 is for minutes, second 0 is for hours, * for every day of month, * for every month, * for every day of week
         console.log('⏰ Running daily summary...');
         await dailySummaryService.getDailySummary();
         console.log('✅ Daily summary completed');

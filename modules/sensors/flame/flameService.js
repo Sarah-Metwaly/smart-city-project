@@ -33,6 +33,7 @@ exports.getLatestReadings = async () =>{
                 status : { $first : "$status" },
                 risk_level : { $first : "$risk_level" },
                 is_flame_detected : { $first : "$is_flame_detected" },
+                power : { $first : "$power" },
                 timeStamp : { $first : "$timeStamp" }
             }   
         }
@@ -44,12 +45,12 @@ exports.checkThresholds = async (data) => {
     let incident;
     if (data.is_flame_detected) {
         await incidentService.upsertFromSensor({
-            type: 'SMOKE_DETECTION',
+            type: 'FLAME_DETECTION',
             sensorId: data.sensor_id,
             readings: { status: data.status, risk_level: data.risk_level }
         });
     } 
     else{
-        await incidentService.resolveFromSensor(data.sensor_id, 'SMOKE_DETECTION');
+        await incidentService.resolveFromSensor(data.sensor_id, 'FLAME_DETECTION');
     }
 };

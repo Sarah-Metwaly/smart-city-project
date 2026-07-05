@@ -10,6 +10,7 @@ exports.createFromSensor = async (data) => {
   const incident = await Incident.create(data);
 
   await generateSummary(); // Update daily summary immediately after creating an incident from sensor data
+  console.log(`⏱️ [BACKEND] incident ${incident.incidentId} created at ${Date.now()}`);
   eventEmitter.emit('incident:created', incident);
   return incident;
 };
@@ -19,19 +20,20 @@ exports.createFromAI = async (payload) => {
 
   await generateSummary(); // Update daily summary immediately after creating an incident from AI data
   console.log("📤 Socket Sending Incident:", JSON.stringify(payload, null, 2));
+  console.log(`⏱️ [BACKEND] incident ${incident.incidentId} created at ${Date.now()}`);
   eventEmitter.emit('incident:created', incident);
   return incident;
 };
 
-exports.createFromManual = async (manualPayload, userId) => {
-    const payload = buildIncidentPayload({
-        ...manualPayload,
-        source: { type: 'MANUAL', userId }
-    });
-    const incident = await Incident.create(payload);
-    eventEmitter.emit('incident:created', incident);
-    return incident;
-};
+// exports.createFromManual = async (manualPayload, userId) => {
+//     const payload = buildIncidentPayload({
+//         ...manualPayload,
+//         source: { type: 'MANUAL', userId }
+//     });
+//     const incident = await Incident.create(payload);
+//     eventEmitter.emit('incident:created', incident);
+//     return incident;
+// };
 
 
 // exports.upsertFromSensor = async (data) => {
