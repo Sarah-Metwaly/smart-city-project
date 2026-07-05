@@ -1,8 +1,8 @@
 import React from "react";
 import { type BehaviorActiveAlert, type Severity } from "../../../../types/fireAlert.types";
-import { useActiveAlerts } from "../../../fire-department/hooks/useActiveAlerts";
 import ActiveAlertsSidebar from "../../../../shared/ui/organisms/ActiveAlertsSidebar";
 import { useHighestPriorityIncident } from "../../../../shared/hooks/useHighestPriorityIncident";
+import { useActiveAlerts } from "../../../fire-department/hooks/useActiveAlerts";
 
 
 const behaviorTypes = [

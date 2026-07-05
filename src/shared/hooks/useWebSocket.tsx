@@ -17,76 +17,104 @@ const OTHER_SENSOR_QUERY_MAP: Record<string, string[]> = {
 
 const SUMMARY_KEYS = ['weeklySummary', 'TotalData'];
 
-// Map MQTT/broadcast topic -> the query key it should populate
-const SENSOR_QUERY_KEY_MAP: Record<string, string[]> = {
-  ldr: ['LDRValue'],
-  dht11: ['DHT11Value'],
-  bmp180: ['BMP180Value'],
-  mq135: ['MQValue'],
-  flame: ['flameSensorStatus'],
-};
-
 const useWebSocket = () => {
   const queryClient = useQueryClient();
   const { setActiveIncidents, addOrUpdateIncident, removeIncident } =
     useLiveIncidentStore();
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const invalidate = (keys: string[]) =>
       keys.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
 
-    const handleMessage = ({ data: raw }: MessageEvent) => {
-      let topic: string, data: any;
-      try {
-        ({ topic, data } = JSON.parse(raw));
-      } catch {
-        return console.error('❌ Failed to parse WS message');
-      }
-      if (!topic) return;
+    const connect = () => {
+      const ws = new WebSocket(import.meta.env.VITE_WS_URL);
+      wsRef.current = ws;
 
-      // incident events
-      switch (topic) {
-        case 'active_incidents': return setActiveIncidents(data);
-        case 'incident:created':
-        case 'incident:updated': return addOrUpdateIncident(data);
-        case 'incident:resolved':
-        case 'incident:ai_cleared': {
-          const id = data?._id || data?.incidentId;
-          return id && removeIncident(id);
+      ws.onopen = () => console.log('✅ WebSocket connected');
+
+      ws.onmessage = ({ data: raw }: MessageEvent) => {
+        let topic: string, data: any;
+        try {
+          ({ topic, data } = JSON.parse(raw));
+        } catch {
+          console.error('❌ Failed to parse WS message');
+          return;
         }
-      }
+        if (!topic) {
+          console.warn('⚠️ WS message missing topic');
+          return;
+        }
 
-      // air quality sensors - direct update to the React Query cache
-  if (AIR_QUALITY_TOPICS.has(topic)) {
-  queryClient.setQueryData<SensorData>(['air-quality'], (old) => {
-    const base: SensorData = old ?? {
-      mq135: toMQ135Data(undefined as any),
-      bmp180: toBMP180Data(undefined),
-      dht11: toDHT11Data(undefined),
+        // incident events
+        if (topic === 'active_incidents') {
+          setActiveIncidents(data);
+          const formattedPayload = { status: 'success', length: data.length, data };
+          queryClient.setQueryData(['ActiveAlerts'], formattedPayload);
+          queryClient.setQueryData(['Incidents', '/api/v1/incidents/DailyIncidents'], formattedPayload);
+          return;
+        }
+
+        if (
+          topic === 'incident:created' ||
+          topic === 'incident:updated' ||
+          topic === 'incident:resolved' ||
+          topic === 'incident:AI CLEARED-AWAITING CONFIRMATION'
+        ) {
+          if (topic === 'incident:created' || topic === 'incident:updated') {
+            addOrUpdateIncident(data);
+          } else {
+            const targetId = data?._id || data?.incidentId;
+            if (targetId) removeIncident(targetId);
+          }
+          invalidate(['ActiveAlerts']);
+          invalidate(['Incidents']);
+          return;
+        }
+
+        // air quality sensors — direct update to the React Query cache,
+        // rebuilding from defaults if the cache is still empty (e.g. the
+        // initial REST fetch failed partially)
+        if (AIR_QUALITY_TOPICS.has(topic)) {
+          queryClient.setQueryData<SensorData>(['air-quality'], (old) => {
+            const base: SensorData = old ?? {
+              mq135: toMQ135Data(undefined as any),
+              bmp180: toBMP180Data(undefined),
+              dht11: toDHT11Data(undefined),
+            };
+
+            if (topic === 'mq135') return { ...base, mq135: toMQ135Data(data) };
+            if (topic === 'bmp180') return { ...base, bmp180: toBMP180Data(data) };
+            return { ...base, dht11: toDHT11Data(data) };
+          });
+          invalidate(SUMMARY_KEYS);
+          return;
+        }
+
+        // other sensors (ldr, flame, ...)
+        if (OTHER_SENSOR_QUERY_MAP[topic]) {
+          invalidate(OTHER_SENSOR_QUERY_MAP[topic]);
+          invalidate(SUMMARY_KEYS);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('⚠️ WebSocket disconnected, retrying in 3s...');
+        reconnectTimeout.current = setTimeout(connect, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.log('❌ WebSocket error:', error);
+        ws.close();
+      };
     };
 
-    if (topic === 'mq135') return { ...base, mq135: toMQ135Data(data) };
-    if (topic === 'bmp180') return { ...base, bmp180: toBMP180Data(data) };
-    return { ...base, dht11: toDHT11Data(data) };
-  });
-  return invalidate(SUMMARY_KEYS);
-}
-      // Other sensors
-      if (OTHER_SENSOR_QUERY_MAP[topic]) {
-        invalidate(OTHER_SENSOR_QUERY_MAP[topic]);
-        invalidate(SUMMARY_KEYS);
-      }
-    };
-
-    // WebSocket connection
-    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
-    ws.onmessage = handleMessage;
-    ws.onerror = (err) => console.error('❌ WebSocket error:', err);
+    connect();
 
     return () => {
-      ws.close();
+      if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
+      wsRef.current?.close();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

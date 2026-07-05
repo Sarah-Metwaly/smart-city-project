@@ -4,6 +4,21 @@ import { useActiveAlerts } from "../hooks/useActiveAlerts";
 import ActiveAlertsSidebar from "../../../shared/ui/organisms/ActiveAlertsSidebar";
 import { useHighestPriorityIncident } from "../../../shared/hooks/useHighestPriorityIncident";
 
+const FireTypes = [
+   'FLAME_DETECTION' ,
+   'POOR_AIR_QUALITY',
+   'HIGH_HUMIDITY' , 
+   'FIRE_DETECTION', 
+   "LOW_PRESSURE", 
+   "HIGH_PRESSURE" ,
+  'ENERGY_ANOMALY',
+  'HIGH_TEMPERATURE'
+
+];
+
+
+
+
 // ── Data mapper ────────────────────────────────────────────────────────────
 // Isolated so swapping API shape only touches this function.
 function mapIncidentToAlert(incident: any): FireAlert {
@@ -76,5 +91,9 @@ const source = priorityIncidents.length > 0
 const alerts: FireAlert[] = source.map(mapIncidentToAlert);
 
 // Alerts sorted by priority then time, filtered for fire detection
+// const alerts: FireAlert[] = (policeIncidents || [])
+  // .filter((incident: any) => FireTypes.includes(incident.type))
+  // .map(mapIncidentToAlert);
+
   return <FireAlertsContainer alerts={alerts} />;
 }
