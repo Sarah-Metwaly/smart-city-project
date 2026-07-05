@@ -28,7 +28,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, badge, co
       </div>
 
       <div className="flex flex-col">
-        <div className={`text-3xl font-bold ${colorClass.text}`}>
+        <div className={`text-2xl font-bold ${colorClass.text}`}>
           {value}
         </div>
         <h4 className="text-sm font-semibold text-white/90 mt-0.5">

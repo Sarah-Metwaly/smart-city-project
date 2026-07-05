@@ -3,7 +3,6 @@ import { ActiveIncidentsPanel } from '../features/dashboard/components/ActiveInc
 import { DangerZonesPanel } from '../features/dashboard/components/DangerZonesPanel';
 import { EnergyMonitoringPanel } from '../features/dashboard/components/EnergyMonitoringPanel';
 import { EnvironmentalPanel } from '../features/dashboard/components/EnvironmentalPanel';
-import { ReportsAnalyticsPanel } from '../features/dashboard/components/ReportsAnalyticsPanel';
 import SmartSensorsPanel from '../features/dashboard/components/SmartSensorsPanel';
 import { WeeklyIncidentTrendPanel } from '../features/dashboard/components/Weeklyincidenttrendpanel';
 
