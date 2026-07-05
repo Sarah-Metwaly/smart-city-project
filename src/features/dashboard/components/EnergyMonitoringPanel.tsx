@@ -1,23 +1,30 @@
 import { Zap, Lightbulb, Gauge, DollarSign } from "lucide-react";
 import { useTotalData } from "../../../shared/hooks/useTotalData";
 import { useLightSystem } from "../../energy-optimization/hooks/useLightsytem";
+import { useActivePower } from "../../energy-optimization/hooks/useActivePower";
 
+const TOTAL_LIGHTS = 3;
+const ON_LIGHTS_WHEN_ACTIVE = 3;
 
 export function EnergyMonitoringPanel() {
-  const { sensorData, isLoading: isLightLoading, isError: isLightError, getPercentage } = useLightSystem();
+  const { isLightsOn, hasData: hasLightData } = useLightSystem();
   const { Total, trend, isTotalLoading, isTotalError } = useTotalData();
+  const {TotalPower}=useActivePower()
 
-  const isLoading = isLightLoading || isTotalLoading;
-  const isError = isLightError || isTotalError;
+  const isLoading = isTotalLoading;
+  const isError = isTotalError;
 
-  const onPercent = getPercentage(sensorData?.on);
+  const onCount = isLightsOn ? ON_LIGHTS_WHEN_ACTIVE : 0;
+  const onPercent = hasLightData
+    ? parseFloat(((onCount / TOTAL_LIGHTS) * 100).toFixed(1))
+    : 0;
 
   const metrics = [
     {
       id: 0,
       icon: <Zap className="h-4 w-4" />,
       label: "Active Load",
-      value: `${Total?.totalActiveLoad ?? 0}`,
+      value: `${TotalPower}`,
       unit: "W",
       trend: trend?.avgPowerComment,
       color: "#E05A5A",
@@ -26,7 +33,7 @@ export function EnergyMonitoringPanel() {
       id: 1,
       icon: <Lightbulb className="h-4 w-4" />,
       label: "Street Lights",
-      value: `${sensorData?.on ?? 0}/${sensorData?.total ?? 0}`,
+      value: `${onCount}/${TOTAL_LIGHTS}`,
       unit: "",
       trend: `${onPercent}%`,
       color: "#1A8A80",

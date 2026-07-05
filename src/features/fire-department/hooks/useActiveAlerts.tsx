@@ -23,28 +23,16 @@ export interface Incident {
 export interface FAlertsData {
     status: string;
     length: number;
-    data: Incident[];
+    data: Incident[]; 
 }
 
-// Police-relevant incident types
-const POLICE_INCIDENT_TYPES = [
-    'THEFT_DETECTION',
-    'WEAPON_DETECTION',
-    'CROWD_MANAGEMENT',
-    'BEHAVIOR_ANOMALY',
-    'CITIZEN_CALL',
-];
-
-// Fetch active police-related incidents from API
+// Fetch Active Incident from API 
 const fetchActiveAlerts = async (): Promise<FAlertsData> => {
-    const typeQuery = POLICE_INCIDENT_TYPES.map((t) => `type=${t}`).join('&');
-    const res = await axios.get(
-        `${BASE_URL}/api/v1/incidents/DailyIncidents?${typeQuery}&status=ACTIVE`
-    );
+    const res = await axios.get(`${BASE_URL}/api/v1/incidents/DailyIncidents?&status=ACTIVE`);
     return res.data;
-};
+}
 
-// Custom hook
+// Custom hook 
 export const useActiveAlerts = () => {
     const { data, isLoading, isError } = useQuery<FAlertsData>({
         queryKey: ['ActiveAlerts'],
@@ -52,14 +40,14 @@ export const useActiveAlerts = () => {
     });
 
     const policeIncidents = data?.data || [];
-
-    // Returns true if there is at least 1 active police-related incident
+    
+    // Returns true if there is more than 1 active incident
     const hasActiveAlarm = policeIncidents.length > 0;
 
     return {
         policeIncidents,
         isLoading,
         isError,
-        hasActiveAlarm,
+        hasActiveAlarm, 
     };
 };
