@@ -59,16 +59,20 @@ const useWebSocket = () => {
       }
 
       // air quality sensors - direct update to the React Query cache
-      if (AIR_QUALITY_TOPICS.has(topic)) {
-        queryClient.setQueryData<SensorData>(['air-quality'], (old) => {
-          if (!old) return old;
-          if (topic === 'mq135') return { ...old, mq135: toMQ135Data(data) };
-          if (topic === 'bmp180') return { ...old, bmp180: toBMP180Data(data) };
-          return { ...old, dht11: toDHT11Data(data) };
-        });
-        return invalidate(SUMMARY_KEYS);
-      }
+  if (AIR_QUALITY_TOPICS.has(topic)) {
+  queryClient.setQueryData<SensorData>(['air-quality'], (old) => {
+    const base: SensorData = old ?? {
+      mq135: toMQ135Data(undefined as any),
+      bmp180: toBMP180Data(undefined),
+      dht11: toDHT11Data(undefined),
+    };
 
+    if (topic === 'mq135') return { ...base, mq135: toMQ135Data(data) };
+    if (topic === 'bmp180') return { ...base, bmp180: toBMP180Data(data) };
+    return { ...base, dht11: toDHT11Data(data) };
+  });
+  return invalidate(SUMMARY_KEYS);
+}
       // Other sensors
       if (OTHER_SENSOR_QUERY_MAP[topic]) {
         invalidate(OTHER_SENSOR_QUERY_MAP[topic]);

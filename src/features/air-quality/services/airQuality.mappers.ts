@@ -30,9 +30,9 @@ export function toMQ135Data(raw: MQ135RawResponse): MQ135Data {
 export function toBMP180Data(raw: any): BMP180Data {
   const item = Array.isArray(raw) ? raw[0] : raw;
   return {
-    pressure: item?.pressure ?? 0,
-    altitude: item?.altitude ?? 0,
-    temperature: item?.temperature ?? 0,
+    pressure: Number(item?.pressure) || 0,
+    altitude: Number(item?.altitude) || 0,
+    temperature: Number(item?.temperature) || 0,
   };
 }
 
