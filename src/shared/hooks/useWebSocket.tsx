@@ -1,8 +1,8 @@
+// export default useWebSocket;
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLiveIncidentStore } from '../../store/useLiveIncidentStore';
 
-// Map MQTT/broadcast topic -> the query key it should populate
 const SENSOR_QUERY_KEY_MAP: Record<string, string[]> = {
   ldr: ['LDRValue'],
   dht11: ['DHT11Value'],
@@ -16,7 +16,7 @@ const useWebSocket = () => {
   const { setActiveIncidents, addOrUpdateIncident, removeIncident } =
     useLiveIncidentStore();
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const wsUrl = import.meta.env.VITE_WS_URL;
@@ -38,7 +38,6 @@ const useWebSocket = () => {
             return;
           }
 
-          // 🚨 INCIDENT EVENTS
           if (topic === 'active_incidents') {
             setActiveIncidents(data);
             const formattedPayload = { status: 'success', length: data.length, data };
@@ -64,15 +63,9 @@ const useWebSocket = () => {
             return;
           }
 
-          // 📊 SENSOR EVENTS
           const queryKey = SENSOR_QUERY_KEY_MAP[topic];
           if (queryKey) {
             queryClient.setQueryData(queryKey, data);
-
-            if (topic === 'ldr') {
-              queryClient.invalidateQueries({ queryKey: ['lightStatus'] });
-            }
-
             queryClient.invalidateQueries({ queryKey: ['weeklySummary'] });
             queryClient.invalidateQueries({ queryKey: ['TotalData'] });
             console.log(`✅ Updated ${topic} cache + invalidated summaries`);
@@ -89,7 +82,7 @@ const useWebSocket = () => {
 
       ws.onerror = (error) => {
         console.log('❌ WebSocket error:', error);
-        ws.close(); // triggers onclose -> reconnect
+        ws.close();
       };
     };
 

@@ -44,8 +44,8 @@ const ActivePower = () => {
     {
       id: 3,
       label: "Flame",
-      realValue: flameSensorData?.power??10,
-      value: getPercent(flameSensorData?.power??10),
+      realValue: flameSensorData?.power??0,
+      value: getPercent(flameSensorData?.power??0),
 
       color: "#FACC15",
     },

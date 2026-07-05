@@ -1,12 +1,51 @@
-import { useWeeklySummary } from '../hooks/useEnergy';
+import { useMemo } from 'react';
+import { useActivePower } from '../../energy-optimization/hooks/useActivePower';
 import LineChart from './../../../shared/ui/molecules/LineChart';
 
-const Energy = () => {
-  // Fetching data from the custom hook
-  const { data, isLoading, isError } = useWeeklySummary();
+interface DayData {
+  date: string;
+  total_energy: number;
+  total_cost: number;
+}
 
-  //  Transforms the API date into  day names
-  const chartData = data?.weeklyData.map((day) => {
+// Generates the last 7 calendar days ending today, oldest first.
+// All days get mock data except Sunday, which is overridden with live TotalPower below.
+const buildMockWeek = (): DayData[] => {
+  const days: DayData[] = [];
+  const today = new Date();
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+
+    days.push({
+      date: d.toISOString(),
+      total_energy: Math.floor(Math.random() * 40) + 20, // mock 20–60 KWH
+      total_cost: Math.floor(Math.random() * 15) + 5,     // mock 5–20 $
+    });
+  }
+
+  return days;
+};
+
+const Energy = () => {
+  const { TotalPower } = useActivePower();
+
+  const mockWeek = useMemo(() => buildMockWeek(), []);
+
+  const weeklyData = useMemo(() => {
+    return mockWeek.map((day) => {
+      const isSunday = new Date(day.date).getDay() === 0;
+      return isSunday ? { ...day, total_energy: TotalPower } : day;
+    });
+  }, [mockWeek, TotalPower]);
+
+  const maxDay = useMemo(
+    () => weeklyData.reduce((max, d) => (d.total_energy > max.total_energy ? d : max), weeklyData[0]),
+    [weeklyData]
+  );
+
+  const chartData = weeklyData.map((day) => {
     const dayName = new Date(day.date)
       .toLocaleDateString("en-US", { weekday: "short" })
       .toUpperCase();
@@ -15,34 +54,28 @@ const Energy = () => {
       label: dayName,
       value: day.total_energy,
     };
-  }) || [];
-
-  // Handling loading and error states for a better UX
-  if (isLoading) return <div className="p-5 text-white">Loading analysis...</div>;
-  if (isError) return <div className="p-5 text-red-500">Failed to load energy data.</div>;
+  });
 
   return (
     <div className="flex flex-col h-full">
       <h4 className="text-aman-light font-inter text-xs uppercase tracking-widest mt-6">
         Real-time Consumption Analysis
       </h4>
-      
+
       <hr className="my-2 border-t-[0.5px] border-aman-white/20" />
 
-      {/* The LineChart receives the dynamic chartData */}
-      <LineChart 
-        data={chartData} 
-        title="Daily Consumption" 
-        color="rgba(88, 113, 125, 0.5)" 
+      <LineChart
+        data={chartData}
+        title="Daily Consumption"
+        color="rgba(88, 113, 125, 0.5)"
       />
 
       <p className="text-aman-light text-[10px] uppercase tracking-widest m-3">
-        {/* maxDay is used here to show the peak energy day dynamically */}
         You used the most energy on{" "}
         <span className="font-bold text-white">
-          {new Date(data?.maxDay.date || "").toLocaleDateString("en-US", { weekday: "long" })}
+          {new Date(maxDay.date).toLocaleDateString("en-US", { weekday: "long" })}
         </span>{" "}
-        this week with <span className="font-bold text-white">{data?.maxDay.total_energy} KWH</span>
+        this week with <span className="font-bold text-white">{maxDay.total_energy} KWH</span>
       </p>
     </div>
   );

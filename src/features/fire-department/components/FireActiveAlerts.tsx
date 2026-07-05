@@ -3,7 +3,17 @@ import { type FireAlert, type Severity } from "../../../types/fireAlert.types";
 import { useActiveAlerts } from "../hooks/useActiveAlerts";
 import ActiveAlertsSidebar from "../../../shared/ui/organisms/ActiveAlertsSidebar";
 
+const FireTypes = [
+   'FLAME_DETECTION' ,
+   'POOR_AIR_QUALITY',
+   'HIGH_HUMIDITY' , 
+   'FIRE_DETECTION', 
+   "LOW_PRESSURE", 
+   "HIGH_PRESSURE" ,
+  'ENERGY_ANOMALY',
+  'HIGH_TEMPERATURE'
 
+];
 
 
 
@@ -73,7 +83,8 @@ export default function FireAlertsPage() {
   }
 
 const alerts: FireAlert[] = (policeIncidents || [])
-  .filter((incident: any) => incident.type === "FIRE_DETECTION")
+  .filter((incident: any) => FireTypes.includes(incident.type))
   .map(mapIncidentToAlert);
+
   return <FireAlertsContainer alerts={alerts} />;
 }

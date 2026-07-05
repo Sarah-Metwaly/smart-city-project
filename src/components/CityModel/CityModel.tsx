@@ -157,7 +157,7 @@ function CityModel() {
     const last = useRef<[number, number]>([0, 0]);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const { isLightsOn, isLoading, isError } = useLightSystem();
+    const { isLightsOn, isFaulty, hasData: hasLightData } = useLightSystem();
     const { hasActiveAlarm, policeIncidents } = useActiveAlerts();
     const { Incidents: fireIncidents } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
 
@@ -165,7 +165,7 @@ function CityModel() {
     const Fireactive = fireActiveCount > 0;
     const policeActiveCount = policeIncidents?.length ?? 0;
 
-    // Handle-wheel zoom — re-attaches once loading finishes and the container mounts
+    // Handle-wheel zoom — re-attaches once the first light reading arrives and the container mounts
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
@@ -175,10 +175,9 @@ function CityModel() {
         };
         el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    }, [isLoading]);
+    }, [hasLightData]);
 
-    if (isLoading) return <div>Loading Light System Data...</div>;
-    if (isError) return <div>Error loading data</div>;
+    if (!hasLightData) return <div>Loading Light System Data...</div>;
 
     return (
         <div className="h-full flex flex-col justify-start gap-6 items-center">
@@ -202,8 +201,8 @@ function CityModel() {
                     icon={<Lightbulb className="h-3.5 w-3.5" />}
                     label="Street Lights"
                     active={isLightsOn}
-                    detail={isLightsOn ? "On" : "Off"}
-                    color="#EAB308"
+                    detail={isFaulty ? "Faulty" : isLightsOn ? "On" : "Off"}
+                    color={isFaulty ? "#EF4444" : "#EAB308"}
                     neutralWhenOff
                 />
             </div>
@@ -226,7 +225,7 @@ function CityModel() {
                             <Model
                                 rotation={rotation}
                                 lights={isLightsOn}
-                                streetAlarm={false}
+                                streetAlarm={isFaulty}
                                 fireAlarm={Fireactive}
                                 policeAlarm={hasActiveAlarm}
                             />
