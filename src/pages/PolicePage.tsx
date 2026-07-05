@@ -33,7 +33,7 @@ const PolicePage = () => {
   }, [queryView, navigate]);
 
   return (
-    <div className="min-h-screen bg-aman-black">
+    <div className="min-h-screen pt-20 bg-aman-black">
       <div className="w-full mx-auto md:px-15 ">
         {/* Hero Section */}
         <div className="relative w-full h-70 ">
