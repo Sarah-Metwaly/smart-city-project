@@ -1,6 +1,12 @@
 import React from "react";
-import {type  AQStatus } from "../types/airQuality";
+import { type AQStatus } from "../types/airQuality";
 import { statusStyles, statusLabel } from "../constants";
+
+function formatValue(value: unknown): string {
+  const num = typeof value === "number" ? value : parseFloat(String(value));
+  if (isNaN(num)) return "—";
+  return num % 1 === 0 ? num.toString() : num.toFixed(1);
+}
 
 // ── Main Component ─────────────────────────────────────────────────────────
 interface SensorCardProps {
@@ -42,7 +48,7 @@ export default function SensorCard({
 
       <div className="flex items-baseline gap-1">
         <span className={`text-3xl font-semibold leading-none tabular-nums ${s.value}`}>
-          {value % 1 === 0 ? value : value.toFixed(1)}
+          {formatValue(value)}
         </span>
         <span className="text-xs text-[#58717D]">{unit}</span>
       </div>

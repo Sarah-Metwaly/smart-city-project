@@ -143,8 +143,10 @@ function AirQualityUI({ data }: { data: SensorData }) {
 export default function AirQuality() {
   const { data, isLoading, isError } = useAirQuality();
 
+  const isDataIncomplete = !data || !data.mq135 || !data.bmp180 || !data.dht11;
+
   if (isLoading) return <AirQualitySkeleton />;
-  if (isError || !data) return <AirQualityError />;
+  if (isError || isDataIncomplete) return <AirQualityError />;
 
   return <AirQualityUI data={data} />;
 }
