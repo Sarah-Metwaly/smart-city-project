@@ -48,7 +48,7 @@ export const FireAlertsContainer: React.FC<FireAlertsContainerProps> = ({
 // Calls the hook, maps data, renders the container.
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function FireAlertsPage() {
-  const { fireIncidents, isLoading, isError } = useActiveAlerts();
+  const { policeIncidents, isLoading, isError } = useActiveAlerts();
 
   if (isLoading) {
     return (
@@ -72,7 +72,7 @@ export default function FireAlertsPage() {
     );
   }
 
-const alerts: FireAlert[] = (fireIncidents || [])
+const alerts: FireAlert[] = (policeIncidents || [])
   .filter((incident: any) => incident.type === "FIRE_DETECTION")
   .map(mapIncidentToAlert);
   return <FireAlertsContainer alerts={alerts} />;
