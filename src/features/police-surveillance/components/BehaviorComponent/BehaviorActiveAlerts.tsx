@@ -50,7 +50,7 @@ export const BehaviorAlertsContainer: React.FC<BehaviorAlertsContainerProps> = (
 // Calls the hook, maps data, renders the container.
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function BehaviorActiveAlerts() {
-  const { fireIncidents, isLoading, isError } = useActiveAlerts();
+  const { policeIncidents, isLoading, isError } = useActiveAlerts();
 
   if (isLoading) {
     return (
@@ -74,7 +74,7 @@ export default function BehaviorActiveAlerts() {
     );
   }
 
-  const alerts: BehaviorActiveAlert[] = (fireIncidents || [])
+  const alerts: BehaviorActiveAlert[] = (policeIncidents || [])
   .filter((incident: any) => behaviorTypes.includes(incident.type))
   .map(mapIncidentToAlert);
 

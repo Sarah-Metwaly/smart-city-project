@@ -1,64 +1,171 @@
-import React, {Suspense, useEffect, useRef, useState} from 'react';
+import { Suspense, useEffect, useRef, useState, memo } from 'react';
 // @ts-ignore
-import {Canvas} from '@react-three/fiber';
-import {PerspectiveCamera, useGLTF} from "@react-three/drei";
-import {MeshStandardMaterial} from 'three';
-import {ErrorBoundary} from '../../shared/utils/appUtils';
+import { Canvas } from '@react-three/fiber';
+import { PerspectiveCamera, useGLTF } from "@react-three/drei";
+import { MeshStandardMaterial } from 'three';
+import { ErrorBoundary } from '../../shared/utils/appUtils';
 import './CityModel.css';
-import {onPointerDown, onPointerMove, onPointerUp} from "../../shared/utils/threeUtils.tsx";
+import { onPointerDown, onPointerMove, onPointerUp } from "../../shared/utils/threeUtils.tsx";
 import { useLightSystem } from '../../features/energy-optimization/hooks/useLightsytem.tsx';
 import { useActiveAlerts } from '../../features/fire-department/hooks/useActiveAlerts.tsx';
 import { useIncidents } from '../../shared/hooks/useIncidentTable.tsx';
+import { Siren, Flame, Lightbulb } from 'lucide-react';
 
-
-
-
-
-
-
-function Model({color, rotation, lights}: {color: string, rotation: [number, number, number], lights: boolean}) {
-    const {materials, scene} = useGLTF('/models/city-model.glb');
-    const streetColor = materials["[Color_001]4"] as MeshStandardMaterial;
-    const modelRef = useRef(null);
-    console.log("All available materials:", Object.keys(materials));
-    console.log("Is streetColor found?:", streetColor);
-
-    React.useEffect(() => {
-        if (streetColor) {
-            streetColor.transparent = true;
-            if (!lights) {
-                streetColor.opacity = 0.0;
-                streetColor.emissiveIntensity = 0.0;
-            } else {
-                streetColor.opacity = 0.27;
-                streetColor.emissiveIntensity = 1.0;
-                streetColor.color.set(color);
-                if (streetColor.emissive) {
-                    streetColor.emissive.set(color);
-                }
-            }
-            streetColor.needsUpdate = true;
-        }
-    }, [color, streetColor, lights]);
-
-    return <primitive object={scene} scale={1} ref={modelRef} rotation={rotation} />;
+// Types
+interface ModelProps {
+    rotation: [number, number, number];
+    lights: boolean;
+    streetAlarm: boolean;
+    fireAlarm: boolean;
+    policeAlarm: boolean;
 }
 
+interface MaterialConfig {
+    opacity: number;
+    emissiveIntensity: number;
+    color: string;
+}
+
+// Utility function to update material properties
+const updateMaterial = (
+    material: MeshStandardMaterial | undefined,
+    config: MaterialConfig
+): void => {
+    if (!material) return;
+
+    material.transparent = true;
+    material.opacity = config.opacity;
+    material.emissiveIntensity = config.emissiveIntensity;
+    material.color.set(config.color);
+    if (material.emissive) {
+        material.emissive.set(config.color);
+    }
+    material.needsUpdate = true;
+};
+
+const Model = memo(function Model({
+    rotation,
+    lights,
+    streetAlarm,
+    fireAlarm,
+    policeAlarm
+}: ModelProps) {
+    const { materials, scene } = useGLTF('/models/city-model.glb');
+    const streetColor = materials["[Color_001]4"] as MeshStandardMaterial;
+    const fireWarningLight = materials["fire_warning"] as MeshStandardMaterial;
+    const policeWarningLight = materials["police_warning1"] as MeshStandardMaterial;
+    const modelRef = useRef(null);
+
+    const [streetCurrentColor, setStreetCurrentColor] = useState('#eadb60');
+    const [fireCurrentColor, setFireCurrentColor] = useState('#ff0000');
+    const [policeCurrentColor, setPoliceCurrentColor] = useState('#0000ff');
+
+    // Street alarm blinking effect (yellow ↔ red)
+    useEffect(() => {
+        let cancelled = false;
+        if (streetAlarm && lights) {
+            const runBlinkEffect = async () => {
+                while (!cancelled) {
+                    setStreetCurrentColor("#ff0000");
+                    await new Promise(r => setTimeout(r, 500));
+                    if (cancelled) break;
+                    setStreetCurrentColor("#eadb60");
+                    await new Promise(r => setTimeout(r, 500));
+                }
+            };
+            runBlinkEffect();
+        } else {
+            setStreetCurrentColor("#eadb60");
+        }
+        return () => { cancelled = true; };
+    }, [streetAlarm, lights]);
+
+    // Fire alarm blinking effect (bright red ↔ dark red)
+    useEffect(() => {
+        let cancelled = false;
+        if (fireAlarm) {
+            const runBlinkEffect = async () => {
+                while (!cancelled) {
+                    setFireCurrentColor("#ff0000");
+                    await new Promise(r => setTimeout(r, 500));
+                    if (cancelled) break;
+                    setFireCurrentColor("#8B0000");
+                    await new Promise(r => setTimeout(r, 500));
+                }
+            };
+            runBlinkEffect();
+        } else {
+            setFireCurrentColor("#ff0000");
+        }
+        return () => { cancelled = true; };
+    }, [fireAlarm]);
+
+    // Police alarm blinking effect (bright blue ↔ dark blue)
+    useEffect(() => {
+        let cancelled = false;
+        if (policeAlarm) {
+            const runBlinkEffect = async () => {
+                while (!cancelled) {
+                    setPoliceCurrentColor("#0000ff");
+                    await new Promise(r => setTimeout(r, 500));
+                    if (cancelled) break;
+                    setPoliceCurrentColor("#00008B");
+                    await new Promise(r => setTimeout(r, 500));
+                }
+            };
+            runBlinkEffect();
+        } else {
+            setPoliceCurrentColor("#0000ff");
+        }
+        return () => { cancelled = true; };
+    }, [policeAlarm]);
+
+    // Street lights effect
+    useEffect(() => {
+        if (!streetColor) return;
+        const config: MaterialConfig = lights
+            ? { opacity: 0.35, emissiveIntensity: 1.2, color: streetCurrentColor }
+            : { opacity: 0.0, emissiveIntensity: 0.0, color: streetCurrentColor };
+        updateMaterial(streetColor, config);
+    }, [streetCurrentColor, streetColor, lights]);
+
+    // Fire warning light effect
+    useEffect(() => {
+        if (!fireWarningLight) return;
+        const config: MaterialConfig = fireAlarm
+            ? { opacity: 0.8, emissiveIntensity: 2.0, color: fireCurrentColor }
+            : { opacity: 0.0, emissiveIntensity: 0.0, color: fireCurrentColor };
+        updateMaterial(fireWarningLight, config);
+    }, [fireAlarm, fireWarningLight, fireCurrentColor]);
+
+    // Police warning light effect
+    useEffect(() => {
+        if (!policeWarningLight) return;
+        const config: MaterialConfig = policeAlarm
+            ? { opacity: 0.8, emissiveIntensity: 2.0, color: policeCurrentColor }
+            : { opacity: 0.0, emissiveIntensity: 0.0, color: policeCurrentColor };
+        updateMaterial(policeWarningLight, config);
+    }, [policeAlarm, policeWarningLight, policeCurrentColor]);
+
+    return <primitive object={scene} scale={1} ref={modelRef} rotation={rotation} />;
+});
+
 function CityModel() {
-    const [color, setColor] = React.useState('#eadb60');
-    const [rotation, setRotation] = useState<[number, number, number]>([Math.PI/8, Math.PI/6, 0]);
+    const [rotation, setRotation] = useState<[number, number, number]>([Math.PI / 8, Math.PI / 6, 0]);
     const [zoom, setZoom] = useState(4);
     const dragging = useRef<boolean>(false);
     const last = useRef<[number, number]>([0, 0]);
-    const [alarm, setAlarm] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const { isLightsOn, isLoading, isError } = useLightSystem();
-    const {hasActiveAlarm} = useActiveAlerts();
-    const { Incidents } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
+    const { hasActiveAlarm, policeIncidents } = useActiveAlerts();
+    const { Incidents: fireIncidents } = useIncidents("/api/v1/incidents/DailyIncidents?type=FIRE_DETECTION");
 
-    const Fireactive = (Incidents?.filter((i) => i.status?.toUpperCase() === "ACTIVE").length ?? 0) > 0;     
+    const fireActiveCount = fireIncidents?.filter((i) => i.status?.toUpperCase() === "ACTIVE").length ?? 0;
+    const Fireactive = fireActiveCount > 0;
+    const policeActiveCount = policeIncidents?.length ?? 0;
 
+    // Handle-wheel zoom — re-attaches once loading finishes and the container mounts
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
@@ -66,45 +173,41 @@ function CityModel() {
             e.preventDefault();
             setZoom(z => Math.max(1, Math.min(20, z + e.deltaY * 0.01)));
         };
-        el.addEventListener('wheel', handleWheel, {passive: false});
+        el.addEventListener('wheel', handleWheel, { passive: false });
         return () => el.removeEventListener('wheel', handleWheel);
-    }, []);
-
-    useEffect(() => {
-        let cancelled = false;
-        if (alarm) {
-            const runAlarm = async () => {
-                while (!cancelled) {
-                    setColor("#ff0000");
-                    await new Promise(r => setTimeout(r, 500));
-                    if (cancelled) break;
-                    setColor("#eadb60");
-                    await new Promise(r => setTimeout(r, 500));
-                }
-            };
-            runAlarm();
-        } else {
-            setTimeout(() => setColor("#eadb60"), 0);
-        }
-        return () => { cancelled = true; };
-    }, [alarm]);
+    }, [isLoading]);
 
     if (isLoading) return <div>Loading Light System Data...</div>;
     if (isError) return <div>Error loading data</div>;
 
     return (
-        <div className="h-full flex flex-col justify-start gap-10 items-center">
-            <div className='w-full flex justify-center items-center gap-10'>
-                <button
-                    onClick={() => setAlarm(a => !a)}
-                    className={`bg-aman-${alarm ? "dark" : "white"} text-aman-${alarm ? "white" : "dark"} px-6 py-2 rounded-lg font-semibold font-inter hover:bg-aman-teal hover:text-aman-white transition-all`}
-                >
-                    {alarm ? "Stop Alarm" : "Start Alarm"}
-                </button>
-                <div className={`px-6 py-2 rounded-lg font-semibold font-inter bg-slate-200`}>
-                    System Lights: {isLightsOn ? "ON" : "OFF"}
-                </div>
+        <div className="h-full flex flex-col justify-start gap-6 items-center">
+            {/* Status strip — read-only, no interactive controls */}
+            <div className="w-full flex justify-center items-center gap-3 flex-wrap">
+                <StatusChip
+                    icon={<Siren className="h-3.5 w-3.5" />}
+                    label="Police"
+                    active={hasActiveAlarm}
+                    detail={hasActiveAlarm ? `${policeActiveCount} active` : "Normal"}
+                    color="#3B82F6"
+                />
+                <StatusChip
+                    icon={<Flame className="h-3.5 w-3.5" />}
+                    label="Fire"
+                    active={Fireactive}
+                    detail={Fireactive ? `${fireActiveCount} active` : "Normal"}
+                    color="#EF4444"
+                />
+                <StatusChip
+                    icon={<Lightbulb className="h-3.5 w-3.5" />}
+                    label="Street Lights"
+                    active={isLightsOn}
+                    detail={isLightsOn ? "On" : "Off"}
+                    color="#EAB308"
+                    neutralWhenOff
+                />
             </div>
+
             <ErrorBoundary>
                 <div
                     ref={containerRef}
@@ -113,18 +216,77 @@ function CityModel() {
                     onMouseUp={() => onPointerUp(dragging)}
                     onMouseLeave={() => onPointerUp(dragging)}
                     onMouseMove={e => onPointerMove(dragging, last, e, setRotation)}
-                    style={{touchAction: 'none'}}
+                    style={{ touchAction: 'none' }}
                 >
                     <Canvas>
-                        <PerspectiveCamera makeDefault position={[0.5, 0, zoom]} rotation={[0, 0, 0]}/>
-                        <ambientLight intensity={1}/>
-                        <pointLight position={[3, 0, 12]} intensity={500}/>
-                        <Suspense fallback={<mesh><boxGeometry/><meshStandardMaterial color="orange"/></mesh>}>
-                            <Model color={color} rotation={rotation} lights={isLightsOn}/>
+                        <PerspectiveCamera makeDefault position={[0.5, 0, zoom]} rotation={[0, 0, 0]} />
+                        <ambientLight intensity={1} />
+                        <pointLight position={[3, 0, 12]} intensity={500} />
+                        <Suspense fallback={<mesh><boxGeometry /><meshStandardMaterial color="orange" /></mesh>}>
+                            <Model
+                                rotation={rotation}
+                                lights={isLightsOn}
+                                streetAlarm={false}
+                                fireAlarm={Fireactive}
+                                policeAlarm={hasActiveAlarm}
+                            />
                         </Suspense>
                     </Canvas>
                 </div>
             </ErrorBoundary>
+        </div>
+    );
+}
+
+function StatusChip({
+    icon,
+    label,
+    active,
+    detail,
+    color,
+    neutralWhenOff = false,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    active: boolean;
+    detail: string;
+    color: string;
+    neutralWhenOff?: boolean;
+}) {
+    // "neutralWhenOff" panels (like street lights) don't need a red/alert
+    // treatment when inactive — off is a normal state, not a warning.
+    const isAlert = active && !neutralWhenOff;
+
+    return (
+        <div
+            className={`flex items-center gap-2.5 px-3.5 py-2 rounded-lg border transition-all ${
+                isAlert
+                    ? 'bg-white/5 border-white/10'
+                    : 'bg-aman-teal/40 border-aman-teal'
+            }`}
+        >
+            <span
+                className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 ${
+                    isAlert ? 'animate-pulse' : ''
+                }`}
+                style={{
+                    backgroundColor: active ? `${color}22` : 'rgba(255,255,255,0.05)',
+                    color: active ? color : '#58717D',
+                }}
+            >
+                {icon}
+            </span>
+            <div className="flex flex-col leading-tight">
+                <span className="text-[9.5px] uppercase tracking-wider text-aman-blue">
+                    {label}
+                </span>
+                <span
+                    className="text-[12px] font-mono font-semibold"
+                    style={{ color: active ? color : '#F4FEFE' }}
+                >
+                    {detail}
+                </span>
+            </div>
         </div>
     );
 }
