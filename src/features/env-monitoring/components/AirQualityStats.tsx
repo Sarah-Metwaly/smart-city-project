@@ -16,8 +16,8 @@ const AirQualityStats = ({ co2, no2, nh3 }: AirProps) => {
       </p>
       <div className="flex items-center justify-around gap-2">
         <CircleGauge label="CO2" percent={calculatePercent(co2, 1000)} />
-        <CircleGauge label="NO2" percent={calculatePercent(no2, 100)} />
-        <CircleGauge label="NH3" percent={calculatePercent(nh3, 50)} />
+        <CircleGauge label="Co" percent={calculatePercent(no2, 100)} />
+        <CircleGauge label="Benzene" percent={calculatePercent(nh3, 50)} />
       </div>
     </div>
   );
