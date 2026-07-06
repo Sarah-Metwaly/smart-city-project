@@ -58,22 +58,22 @@ const saveSensorSummary = async (sensorType, sensorId, date, avgPower, totalEner
     );
 };
 
-const calculateSensorData = async (model, sensorId, startTime, endTime, costPerKwh) => {
+const calculateSensorData = async (model, sensorId, startTime, endTime, costPerKwh, idField = 'sensor_id') => {
     const readings = await model.aggregate([
         {
             $match: {
-                sensor_id: sensorId,
+                [idField]: sensorId,
                 timestamp: { $gte: startTime, $lt: endTime }
             }
         },
         {
-            $sort:{
+            $sort: {
                 timestamp: -1
             }
         },
         {
             $group: {
-                _id: "$sensor_id",
+                _id: `$${idField}`,
                 status: { $first: "$status" },
                 active_power: { $first: "$power" },
                 avg_power: { $avg: "$power" }
@@ -94,22 +94,20 @@ const calculateSensorData = async (model, sensorId, startTime, endTime, costPerK
     return { activePower, avgPower, energy, cost};
 }
 
-const loopThroughSensorIds = async (model, startTime, endTime, costPerKwh, save) => {
-    const sensorIds = await model.distinct('sensor_id');
+const loopThroughSensorIds = async (model, startTime, endTime, costPerKwh, save, idField = 'sensor_id') => {
+    const sensorIds = await model.distinct(idField);
 
     let totalActivePower = 0;
     let totalEnergy = 0;
     let totalCost = 0;
     let totalAvgPower = 0;
 
-    // Run all sensors in parallel
     const results = await Promise.all(
-        sensorIds.map(sensorId => calculateSensorData(model, sensorId, startTime, endTime, costPerKwh)
-            .then(result => ({ sensorId, ...result })) // include sensorId
+        sensorIds.map(sensorId => calculateSensorData(model, sensorId, startTime, endTime, costPerKwh, idField)
+            .then(result => ({ sensorId, ...result }))
         )
     );
 
-    // Process results
     for (const result of results) {
         if(save){
             await saveSensorSummary(model.modelName, result.sensorId, startTime, result.avgPower, result.energy, result.cost);
@@ -130,27 +128,24 @@ const calculateChange = (todayValue, yesterdayValue) => {
 }
 
 exports.getDailySummary = async () => {
-    //Get Yesterday's date at 00:00:00 hours - Start of the day-
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday.setHours(0, 0, 0, 0);
 
-    //Get today's date at 00:00:00 hours - Start of the day-
     const today= new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Get cost per kWh from settings
     const settings = await settingsModel.findOne();
     const costPerKwh = settings ? settings.cost_per_kwh : 1.5;
 
     await Promise.all([
-            loopThroughSensorIds(dht11Model, yesterday, today, costPerKwh , true),
-            loopThroughSensorIds(bmp180Model, yesterday, today, costPerKwh , true),
-            loopThroughSensorIds(mq135Model, yesterday, today, costPerKwh , true),
-            loopThroughSensorIds(ldrModel, yesterday, today, costPerKwh , true),
-            loopThroughSensorIds(flameModel, yesterday, today, costPerKwh , true)
+            loopThroughSensorIds(dht11Model, yesterday, today, costPerKwh, true),
+            loopThroughSensorIds(bmp180Model, yesterday, today, costPerKwh, true),
+            loopThroughSensorIds(mq135Model, yesterday, today, costPerKwh, true, 'device_id'),  // ← changed
+            loopThroughSensorIds(ldrModel, yesterday, today, costPerKwh, true),
+            loopThroughSensorIds(flameModel, yesterday, today, costPerKwh, true)
     ]);
- }  
+}
 
 exports.getWeeklyConsumption = async () => {
     const sevenDaysAgo = new Date();
@@ -239,14 +234,12 @@ exports.getWeeklyConsumption = async () => {
 }
 
 exports.getTodaySummary = async () =>{
-    const today= new Date();
+  const today= new Date();
     today.setHours(0, 0, 0, 0);
-
     const liveTime= new Date();
 
-    // Get cost per kWh from settings
     const settings = await settingsModel.findOne();
-    const costPerKwh = settings ? settings.cost_per_kwh : 1.5; // default to 1.5 if not found
+    const costPerKwh = settings ? settings.cost_per_kwh : 1.5;
 
     const [
         ldrSummary,
@@ -255,11 +248,11 @@ exports.getTodaySummary = async () =>{
         mq135Summary,
         flameSummary
     ] = await Promise.all([
-        loopThroughSensorIds(ldrModel, today, liveTime, costPerKwh , false),
-        loopThroughSensorIds(dht11Model, today, liveTime, costPerKwh , false),
-        loopThroughSensorIds(bmp180Model, today, liveTime, costPerKwh , false),
-        loopThroughSensorIds(mq135Model, today, liveTime, costPerKwh , false),
-        loopThroughSensorIds(flameModel, today, liveTime, costPerKwh , false)
+        loopThroughSensorIds(ldrModel, today, liveTime, costPerKwh, false),
+        loopThroughSensorIds(dht11Model, today, liveTime, costPerKwh, false),
+        loopThroughSensorIds(bmp180Model, today, liveTime, costPerKwh, false),
+        loopThroughSensorIds(mq135Model, today, liveTime, costPerKwh, false, 'device_id'),  // ← changed
+        loopThroughSensorIds(flameModel, today, liveTime, costPerKwh, false)
     ]);
 
     return {
