@@ -1,0 +1,28 @@
+Merge branch 'frontend/global-ui-improvements' into frontend/dashboard-integration
+
+# Conflicts:
+#	src/pages/DashboardPage.tsx
+#	src/shared/templates/MainLayout.tsx
+#	src/shared/ui/organisms/LiveStream.tsx
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please run
+#	git update-ref -d MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch frontend/dashboard-integration
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	modified:   src/pages/PolicePage.tsx
+#	new file:   src/shared/hooks/useCriticalAlertBanner.tsx
+#	new file:   src/shared/icons/WarningIcon.tsx
+#	modified:   src/shared/templates/MainLayout.tsx
+#	new file:   src/shared/ui/molecules/CriticalAlertBanner.tsx
+#	modified:   src/shared/ui/organisms/LiveStream.tsx
+#	modified:   src/shared/ui/organisms/NavbarActiveAlerts.tsx
+#

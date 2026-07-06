@@ -10,7 +10,7 @@ import { WeeklyIncidentTrendPanel } from '../features/dashboard/components/Weekl
  export function HomePage() {
   return (
    
-    <div className="h-screen w-screen overflow-hidden bg-[#0a121e] text-slate-200 p-4 box-border">
+    <div className="pt-22 h-screen w-screen overflow-hidden bg-[#0a121e] text-slate-200 p-4 box-border">
       <div
         className="
           h-full grid gap-4
