@@ -1,7 +1,6 @@
 import React from "react";
 import { type LiveActiveAlert, type Severity } from "../../../../types/fireAlert.types";
 import ActiveAlertsSidebar from "../../../../shared/ui/organisms/ActiveAlertsSidebar";
-import { useHighestPriorityIncident } from "../../../../shared/hooks/useHighestPriorityIncident"; 
 import { useActiveAlerts } from "../../../fire-department/hooks/useActiveAlerts";
 
 
@@ -46,12 +45,11 @@ export const LiveAlertsContainer: React.FC<LiveAlertsContainerProps> = ({
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function LiveActiveAlerts() {
   const { policeIncidents, isLoading, isError } = useActiveAlerts();
-const { priorityIncidents } = useHighestPriorityIncident();
 
   if (isLoading) {
     return (
       <div
-        className="flex items-center justify-center p-10 font-mono text-sm"
+        className="flex items-center justify-center p-10 text-sm font-mono"
         style={{ color: "#444" }}
       >
         Loading alerts...
@@ -62,7 +60,7 @@ const { priorityIncidents } = useHighestPriorityIncident();
   if (isError) {
     return (
       <div
-        className="flex items-center justify-center p-10 font-mono text-sm"
+        className="flex items-center justify-center p-10 text-sm font-mono"
         style={{ color: "#ff4433" }}
       >
         Error fetching alerts.
@@ -70,10 +68,7 @@ const { priorityIncidents } = useHighestPriorityIncident();
     );
   }
 
-  // sort the alerts by priority then newest
-  const source = priorityIncidents.length > 0 ? priorityIncidents : (policeIncidents || []);
- const alerts: LiveActiveAlert[] = source.map(mapIncidentToAlert);
-
+  const alerts: LiveActiveAlert[] = (policeIncidents || []).map(mapIncidentToAlert);
 
 
 return <LiveAlertsContainer alerts={alerts} />;
