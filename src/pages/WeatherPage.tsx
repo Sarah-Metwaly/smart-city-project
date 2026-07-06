@@ -35,8 +35,8 @@ const WeatherPage = () => {
   if (loading) return <div className="min-h-screen bg-aman-black" />;
 
   return (
-    <div className="min-h-screen w-full bg-linear-to-b from-aman-black to-aman-gray p-4 sm:p-6 md:p-10 lg:p-16 flex flex-col">
-      <div className="grid grid-cols-1 gap-4 sm:gap-5 mx-auto lg:grid-cols-12 max-w-350 w-full items-stretch">
+    <div className="min-h-screen w-full bg-linear-to-b from-aman-black to-aman-gray p-4 sm:p-6 md:p-10 lg:p-16 flex flex-col pt-20 mt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 mx-auto max-w-350 w-full items-stretch">
 
         {/* LEFT SECTION */}
         <div className="flex flex-col gap-4 sm:gap-5 lg:col-span-6">
