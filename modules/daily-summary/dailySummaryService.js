@@ -213,6 +213,8 @@ exports.getWeeklyConsumption = async () => {
             });
     }
 
+    const todayDateStr = new Date().toISOString().split('T')[0];
+
     
     try {
         const todaySummary = await getCachedTodaySummary();
