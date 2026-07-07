@@ -214,18 +214,21 @@ export function EnvironmentalPanel() {
   const statusLabel = overallStatus.toUpperCase();
 
   return (
-    <div className="h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-4 py-3.5 overflow-hidden">
-      <div className="flex items-center justify-between mb-3 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="h-6.5 w-6.5 rounded-md bg-aman-teal flex items-center justify-center">
+    <div className="relative h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-3 sm:px-4 py-3 sm:py-3.5 overflow-hidden">
+      {/* HUD accent strip */}
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+
+      <div className="flex items-center justify-between mb-3 shrink-0 min-w-0 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-6.5 w-6.5 rounded-md bg-aman-teal flex items-center justify-center shrink-0">
             <Thermometer className="h-3.5 w-3.5 text-aman-light" />
           </div>
-          <span className="text-[13px] font-medium tracking-wide text-aman-white">
+          <span className="text-[12px] sm:text-[13px] font-medium tracking-wide text-aman-white truncate">
             ENVIRONMENTAL
           </span>
         </div>
         <span
-          className={`flex items-center gap-1.5 text-[11px] tracking-wider ${
+          className={`flex items-center gap-1.5 text-[10px] sm:text-[11px] tracking-wider shrink-0 ${
             statusTextColor[overallStatus] ?? 'text-emerald-400'
           }`}
         >
@@ -239,7 +242,7 @@ export function EnvironmentalPanel() {
 
       {!isLoading && !showError && (
         // grid بدل flex+scroll — كل reading بياخد مساحة متساوية، مفيش scrollbar خالص
-        <div className="flex-1 min-h-0 grid grid-rows-4 gap-2.5">
+        <div className="flex-1 min-h-0 grid grid-rows-4 gap-2 sm:gap-2.5">
           {readings.map((reading) => (
             <ReadingRow key={reading.label} reading={reading} />
           ))}
@@ -251,10 +254,10 @@ export function EnvironmentalPanel() {
 
 function ReadingRow({ reading }: { reading: Reading }) {
   return (
-    <div className="flex flex-col justify-center">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] tracking-wide text-aman-light">{reading.label}</span>
-        <span className="text-[13px] font-medium text-amber-500">{reading.value}</span>
+    <div className="flex flex-col justify-center min-w-0">
+      <div className="flex items-center justify-between mb-1.5 gap-2">
+        <span className="text-[10px] sm:text-[11px] tracking-wide text-aman-light truncate">{reading.label}</span>
+        <span className="text-[12px] sm:text-[13px] font-medium text-amber-500 shrink-0 tabular-nums">{reading.value}</span>
       </div>
       <div className="h-1 rounded-full bg-aman-teal overflow-hidden">
         <div
