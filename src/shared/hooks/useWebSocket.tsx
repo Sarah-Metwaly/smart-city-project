@@ -154,18 +154,19 @@ const useWebSocket = () => {
 
       ws.onopen = () => console.log('✅ WebSocket connected');
 
-      ws.onmessage = ({ data: raw }: MessageEvent) => {
-        let topic: string, data: any;
-        try {
-          ({ topic, data } = JSON.parse(raw));
-        } catch {
-          console.error('❌ Failed to parse WS message');
-          return;
-        }
-        if (!topic) {
-          console.warn('⚠️ WS message missing topic');
-          return;
-        }
+     ws.onmessage = ({ data: raw }: MessageEvent) => {
+  let topic: string, data: any;
+  try {
+    ({ topic, data } = JSON.parse(raw));
+  } catch {
+    console.error('❌ Failed to parse WS message');
+    return;
+  }
+  console.log('📡 WS message, topic:', JSON.stringify(topic));  // ← add this
+  if (!topic) {
+    console.warn('⚠️ WS message missing topic');
+    return;
+  }
 
         // incident events
         if (topic === 'active_incidents') {

@@ -32,3 +32,4 @@ export const useLightSystem = () => {
 
   return { reading: data, isLightsOn, isFaulty, hasData, isLoading, isError };
 };
+
