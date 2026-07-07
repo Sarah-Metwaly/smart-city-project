@@ -1,19 +1,9 @@
 import fire from '../assets/images/Fire/fire.jfif';
 import FireLiveEvents from '../features/fire-department/components/FireliveEvents';
-import AirQuality from '../features/fire-department/components/AirQuality';
-// import CitySurveillanceMap from '../shared/ui/organisms/CitySurveillanceMap';
 import FireIncidents from '../features/fire-department/components/FireIncidentTable';
-import IncidentTable from '../shared/ui/organisms/IncidentTable';
-import CitySurveillanceMap from '../shared/ui/organisms/CitySurveillanceMap';
-
-
-
-
-
 
 const FirePage = () => {
   
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0f1a1f] to-[#1e3a46] border border-white/5 shadow-2xl relative">
       <div
@@ -177,7 +167,6 @@ const FirePage = () => {
       <main className="p-6 md:px-30">
         <FireLiveEvents/>
         <FireIncidents/>
-        <AirQuality/>
         {/* <div className="grid grid-cols-2 gap-5 bg-aman-teal mt-7">
          <CitySurveillanceMap/>
          <CitySurveillanceMap/>

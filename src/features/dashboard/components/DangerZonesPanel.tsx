@@ -1,4 +1,5 @@
 import { MapPin } from 'lucide-react';
+import { useDangerZones } from '../../../shared/hooks/useDangerZones';
 
 /**
  * DangerZonesPanel
@@ -6,22 +7,9 @@ import { MapPin } from 'lucide-react';
  * Left column, bottom card. Ranked list of monitored zones with a risk %
  * and a horizontal progress bar colored by severity band.
  *
- * Data: static mock — swap for `useDangerZones()` once the API exists.
+ * Data: GET /api/v1/dangerZones/weekly via useDangerZones()
  * ---------------------------------------------------------------------------
  */
-
-interface Zone {
-  name: string;
-  area: string;
-  risk: number; // 0-100
-}
-
-const MOCK_ZONES: Zone[] = [
-  { name: 'Zone A', area: 'Industrial', risk: 82 },
-  { name: 'Zone B', area: 'Highway 4', risk: 64 },
-  { name: 'Zone C', area: 'Residential', risk: 28 },
-  { name: 'Zone D', area: 'Commercial', risk: 65 },
-];
 
 function riskColor(risk: number): string {
   if (risk >= 70) return 'bg-red-500';
@@ -36,6 +24,9 @@ function riskTextColor(risk: number): string {
 }
 
 export function DangerZonesPanel() {
+  const { data, isLoading, isError } = useDangerZones();
+  const zones = data ?? [];
+
   return (
     <div className="h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-4 py-3.5 overflow-hidden">
       {/* Header */}
@@ -54,33 +45,47 @@ export function DangerZonesPanel() {
         </span>
       </div>
 
-      {/* Zone list — flex-1 + min-h-0 bounds this to the card's remaining
-          height so it scrolls internally instead of overflowing the card
-          and getting clipped by overflow-hidden above. */}
-      <div className="flex-1 flex flex-col gap-2.5 overflow-y-auto min-h-0">
-        {MOCK_ZONES.map((zone) => (
-          <ZoneRow key={zone.name} zone={zone} />
-        ))}
-      </div>
+      {isLoading && (
+        <p className="text-[12px] text-aman-blue">Loading...</p>
+      )}
+      {isError && (
+        <p className="text-[12px] text-red-500">Failed to load danger zones.</p>
+      )}
+
+      {!isLoading && !isError && (
+        <div
+          className="
+            flex-1 flex flex-col gap-2.5 overflow-y-auto min-h-0 pr-1
+            [&::-webkit-scrollbar]:w-1.5
+            [&::-webkit-scrollbar-track]:bg-transparent
+            [&::-webkit-scrollbar-thumb]:bg-aman-teal
+            [&::-webkit-scrollbar-thumb]:rounded-full
+            hover:[&::-webkit-scrollbar-thumb]:bg-aman-blue/60
+          "
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#1A8A80 transparent' }}
+        >
+          {zones.map((zone) => (
+            <ZoneRow key={zone.zone} name={zone.zone} risk={zone.percentage} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-function ZoneRow({ zone }: { zone: Zone }) {
+function ZoneRow({ name, risk }: { name: string; risk: number }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[12px] text-aman-white">
-          {zone.name} · {zone.area}
-        </span>
-        <span className={`text-[12px] font-medium ${riskTextColor(zone.risk)}`}>
-          {zone.risk}% RISK
+        <span className="text-[12px] text-aman-white">{name}</span>
+        <span className={`text-[12px] font-medium ${riskTextColor(risk)}`}>
+          {risk}% RISK
         </span>
       </div>
-      <div className="h-1 rounded-full bg-aman-teal overflow-hidden">
+      <div className="h-1.5 rounded-full bg-aman-teal/50 overflow-hidden">
         <div
-          className={`h-full rounded-full ${riskColor(zone.risk)}`}
-          style={{ width: `${zone.risk}%` }}
+          className={`h-full rounded-full transition-all duration-500 ${riskColor(risk)}`}
+          style={{ width: `${risk}%` }}
         />
       </div>
     </div>

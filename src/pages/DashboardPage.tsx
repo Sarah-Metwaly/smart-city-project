@@ -3,14 +3,14 @@ import { ActiveIncidentsPanel } from '../features/dashboard/components/ActiveInc
 import { DangerZonesPanel } from '../features/dashboard/components/DangerZonesPanel';
 import { EnergyMonitoringPanel } from '../features/dashboard/components/EnergyMonitoringPanel';
 import { EnvironmentalPanel } from '../features/dashboard/components/EnvironmentalPanel';
-import { ReportsAnalyticsPanel } from '../features/dashboard/components/ReportsAnalyticsPanel';
 import SmartSensorsPanel from '../features/dashboard/components/SmartSensorsPanel';
+import { WeeklyIncidentTrendPanel } from '../features/dashboard/components/Weeklyincidenttrendpanel';
 
 
  export function HomePage() {
   return (
    
-    <div className="h-screen w-screen overflow-hidden bg-[#0a121e] text-slate-200 p-4 box-border">
+    <div className="pt-22 h-screen w-screen overflow-hidden bg-[#0a121e] text-slate-200 p-4 box-border">
       <div
         className="
           h-full grid gap-4
@@ -23,7 +23,7 @@ import SmartSensorsPanel from '../features/dashboard/components/SmartSensorsPane
         
         <div className="flex flex-col gap-4 h-full min-h-0 order-2 lg:order-1">
           <div className="flex-1 min-h-0"><ActiveIncidentsPanel /></div>
-           <div className="flex-1 min-h-0"><ReportsAnalyticsPanel /></div>
+           <div className="flex-1 min-h-0"><WeeklyIncidentTrendPanel/></div>
           <div className="flex-1 min-h-0"><DangerZonesPanel /></div> 
         </div>
 
