@@ -59,20 +59,23 @@ export function EnergyMonitoringPanel() {
   ];
 
   return (
-    <div className="h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-4 py-3.5 overflow-hidden">
+    <div className="relative h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-3 sm:px-4 py-3 sm:py-3.5 overflow-hidden">
+      {/* HUD accent strip */}
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="h-6.5 w-6.5 rounded-md bg-aman-teal flex items-center justify-center">
+      <div className="flex items-center justify-between mb-3 shrink-0 min-w-0 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-6.5 w-6.5 rounded-md bg-aman-teal flex items-center justify-center shrink-0">
             <Zap className="h-3.5 w-3.5 text-aman-light" />
           </div>
-          <span className="text-[13px] font-medium tracking-wide text-aman-white leading-tight">
+          <span className="text-[12px] sm:text-[13px] font-medium tracking-wide text-aman-white leading-tight truncate">
             ENERGY
             <br />
             MONITORING
           </span>
         </div>
-        <span className="flex items-center gap-1.5 text-[11px] tracking-wider text-emerald-400 self-start">
+        <span className="flex items-center gap-1.5 text-[10px] sm:text-[11px] tracking-wider text-emerald-400 self-start shrink-0">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
           STABLE
         </span>
@@ -87,22 +90,22 @@ export function EnergyMonitoringPanel() {
           {metrics.map((m) => (
             <div
               key={m.id}
-              className="rounded-lg bg-aman-teal/60 px-3 py-2 flex flex-col justify-center gap-1"
+              className="rounded-lg bg-aman-teal/60 px-2.5 sm:px-3 py-2 flex flex-col justify-center gap-1 min-w-0"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span style={{ color: m.color }}>{m.icon}</span>
-                  <span className="text-[9.5px] tracking-wider text-aman-blue uppercase">
+              <div className="flex items-center justify-between gap-1 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="shrink-0" style={{ color: m.color }}>{m.icon}</span>
+                  <span className="text-[9px] sm:text-[9.5px] tracking-wider text-aman-blue uppercase truncate">
                     {m.label}
                   </span>
                 </div>
                 {m.trend != null && (
-                  <span className="bg-aman-blue/20 text-aman-white px-1.5 py-0.5 rounded-[8px] text-[9px] font-bold shrink-0">
+                  <span className="bg-aman-blue/20 text-aman-white px-1.5 py-0.5 rounded-[8px] text-[9px] font-bold shrink-0 max-w-[56px] sm:max-w-[72px] truncate">
                     {m.trend}
                   </span>
                 )}
               </div>
-              <span className="text-[16px] font-mono font-semibold" style={{ color: m.color }}>
+              <span className="text-[14px] sm:text-[16px] font-mono font-semibold tabular-nums truncate" style={{ color: m.color }}>
                 {m.value}
                 {m.unit && <span className="text-[10px] text-aman-blue ml-0.5">{m.unit}</span>}
               </span>
