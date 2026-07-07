@@ -38,7 +38,7 @@ const RES: Record<string, { text: string; bgBorder: string; pulse?: boolean }> =
 
 const TYPE_ROUTES: Record<string, string> = {
   FIRE_DETECTION:   "/fire",
-  SMOKE_DETECTION:  "/fire",
+  FLAME_DETECTION:  "/fire",
   POOR_AIR_QUALITY: "/fire",
   HIGH_HUMIDITY:    "/fire",
   LOW_PRESSURE:     "/fire",
