@@ -30,7 +30,7 @@ function AirQualityUI({ data }: { data: SensorData }) {
   const humPct = Math.min(dht11.humidity, 100);
 
   return (
-    <div className="bg-[#0A0E14] py-10 px-5 mx-5 rounded-2xl flex flex-col gap-4">
+    <div className="bg-[#0A0E14] py-10 px-5  rounded-2xl flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

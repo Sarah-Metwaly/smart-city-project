@@ -1,5 +1,5 @@
 export interface Incident {
-  _id: string;
+  id: string;
   incidentId: string;
   type:
     | 'MEDICAL_EMERGENCY' | 'CROWD_MANAGEMENT' | 'THEFT_DETECTION'

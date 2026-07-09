@@ -2,6 +2,67 @@ import { useLightSystem } from './useLightsytem';
 import { useAirQuality } from '../../air-quality/hooks/useAirQuality';
 import { useFlameSensor } from '../../fire-department/hooks/useFlame';
 
+// ─── Light System (LDR) ────────────────────────────────────────────────────
+export interface LDRReading {
+  sensor_id: string;
+  ldr_value: number;
+  status: string;
+  power: number;
+}
+
+// ─── DHT11 ─────────────────────────────────────────────────────────────────
+export interface DHT11Data {
+  _id: string;
+  temperature: number;
+  humidity: number;
+  status: string;
+  power: number;
+  timeStamp: string;
+}
+
+// ─── MQ135 ─────────────────────────────────────────────────────────────────
+export interface MQreading {
+  sensor_id: string;
+  type: string;
+  power: number;
+  co?: number;
+  smoke?: string | number;
+  co2?: number;
+  benzene?: string | number;
+  nh3?: number;
+  alcohol?: number;
+}
+
+export interface AirQuality {
+  aqi: number;
+  level: string;
+}
+
+export interface MQResponseData {
+  _id: string;
+  sensors: MQreading[];
+  air_quality: AirQuality;
+  status: string;
+  power: number;
+  timestamp: string;
+}
+
+// ─── Combined Air Quality Hook Response ────────────────────────────────────
+export interface AirQualityData {
+  dht11: DHT11Data;
+  mq135: MQResponseData;
+}
+
+// ─── Flame ──────────────────────────────────────────────────────────────────
+export interface FlameSensorData {
+  _id: string;
+  status: string;
+  risk_level: "DANGER" | "SAFE" | "WARNING" | string;
+  is_flame_detected: boolean;
+  power: number;
+  timeStamp: string;
+}
+
 export const useActivePower = () => {
   const { reading: LDRData, isLoading: isLDRLoading } = useLightSystem();
   const { data: airQualityData, isLoading: isAQLoading, isError: isAQError } = useAirQuality();

@@ -21,17 +21,20 @@ export function WeeklyIncidentTrendPanel() {
   const maxTotal = Math.max(1, ...data.map((p) => p.total));
 
   return (
-    <div className="h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-4 py-3.5 overflow-hidden">
-      <div className="flex items-center justify-between mb-2 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-md bg-aman-teal flex items-center justify-center">
+    <div className="relative h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-3 sm:px-4 py-3 sm:py-3.5 overflow-hidden">
+      {/* HUD accent strip */}
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+
+      <div className="flex items-center justify-between mb-2 shrink-0 min-w-0 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-6 w-6 rounded-md bg-aman-teal flex items-center justify-center shrink-0">
             <TrendingUp className="h-3 w-3 text-aman-light" />
           </div>
-          <span className="text-[12px] font-medium tracking-wide text-aman-white leading-tight">
+          <span className="text-[11px] sm:text-[12px] font-medium tracking-wide text-aman-white leading-tight truncate">
             WEEKLY INCIDENT TREND
           </span>
         </div>
-        <span className="bg-aman-blue/20 text-aman-white px-2 py-0.5 rounded-[8px] text-[10px] font-bold">
+        <span className="bg-aman-blue/20 text-aman-white px-2 py-0.5 rounded-[8px] text-[9px] sm:text-[10px] font-bold shrink-0 tabular-nums">
           TOTAL {grandTotal}
         </span>
       </div>
@@ -41,14 +44,14 @@ export function WeeklyIncidentTrendPanel() {
 
       {!isLoading && !isError && (
         <div className="flex-1 min-h-0 flex flex-col">
-          <div className="flex-1 min-h-0 flex items-end justify-between gap-2.5 px-1 pb-1">
+          <div className="flex-1 min-h-0 flex items-end justify-between gap-1.5 sm:gap-2.5 px-1 pt-6 pb-1">
             {data.map((point) => {
               const heightPct = Math.max(8, (point.total / maxTotal) * 100);
               const isHovered = hoveredId === point._id;
               return (
                 <div
                   key={point._id}
-                  className="relative flex flex-col items-center gap-1.5 flex-1 h-full justify-end"
+                  className="relative flex flex-col items-center gap-1.5 flex-1 h-full justify-end min-w-0"
                   onMouseEnter={() => setHoveredId(point._id)}
                   onMouseLeave={() => setHoveredId(null)}
                 >
@@ -59,7 +62,7 @@ export function WeeklyIncidentTrendPanel() {
                   )}
 
                   <span
-                    className="text-[10px] font-mono font-semibold transition-colors"
+                    className="text-[9px] sm:text-[10px] font-mono font-semibold transition-colors tabular-nums"
                     style={{ color: isHovered ? BAR_HOVER_COLOR : "#B4C3CC" }}
                   >
                     {point.total}
@@ -73,7 +76,7 @@ export function WeeklyIncidentTrendPanel() {
                       backgroundColor: isHovered ? BAR_HOVER_COLOR : BAR_COLOR,
                     }}
                   />
-                  <span className="text-[9px] text-aman-blue uppercase font-medium">
+                  <span className="text-[8px] sm:text-[9px] text-aman-blue uppercase font-medium truncate">
                     {formatDayLabel(point._id)}
                   </span>
                 </div>
@@ -82,15 +85,15 @@ export function WeeklyIncidentTrendPanel() {
           </div>
 
           <div className="flex items-center justify-between pt-2 mt-1 border-t border-aman-teal/60 shrink-0">
-            <div className="flex flex-col">
-              <span className="text-[9px] text-aman-blue uppercase">Days Tracked</span>
-              <span className="text-[12px] font-mono font-semibold text-aman-white">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[9px] text-aman-blue uppercase truncate">Days Tracked</span>
+              <span className="text-[12px] font-mono font-semibold text-aman-white tabular-nums">
                 {data.length}
               </span>
             </div>
-            <div className="flex flex-col text-right">
-              <span className="text-[9px] text-aman-blue uppercase">Avg / Day</span>
-              <span className="text-[12px] font-mono font-semibold" style={{ color: BAR_COLOR }}>
+            <div className="flex flex-col text-right min-w-0">
+              <span className="text-[9px] text-aman-blue uppercase truncate">Avg / Day</span>
+              <span className="text-[12px] font-mono font-semibold tabular-nums" style={{ color: BAR_COLOR }}>
                 {data.length > 0 ? Math.round(grandTotal / data.length) : 0}
               </span>
             </div>
