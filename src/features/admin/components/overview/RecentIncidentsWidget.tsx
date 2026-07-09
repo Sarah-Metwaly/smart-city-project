@@ -8,7 +8,7 @@ import {
   TbUsersGroup,
   TbAmbulance,
 } from 'react-icons/tb';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface Props {
   incidents: Incident[];

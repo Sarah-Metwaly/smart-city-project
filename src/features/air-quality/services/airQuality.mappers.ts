@@ -44,5 +44,7 @@ export function toDHT11Data(raw: any): DHT11Data {
     humidity: item?.humidity ?? 0,
     temperature: item?.temperature ?? 0,
     power: item?.power ?? 0,
+    status: item?.status ?? "UNKNOWN",
+    timeStamp: item?.timeStamp ?? new Date().toISOString(), 
   };
 }

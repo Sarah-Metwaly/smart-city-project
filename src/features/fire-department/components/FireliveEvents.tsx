@@ -1,21 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import StatCards from '../../../shared/ui/organisms/StatCards';
 import { Flame, Thermometer, Wind, AlertCircle } from 'lucide-react';
-import CameraFeed from '../../../shared/ui/organisms/CameraFeed';
 import FireAlertsPage from './FireActiveAlerts';
 import { Sensors } from './Sensors';
 import { useActivePower } from '../../energy-optimization/hooks/useActivePower';
 import { useFlameSensor } from '../hooks/useFlame';
 import { useIncidents } from '../../../shared/hooks/useIncidentTable';
 import LiveStream from '../../../shared/ui/organisms/LiveStream';
-
-
-
-
-
-
-
-
 
 const FireLiveEvents: React.FC = () => {
   const { DHT11Value } = useActivePower();
@@ -26,9 +17,6 @@ const FireLiveEvents: React.FC = () => {
 
   const high = Incidents?.filter((i) => i.priority === "HIGH").length ?? 0;
   const active = Incidents?.filter((i) => i.status?.toUpperCase() === "ACTIVE").length ?? 0;
-
-
-
 
   const surveillanceStats = [
     {
@@ -53,9 +41,9 @@ const FireLiveEvents: React.FC = () => {
     },
     {
       title: 'Flame detection',
-      value: flameSensorData?.status,
+      value: flameSensorData?.status ?? 'Unknown',
       icon: Wind,
-      badge: flameSensorData?.risk_level,
+      badge: flameSensorData?.risk_level ?? 'Unknown',
       colorClass: {
         text: 'text-amber-500',
         bg: 'bg-amber-600',

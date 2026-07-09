@@ -24,7 +24,7 @@ const Chart = ({ value, label, mainColor,secondColor='#182B31' }: ChartProps) =>
         ]}
         width={150}
         height={150}
-        slotProps={{ legend: { hidden: true } }}
+        hideLegend
       />
 
       <div className='absolute inset-0 flex items-center justify-center text-aman-white font-inter  pointer-events-none'>

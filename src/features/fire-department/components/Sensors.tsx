@@ -92,7 +92,7 @@ export const Sensors: React.FC = () => {
 
                     <div>
                       <h3 className="text-sm font-semibold text-aman-white">
-                        {flameSensorData.sensor_id || 'Flame Sensor'}
+                        {flameSensorData._id || 'Flame Sensor'}
                       </h3>
 
                       <p className="text-[10px] font-mono text-aman-blue/60">

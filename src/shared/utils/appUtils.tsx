@@ -1,20 +1,22 @@
 import React from 'react';
 
 // Error boundary to catch model loading/rendering errors
-export class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: never }, {message: string}> {
-    constructor(props: object) {
+export class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+    constructor(props: { children: React.ReactNode }) {
         super(props);
         this.state = { hasError: false, error: null };
     }
-    static getDerivedStateFromError(error: never) {
+    static getDerivedStateFromError(error: Error) {
         return { hasError: true, error };
     }
-    componentDidCatch(error: never, errorInfo: never) {
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         console.error("Error loading model:", error, errorInfo);
     }
     render() {
         if (this.state.hasError) {
-            // @ts-ignore
             return <div style={{color: 'red'}}>Error loading model: {this.state.error?.message || 'Unknown error'}</div>;
         }
         return this.props.children;
