@@ -37,19 +37,13 @@ app.use(cookieParser())
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+      if (
+        !origin ||
+        /^http:\/\/localhost:\d+$/.test(origin) ||
+        /^https:\/\/smart-city-project.*\.vercel\.app$/.test(origin)
+      ) {
         return callback(null, true);
       }
-
-      const allowedOrigins = [
-        "https://smart-city-project-pi.vercel.app",
-      ];
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // Don't throw — just deny without crashing the request
       return callback(null, false);
     },
     credentials: true,
