@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Incident } from '../../types/incident';
+import type { Incident } from '../../../features/fire-department/hooks/useActiveAlerts';
 
 interface AlertsDropdownProps {
   incidents: Incident[];
@@ -49,12 +49,12 @@ const AlertsDropdown: React.FC<AlertsDropdownProps> = ({ incidents }) => {
 
         {incidents.map((incident, index) => {
           const style = PRIORITY_STYLES[incident.priority] || PRIORITY_STYLES.LOW;
-          const zoneName = incident.location?.zone || incident.location?.name || 'unknown';
+          const zoneName = incident.location?.name || 'unknown';
           const isHigh = incident.priority === 'HIGH';
 
           return (
             <li
-              key={incident._id}
+              key={incident.id}
               onClick={() => navigate(getTargetPath(incident.type))}
               className={`flex items-center justify-between px-3.5 py-2.5 cursor-pointer border-b border-aman-teal/40 hover:bg-aman-teal/20 transition-colors duration-150 animate-slide-in ${
                 isHigh ? 'animate-pulse-danger' : ''

@@ -1,4 +1,4 @@
- import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -34,9 +34,12 @@ export const useFlameSensor = () => {
     retry: 1,
   });
 
+  // risk_level is now the single source of truth for "is this dangerous?"
+  const isFlameDetected = flameSensorData?.risk_level === 'DANGER';
+
   return {
     flameSensorData,
-    isFlameDetected: flameSensorData?.is_flame_detected ?? false,
+    isFlameDetected,
     isLoading,
     isError,
   };

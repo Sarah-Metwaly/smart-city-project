@@ -17,18 +17,21 @@ const SmartSensorPanel = () => {
   const highest = sensors.reduce((a, b) => (b.value > a.value ? b : a), sensors[0]);
 
   return (
-    <div className="h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-4 py-3.5 overflow-hidden">
+    <div className="relative h-full flex flex-col rounded-xl border border-aman-teal bg-aman-dark px-3 sm:px-4 py-3 sm:py-3.5 overflow-hidden">
+      {/* HUD accent strip */}
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="h-6.5 w-6.5 rounded-md bg-aman-teal flex items-center justify-center">
+      <div className="flex items-center justify-between mb-3 shrink-0 min-w-0 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-6.5 w-6.5 rounded-md bg-aman-teal flex items-center justify-center shrink-0">
             <Zap className="h-3.5 w-3.5 text-aman-light" />
           </div>
-          <span className="text-[13px] font-medium tracking-wide text-aman-white">
+          <span className="text-[12px] sm:text-[13px] font-medium tracking-wide text-aman-white truncate">
             SMART SENSOR POWER
           </span>
         </div>
-        <span className="flex items-center gap-1.5 text-[11px] tracking-wider text-emerald-400">
+        <span className="flex items-center gap-1.5 text-[10px] sm:text-[11px] tracking-wider text-emerald-400 shrink-0">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
           LIVE
         </span>
@@ -62,23 +65,23 @@ const SmartSensorPanel = () => {
             {sensors.map((s) => (
               <div
                 key={s.id}
-                className="rounded-lg bg-aman-teal/60 px-3 py-2 flex flex-col justify-center gap-1"
+                className="rounded-lg bg-aman-teal/60 px-2.5 sm:px-3 py-2 flex flex-col justify-center gap-1 min-w-0"
               >
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
                   <span
                     className="h-2 w-2 rounded-full shrink-0"
                     style={{ backgroundColor: s.color, boxShadow: `0 0 6px ${s.color}88` }}
                   />
-                  <span className="text-[10px] tracking-wider text-aman-blue uppercase">
+                  <span className="text-[8px] tracking-wider text-aman-blue uppercase truncate">
                     {s.label}
                   </span>
                 </div>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[16px] font-mono font-semibold text-aman-white">
+                <div className="flex items-baseline justify-between gap-1 min-w-0">
+                  <span className="text-[8px] sm:text-[16px] font-mono font-semibold text-aman-white tabular-nums truncate">
                     {s.realValue}
-                    <span className="text-[10px] text-aman-blue ml-0.5">W</span>
+                    <span className="text-[8px] text-aman-blue ml-0.5">W</span>
                   </span>
-                  <span className="text-[12px] font-mono font-bold" style={{ color: s.color }}>
+                  <span className="text-[11px] sm:text-[12px] font-mono font-bold shrink-0 tabular-nums" style={{ color: s.color }}>
                     {s.value}%
                   </span>
                 </div>
@@ -93,9 +96,9 @@ const SmartSensorPanel = () => {
 
 function Stat({ label, value, className }: { label: string; value: string | number; className: string }) {
   return (
-    <div>
-      <p className="text-[10px] tracking-wider text-aman-blue mb-1">{label}</p>
-      <p className={`text-[20px] font-medium leading-none ${className}`}>{value}</p>
+    <div className="min-w-0">
+      <p className="text-[9px] sm:text-[10px] tracking-wider text-aman-blue mb-1 truncate">{label}</p>
+      <p className={`text-[16px] sm:text-[20px] font-medium leading-none truncate ${className}`}>{value}</p>
     </div>
   );
 }
