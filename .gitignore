@@ -25,6 +25,6 @@ text.txt
 *.njsproj
 *.sln
 *.sw?
-"config.env" 
-".idea/" 
-".vs/" 
+config.env
+.idea/
+.vs/ 
