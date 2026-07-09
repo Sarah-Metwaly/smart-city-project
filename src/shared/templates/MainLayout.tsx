@@ -11,18 +11,18 @@ const MainLayout = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#020617] text-white flex flex-col font-sans relative">
-      <div className="sticky top-0 w-full z-200">
-        {bannerIncident && (
+      {bannerIncident && (
+        <div className="fixed top-0 w-full z-[100]">
           <CriticalAlertBanner
             incident={bannerIncident}
             onDismiss={dismissBanner}
             autoDismissMs={8000}
           />
-        )}
-        <Navbar />
-      </div>
+        </div>
+      )}
+      <Navbar />
 
-      <main className="flex-1 w-full mx-auto transition-all duration-300">
+      <main className="flex-1 w-full mx-auto transition-all duration-300 pt-20">
         <div className="duration-700 animate-in fade-in slide-in-from-bottom-4">
           <Outlet />
         </div>
