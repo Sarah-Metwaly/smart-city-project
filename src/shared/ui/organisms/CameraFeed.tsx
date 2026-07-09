@@ -167,7 +167,7 @@ const CameraFeed: React.FC = () => {
 
             return (
               <div
-                key={incident._id || incident.incidentId}
+                key={incident.incidentId}
                 className="
                   relative
                   w-full

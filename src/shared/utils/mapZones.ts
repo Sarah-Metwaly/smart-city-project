@@ -104,7 +104,7 @@ export const mapIncidentsToPins = (incidents: Incident[]): DisplayPin[] => {
       const offsetY = (Math.random() - 0.5) * 8;
 
       return {
-        id: inc._id,
+        id: inc.incidentId,
         incidentId: inc.incidentId,
         type: inc.type,
         priority: PRIORITY_TO_RISK[inc.priority?.toUpperCase()] || 'low',
