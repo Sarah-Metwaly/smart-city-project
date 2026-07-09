@@ -32,3 +32,16 @@ export function onWheel(e: React.WheelEvent, setZoom: React.Dispatch<React.SetSt
     e.preventDefault();
     setZoom(z => Math.max(1, Math.min(20, z + e.deltaY * 0.01)));
 }
+
+// Shared rotation math, reusable by both mouse and touch move handlers
+export function computeRotationDelta(
+    lastX: number,
+    lastY: number,
+    currentX: number,
+    currentY: number,
+    setRotation: React.Dispatch<React.SetStateAction<[number, number, number]>>
+) {
+    const dx = currentX - lastX;
+    const dy = currentY - lastY;
+    setRotation(([rx, ry, rz]) => [Math.max(0, rx + dy * 0.01), ry + dx * 0.01, rz] as [number, number, number]);
+}

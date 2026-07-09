@@ -9,6 +9,7 @@ import {
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  computeRotationDelta,
 } from '../../shared/utils/threeUtils.tsx';
 import { useLightSystem } from '../../features/energy-optimization/hooks/useLightsytem.tsx';
 import { useActiveAlerts } from '../../features/fire-department/hooks/useActiveAlerts.tsx';
@@ -197,8 +198,9 @@ function CityModel() {
       setZoom((z) => Math.max(1, Math.min(20, z + e.deltaY * 0.01)));
     };
 
-    // Track pinch distance between two touch points
     let lastPinchDistance: number | null = null;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
 
     const getPinchDistance = (touches: TouchList) => {
       const dx = touches[0].clientX - touches[1].clientX;
@@ -209,25 +211,45 @@ function CityModel() {
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 2) {
         lastPinchDistance = getPinchDistance(e.touches);
+      } else if (e.touches.length === 1) {
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+
       if (e.touches.length === 2) {
-        e.preventDefault();
+        // Two fingers → pinch zoom
         const currentDistance = getPinchDistance(e.touches);
         if (lastPinchDistance !== null) {
           const delta = currentDistance - lastPinchDistance;
-          // Pinching outward (fingers moving apart) = zoom in = decrease zoom value
           setZoom((z) => Math.max(1, Math.min(20, z - delta * 0.02)));
         }
         lastPinchDistance = currentDistance;
+      } else if (e.touches.length === 1) {
+        // One finger → rotate
+        const touch = e.touches[0];
+        computeRotationDelta(
+          lastTouchX,
+          lastTouchY,
+          touch.clientX,
+          touch.clientY,
+          setRotation,
+        );
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
       }
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
       if (e.touches.length < 2) {
         lastPinchDistance = null;
+      }
+      if (e.touches.length === 0) {
+        lastTouchX = 0;
+        lastTouchY = 0;
       }
     };
 
