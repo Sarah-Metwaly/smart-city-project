@@ -79,7 +79,7 @@ const SmartSensorPanel = () => {
       {!isLoading && !isError && (
         <>
           {/* Stats row */}
-          <div className="grid grid-cols-3 gap-2 mb-3 shrink-0">
+          <div className="grid grid-cols-3 gap-2 mb-2 shrink-0">
             <Stat
               label="TOTAL"
               value={`${TotalPower}W`}
@@ -98,7 +98,7 @@ const SmartSensorPanel = () => {
           </div>
 
           {/* Stacked bar */}
-          <div className="flex h-2 w-full rounded-full overflow-hidden mb-3 bg-white/5 shrink-0">
+          <div className="flex h-1.5 w-full rounded-full overflow-hidden mb-2 bg-white/5 shrink-0">
             {sensors.map((s) => (
               <div
                 key={s.id}
@@ -108,37 +108,35 @@ const SmartSensorPanel = () => {
             ))}
           </div>
 
-          {/* Sensor grid — fixed 2x2, */}
-          <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-2">
+          {/* Sensor grid — single row, 4 columns */}
+          <div className="flex-1 min-h-0 grid grid-cols-4 gap-1.5 sm:gap-2">
             {sensors.map((s) => (
               <div
                 key={s.id}
-                className="rounded-lg bg-aman-teal/60 px-2.5 sm:px-3 py-2 flex flex-col justify-center gap-1 min-w-0 min-h-[56px]"
+                className="rounded-lg bg-aman-teal/60 px-1.5 sm:px-2.5 py-1.5 flex flex-col items-center justify-center text-center gap-0.5 min-w-0"
               >
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex items-center justify-center gap-1 min-w-0">
                   <span
-                    className="h-2 w-2 rounded-full shrink-0"
+                    className="h-1.5 w-1.5 rounded-full shrink-0"
                     style={{
                       backgroundColor: s.color,
                       boxShadow: `0 0 6px ${s.color}88`,
                     }}
                   />
-                  <span className="text-[8px] tracking-wider text-aman-blue uppercase truncate">
+                  <span className="text-[7px] sm:text-[8px] tracking-wider text-aman-blue uppercase truncate">
                     {s.label}
                   </span>
                 </div>
-                <div className="flex items-baseline justify-between gap-1 min-w-0">
-                  <span className="text-[13px] sm:text-[14px] font-mono font-semibold text-aman-white tabular-nums truncate">
-                    {s.realValue}
-                    <span className="text-[8px] text-aman-blue ml-0.5">W</span>
-                  </span>
-                  <span
-                    className="text-[11px] sm:text-[12px] font-mono font-bold shrink-0 tabular-nums"
-                    style={{ color: s.color }}
-                  >
-                    {s.value}%
-                  </span>
-                </div>
+                <span className="text-[11px] sm:text-[13px] font-mono font-semibold text-aman-white tabular-nums truncate">
+                  {s.realValue}
+                  <span className="text-[7px] text-aman-blue ml-0.5">W</span>
+                </span>
+                <span
+                  className="text-[9px] sm:text-[10px] font-mono font-bold tabular-nums"
+                  style={{ color: s.color }}
+                >
+                  {s.value}%
+                </span>
               </div>
             ))}
           </div>
@@ -159,11 +157,11 @@ function Stat({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-[9px] sm:text-[10px] tracking-wider text-aman-blue mb-1 truncate">
+      <p className="text-[8px] sm:text-[9px] tracking-wider text-aman-blue mb-0.5 truncate">
         {label}
       </p>
       <p
-        className={`text-[16px] sm:text-[20px] font-medium leading-none truncate ${className}`}
+        className={`text-[13px] sm:text-[16px] font-medium leading-none truncate ${className}`}
       >
         {value}
       </p>
