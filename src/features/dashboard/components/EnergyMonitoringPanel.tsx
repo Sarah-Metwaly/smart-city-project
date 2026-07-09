@@ -23,7 +23,7 @@ export function EnergyMonitoringPanel() {
     {
       id: 0,
       icon: <Zap className="h-4 w-4" />,
-      label: "Active Load",
+      label: "Load",
       value: `${TotalPower}`,
       unit: "W",
       trend: trend?.avgPowerComment,
@@ -32,7 +32,7 @@ export function EnergyMonitoringPanel() {
     {
       id: 1,
       icon: <Lightbulb className="h-4 w-4" />,
-      label: "Street Lights",
+      label: "Lights",
       value: `${onCount}/${TOTAL_LIGHTS}`,
       unit: "",
       trend: `${onPercent}%`,
@@ -41,7 +41,7 @@ export function EnergyMonitoringPanel() {
     {
       id: 2,
       icon: <Gauge className="h-4 w-4" />,
-      label: "Total Energy",
+      label: "Energy",
       value: `${Total?.totalEnergy ?? 0}`,
       unit: "KW",
       trend: trend?.energyChangeComment,
@@ -50,7 +50,7 @@ export function EnergyMonitoringPanel() {
     {
       id: 3,
       icon: <DollarSign className="h-4 w-4" />,
-      label: "Total Cost",
+      label: "Cost",
       value: `${Total?.totalCost ?? 0}`,
       unit: "$",
       trend: trend?.costChangeComment,
@@ -90,7 +90,7 @@ export function EnergyMonitoringPanel() {
           {metrics.map((m) => (
             <div
               key={m.id}
-              className="rounded-lg bg-aman-teal/60 px-2.5 sm:px-3 py-2 flex flex-col justify-center gap-1 min-w-0"
+              className="rounded-lg bg-aman-teal/60 px-2.5 sm:px-3 py-2 flex flex-col justify-center gap-1 min-w-0 min-h-[56px]"
             >
               <div className="flex items-center justify-between gap-1 min-w-0">
                 <div className="flex items-center gap-1.5 min-w-0">
