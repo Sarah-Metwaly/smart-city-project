@@ -37,10 +37,7 @@ app.use(cookieParser())
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        /^http:\/\/localhost:\d+$/.test(origin)
-      ) {
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
         return callback(null, true);
       }
 
@@ -52,7 +49,8 @@ app.use(
         return callback(null, true);
       }
 
-      callback(new Error("Not allowed by CORS"));
+      // Don't throw — just deny without crashing the request
+      return callback(null, false);
     },
     credentials: true,
   })
