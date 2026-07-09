@@ -1,6 +1,5 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useActivePower } from "../hooks/useActivePower";
-import { useTotalData } from "../../../shared/hooks/useTotalData";
 import { useFlameSensor } from "../../fire-department/hooks/useFlame";
 
 const ActivePower = () => {
@@ -70,7 +69,7 @@ const ActivePower = () => {
                 cornerRadius: 0,
               },
             ]}
-            slotProps={{ legend: { hidden: true } }}
+            hideLegend
             height={150}
             width={150}
           />
