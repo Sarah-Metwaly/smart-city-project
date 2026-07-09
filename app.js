@@ -45,7 +45,7 @@ app.use(
       }
 
       const allowedOrigins = [
-        "https://your-production-domain.com",
+        "https://smart-city-project-pi.vercel.app/",
       ];
 
       if (allowedOrigins.includes(origin)) {
