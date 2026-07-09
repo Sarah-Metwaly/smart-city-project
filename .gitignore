@@ -25,3 +25,4 @@ text.txt
 *.njsproj
 *.sln
 *.sw?
+"config.env" 
