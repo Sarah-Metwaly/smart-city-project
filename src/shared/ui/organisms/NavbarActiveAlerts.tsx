@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import { useHighestPriorityIncident } from '../../hooks/useHighestPriorityIncident';
 import AlertsDropdown from '../molecules/AlertsDropdown';
+import { useActiveAlerts } from '../../../features/fire-department/hooks/useActiveAlerts';
 
 const NavbarActiveAlerts: React.FC = () => {
-  const { priorityIncidents, hasActiveAlert } = useHighestPriorityIncident();
+  const { policeIncidents, hasActiveAlarm } = useActiveAlerts();
+
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -29,17 +30,17 @@ const NavbarActiveAlerts: React.FC = () => {
       >
         <Bell size={20} strokeWidth={1.75} />
 
-        {hasActiveAlert && (
+        {hasActiveAlarm && (
           <>
             <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-red-500/60 animate-ping" />
             <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold leading-none text-white ring-2 ring-slate-900">
-              {priorityIncidents.length}
+              {policeIncidents.length}
             </span>
           </>
         )}
       </button>
 
-      {open && <AlertsDropdown incidents={priorityIncidents} />}
+      {open && <AlertsDropdown incidents={policeIncidents} />}
     </div>
   );
 };

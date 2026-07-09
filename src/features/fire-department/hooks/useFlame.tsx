@@ -1,45 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface FlameSensorData {
   _id: string;
-  sensor_id: string; // Added to match standard sensor payloads
   status: string;
   risk_level: "DANGER" | "SAFE" | string;
   is_flame_detected: boolean;
-  power?: number; // Kept optional in case GET omits it
+  power: number;
   timeStamp: string;
 }
 
-interface ApiResponse {
-  status: string;
-  data: FlameSensorData[];
-}
-
-const fetchFlameSensor = async (): Promise<FlameSensorData[]> => {
-  const res = await axios.get<ApiResponse>(`${BASE_URL}/api/v1/flame/latest`);
-  console.log(res.data.data);
-  
-  return res.data.data;
+const fetchInitialFlameReading = async (): Promise<FlameSensorData> => {
+  const res = await axios.get(`${BASE_URL}/api/v1/flame/latest`);
+  return res.data?.data?.[0] ?? {
+    _id: '',
+    status: 'UNKNOWN',
+    risk_level: 'SAFE',
+    is_flame_detected: false,
+    power: 0,
+    timeStamp: '',
+  };
 };
 
 export const useFlameSensor = () => {
-  const { data, isLoading, isError, error } = useQuery<FlameSensorData[]>({
+  const { data: flameSensorData, isLoading, isError } = useQuery<FlameSensorData>({
     queryKey: ["flameSensorStatus"],
-    queryFn: fetchFlameSensor,
+    queryFn: fetchInitialFlameReading,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 1,
   });
 
-  // Extract the latest reading safely
-  const flameSensorData: FlameSensorData | null = data && data.length > 0 ? data[0] : null;
+  // risk_level is now the single source of truth for "is this dangerous?"
+  const isFlameDetected = flameSensorData?.risk_level === 'DANGER';
 
   return {
     flameSensorData,
-    rawList: data ?? [],
-    isFlameDetected: flameSensorData?.is_flame_detected ?? false,
+    isFlameDetected,
     isLoading,
     isError,
-    error: error as Error | null,
   };
 };

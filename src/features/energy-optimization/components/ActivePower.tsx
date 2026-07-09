@@ -1,25 +1,25 @@
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useActivePower } from "../hooks/useActivePower";
-import { useTotalData } from "../../../shared/hooks/useTotalData";
+import { useFlameSensor } from "../../fire-department/hooks/useFlame";
 
 const ActivePower = () => {
   const {
-    LDRValue,
+    LDRData,
     getPercent,
     DHT11Value,
-    BMB180Value,
-    MQ135Value,
-    isLoading,
-    isError,
+    MQResponse,
+    TotalPower
+    
   } = useActivePower();
-  const { Total, isTotalLoading, isTotalError } = useTotalData();
+    const { flameSensorData} = useFlameSensor();
+
 
   const data = [
     {
       id: 0,
       label: "LDR",
-      realValue: LDRValue ?? 0,
-      value: getPercent(LDRValue ?? 0),
+      realValue:  LDRData?.power??0 ,
+      value: getPercent( LDRData?.power??0),
 
       color: "#14B8A6",
     },
@@ -31,27 +31,20 @@ const ActivePower = () => {
 
       color: "#3B82F6",
     },
+    
     {
       id: 2,
-      label: "BMB180",
-      realValue: BMB180Value?.power ?? 0,
-      value: getPercent(BMB180Value?.power ?? 0),
-
-      color: "#EC4899",
-    },
-    {
-      id: 3,
-      label: "MQ135",
-      realValue: MQ135Value?.power ?? 0,
-      value: getPercent(MQ135Value?.power ?? 0),
+      label: "MQ",
+      realValue: MQResponse?.power ?? 0,
+      value: getPercent(MQResponse?.power ?? 0),
 
       color: "#F59E0B",
     },
     {
-      id: 4,
-      label: "CCTV",
-      realValue: 0,
-      value: 0,
+      id: 3,
+      label: "Flame",
+      realValue: flameSensorData?.power??0,
+      value: getPercent(flameSensorData?.power??0),
 
       color: "#FACC15",
     },
@@ -76,7 +69,7 @@ const ActivePower = () => {
                 cornerRadius: 0,
               },
             ]}
-            slotProps={{ legend: { hidden: true } }}
+            hideLegend
             height={150}
             width={150}
           />
@@ -86,7 +79,7 @@ const ActivePower = () => {
               Total value
             </span>
             <span className="text-2xl font-black text-aman-white">
-              {`${Total?.totalActiveLoad ?? 0}`}
+              {TotalPower}
             </span>
           </div>
         </div>

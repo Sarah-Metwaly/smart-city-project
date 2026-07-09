@@ -1,8 +1,7 @@
 import React from "react";
 import { type BehaviorActiveAlert, type Severity } from "../../../../types/fireAlert.types";
-import { useActiveAlerts } from "../../../fire-department/hooks/useActiveAlerts";
 import ActiveAlertsSidebar from "../../../../shared/ui/organisms/ActiveAlertsSidebar";
-import { useHighestPriorityIncident } from "../../../../shared/hooks/useHighestPriorityIncident";
+import { useActiveAlerts } from "../../../fire-department/hooks/useActiveAlerts";
 
 
 const behaviorTypes = [
@@ -51,13 +50,12 @@ export const BehaviorAlertsContainer: React.FC<BehaviorAlertsContainerProps> = (
 // Calls the hook, maps data, renders the container.
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function BehaviorActiveAlerts() {
-  const { fireIncidents, isLoading, isError } = useActiveAlerts();
-  const { priorityIncidents } = useHighestPriorityIncident();
-  
+  const { policeIncidents, isLoading, isError } = useActiveAlerts();
+
   if (isLoading) {
     return (
       <div
-        className="flex items-center justify-center p-10 font-mono text-sm"
+        className="flex items-center justify-center p-10 text-sm font-mono"
         style={{ color: "#444" }}
       >
         Loading alerts...
@@ -68,7 +66,7 @@ export default function BehaviorActiveAlerts() {
   if (isError) {
     return (
       <div
-        className="flex items-center justify-center p-10 font-mono text-sm"
+        className="flex items-center justify-center p-10 text-sm font-mono"
         style={{ color: "#ff4433" }}
       >
         Error fetching alerts.
@@ -76,13 +74,10 @@ export default function BehaviorActiveAlerts() {
     );
   }
 
- const source = priorityIncidents.length > 0
-  ? priorityIncidents.filter((incident: any) => incident.type === "SOME_TYPE")
-  : (fireIncidents || []).filter((incident: any) => incident.type === "SOME_TYPE");
+  const alerts: BehaviorActiveAlert[] = (policeIncidents || [])
+  .filter((incident: any) => behaviorTypes.includes(incident.type))
+  .map(mapIncidentToAlert);
 
-const alerts = source.map(mapIncidentToAlert);
-
-// Alerts sorted by priority then time, filtered for SOME_TYPE
 
 return <BehaviorAlertsContainer alerts={alerts} />;
 }

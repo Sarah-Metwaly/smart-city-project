@@ -4,9 +4,10 @@ import { useLiveIncidentStore } from '../../../store/useLiveIncidentStore';
 
 interface LiveStreamProps {
   incidentId?: string;
+  streamUrl?: string;
 }
 
-export default function LiveStream({ incidentId }: LiveStreamProps) {
+export default function LiveStream({ incidentId, streamUrl: overrideStreamUrl }: LiveStreamProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isStreamActive, setIsStreamActive] = useState(false);
 
@@ -25,7 +26,9 @@ export default function LiveStream({ incidentId }: LiveStreamProps) {
     [activeIncidents]
   );
 
-  const streamUrl = incident?.media?.liveFeedUrl ?? '';
+  // If a streamUrl is passed directly, use it; otherwise fall back to the
+  // incident-derived URL from the live incident store.
+  const streamUrl = overrideStreamUrl ?? incident?.media?.liveFeedUrl ?? '';
   const zone = incident?.location?.zone ?? incident?.location?.name ?? '—';
   const priorityLevel = incident?.priority ?? '—';
   const displayIncidentId = incident?.incidentId ?? '—';

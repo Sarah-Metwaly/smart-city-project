@@ -1,18 +1,22 @@
-import ActivePower from "../features/energy-optimization/components/ActivePower";
-import { MdOutlineLightbulb } from "react-icons/md"; // لـ Active Street Lights
-import { RiFlashlightFill } from "react-icons/ri"; // لـ TOTAL ENERGY
-import { FaDollarSign } from "react-icons/fa"; // لـ TOTAL COST
+import ActivePower from '../features/energy-optimization/components/ActivePower';
+import { MdOutlineLightbulb } from 'react-icons/md'; // لـ Active Street Lights
+import { RiFlashlightFill } from 'react-icons/ri'; // لـ TOTAL ENERGY
+import { FaDollarSign } from 'react-icons/fa'; // لـ TOTAL COST
 import {
   HiArrowUp,
   HiArrowDown,
   HiMinus,
   HiLightningBolt,
-} from "react-icons/hi";
-import Lightsystem from "../features/energy-optimization/components/Lightsystem";
-import Card from "../shared/ui/atoms/Card";
-import Energy from "../features/energy-optimization/components/Energy";
-import { useLightSystem } from "../features/energy-optimization/hooks/useLightsytem";
-import { useTotalData } from "../shared/hooks/useTotalData";
+} from 'react-icons/hi';
+import Lightsystem from '../features/energy-optimization/components/Lightsystem';
+import Card from '../shared/ui/atoms/Card';
+import Energy from '../features/energy-optimization/components/Energy';
+import { useLightSystem } from '../features/energy-optimization/hooks/useLightsytem';
+import { useTotalData } from '../shared/hooks/useTotalData';
+import { useActivePower } from '../features/energy-optimization/hooks/useActivePower';
+
+const TOTAL_LIGHTS = 3;
+const ON_LIGHTS_WHEN_ACTIVE = 3;
 
 const renderTrend = (comment?: string) => {
   const status = comment?.toUpperCase();
@@ -22,16 +26,16 @@ const renderTrend = (comment?: string) => {
   return (
     <div
       className={`flex items-center gap-1 px-2 py-0.5 rounded-[10px] font-bold uppercase text-[10px] ${
-        status === "HIGH"
-          ? "bg-red-500/20 text-red-500"
-          : status === "LOW"
-          ? "bg-green-500/20 text-green-500"
-          : "bg-gray-500/20 text-gray-400"
+        status === 'HIGH'
+          ? 'bg-red-500/20 text-red-500'
+          : status === 'LOW'
+          ? 'bg-green-500/20 text-green-500'
+          : 'bg-gray-500/20 text-gray-400'
       }`}
     >
-      {status === "HIGH" && <HiArrowUp size={12} />}
-      {status === "LOW" && <HiArrowDown size={12} />}
-      {status === "NORMAL" && <HiMinus size={12} />}
+      {status === 'HIGH' && <HiArrowUp size={12} />}
+      {status === 'LOW' && <HiArrowDown size={12} />}
+      {status === 'NORMAL' && <HiMinus size={12} />}
 
       <span>{status}</span>
     </div>
@@ -39,8 +43,14 @@ const renderTrend = (comment?: string) => {
 };
 
 const EnergyPage = () => {
-  const { sensorData, isLoading, isError, getPercentage } = useLightSystem();
   const { Total, trend, isTotalLoading, isTotalError } = useTotalData();
+  const { isLightsOn, hasData } = useLightSystem();
+  const {TotalPower}=useActivePower()
+
+  const onCount = isLightsOn ? ON_LIGHTS_WHEN_ACTIVE : 0;
+  const percentage = hasData
+    ? parseFloat(((onCount / TOTAL_LIGHTS) * 100).toFixed(1))
+    : 0;
 
   //function to get trend style
 
@@ -53,7 +63,7 @@ const EnergyPage = () => {
           <Card
             icon={<HiLightningBolt size={22} />}
             trend={renderTrend(trend?.avgPowerComment)}
-            value={`${Total?.totalActiveLoad ?? 0} W`}
+            value={`${TotalPower} W`}
             title="Total Active Load"
             colorClass="text-[#E05A5A]"
           />
@@ -63,10 +73,10 @@ const EnergyPage = () => {
             icon={<MdOutlineLightbulb size={22} />}
             trend={
               <div className="bg-aman-blue/20 text-aman-white px-2 py-1 rounded-[10px] text-[11px] font-bold">
-                {`${getPercentage(sensorData?.on)}%`}
+                {`${percentage}%`}
               </div>
             }
-            value={`${sensorData?.on ?? 0} / ${sensorData?.total ?? 0} `}
+            value={`${onCount} / ${TOTAL_LIGHTS}`}
             title="Active Street Lights"
             colorClass="text-[#1A8A80]"
           />
@@ -75,7 +85,7 @@ const EnergyPage = () => {
           <Card
             icon={<RiFlashlightFill size={22} />}
             trend={renderTrend(trend?.energyChangeComment)}
-            value={`${Total?.totalEnergy ?? 0} KW`}
+            value={`${Total?.totalEnergy ?? 0} KWh`}
             title="Total Energy"
             colorClass="text-[#F4FEFE]"
           />

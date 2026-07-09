@@ -2,7 +2,21 @@ import React from "react";
 import { type FireAlert, type Severity } from "../../../types/fireAlert.types";
 import { useActiveAlerts } from "../hooks/useActiveAlerts";
 import ActiveAlertsSidebar from "../../../shared/ui/organisms/ActiveAlertsSidebar";
-import { useHighestPriorityIncident } from "../../../shared/hooks/useHighestPriorityIncident";
+
+const FireTypes = [
+   'FLAME_DETECTION' ,
+   'POOR_AIR_QUALITY',
+   'HIGH_HUMIDITY' , 
+   'FIRE_DETECTION', 
+   "LOW_PRESSURE", 
+   "HIGH_PRESSURE" ,
+  'ENERGY_ANOMALY',
+  'HIGH_TEMPERATURE'
+
+];
+
+
+
 
 // ── Data mapper ────────────────────────────────────────────────────────────
 // Isolated so swapping API shape only touches this function.
@@ -44,13 +58,12 @@ export const FireAlertsContainer: React.FC<FireAlertsContainerProps> = ({
 // Calls the hook, maps data, renders the container.
 // On other pages: import { FireAlertsContainer } and pass your own alerts.
 export default function FireAlertsPage() {
-  const { fireIncidents, isLoading, isError } = useActiveAlerts();
-  const { priorityIncidents } = useHighestPriorityIncident();
+  const { policeIncidents, isLoading, isError } = useActiveAlerts();
 
   if (isLoading) {
     return (
       <div
-        className="flex items-center justify-center p-10 font-mono text-sm"
+        className="flex items-center justify-center p-10 text-sm font-mono"
         style={{ color: "#444" }}
       >
         Loading alerts...
@@ -61,7 +74,7 @@ export default function FireAlertsPage() {
   if (isError) {
     return (
       <div
-        className="flex items-center justify-center p-10 font-mono text-sm"
+        className="flex items-center justify-center p-10 text-sm font-mono"
         style={{ color: "#ff4433" }}
       >
         Error fetching alerts.
@@ -69,12 +82,9 @@ export default function FireAlertsPage() {
     );
   }
 
+const alerts: FireAlert[] = (policeIncidents || [])
+  .filter((incident: any) => FireTypes.includes(incident.type))
+  .map(mapIncidentToAlert);
 
-const source = priorityIncidents.length > 0
-  ? priorityIncidents.filter((incident: any) => incident.type === "FIRE_DETECTION")
-  : (fireIncidents || []).filter((incident: any) => incident.type === "FIRE_DETECTION");
-const alerts: FireAlert[] = source.map(mapIncidentToAlert);
-
-// Alerts sorted by priority then time, filtered for fire detection
   return <FireAlertsContainer alerts={alerts} />;
 }

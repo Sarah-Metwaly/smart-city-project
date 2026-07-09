@@ -18,15 +18,15 @@ export const Sensors: React.FC = () => {
   } = useFlameSensor();
 
   const {
-    BMB180Value,
-    isLoading: isBMB180Loading,
-    isError: isBMB180Error,
+    DHT11Value,
+    isLoading: isDHT11Loading ,
+    isError: isDHT11Error,
   } = useActivePower();
 
   const DANGER_THRESHOLD = 45;
 
-  const isDangerous = BMB180Value
-    ? BMB180Value.temperature > DANGER_THRESHOLD
+  const isDangerous = DHT11Value
+    ? DHT11Value.temperature > DANGER_THRESHOLD
     : false;
 
   const flameRiskColor =
@@ -92,7 +92,7 @@ export const Sensors: React.FC = () => {
 
                     <div>
                       <h3 className="text-sm font-semibold text-aman-white">
-                        {flameSensorData.sensor_id || 'Flame Sensor'}
+                        {flameSensorData._id || 'Flame Sensor'}
                       </h3>
 
                       <p className="text-[10px] font-mono text-aman-blue/60">
@@ -152,11 +152,7 @@ export const Sensors: React.FC = () => {
                     Flame Module
                   </span>
 
-                  <span className="text-[10px] font-mono text-aman-blue/40 break-all">
-                    {new Date(
-                      flameSensorData.timeStamp
-                    ).toLocaleString()}
-                  </span>
+                  
                 </div>
               </>
             )}
@@ -177,17 +173,17 @@ export const Sensors: React.FC = () => {
             className={`h-1 w-full
               ${
                 isDangerous
-                  ? 'bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse'
+                  ? 'bg-gradient-to-r from-transparent via-aman-danger to-transparent animate-pulse'
                   : 'bg-gradient-to-r from-transparent via-emerald-400 to-transparent'
               }`}
           />
 
           <div className="p-4 sm:p-5 lg:p-6">
-            {isBMB180Loading ? (
+            {isDHT11Loading ? (
               <p className="py-12 text-center text-sm font-mono text-aman-light/40 animate-pulse">
                 Loading Temperature Telemetry...
               </p>
-            ) : isBMB180Error || !BMB180Value ? (
+            ) : isDHT11Error || !DHT11Value ? (
               <p className="py-12 text-center text-sm font-mono text-red-400">
                 Failed to read Temperature Sensor.
               </p>
@@ -208,7 +204,7 @@ export const Sensors: React.FC = () => {
                         size={20}
                         className={
                           isDangerous
-                            ? 'text-amber-400'
+                            ? 'text-red-500'
                             : 'text-aman-blue'
                         }
                       />
@@ -220,7 +216,7 @@ export const Sensors: React.FC = () => {
                       </h3>
 
                       <p className="text-[10px] font-mono text-aman-blue/60">
-                        BMP180
+                        DH135
                       </p>
                     </div>
                   </div>
@@ -228,7 +224,7 @@ export const Sensors: React.FC = () => {
                   {isDangerous ? (
                     <ShieldAlert
                       size={18}
-                      className="text-amber-400 animate-pulse"
+                      className="text-red-600 animate-pulse"
                     />
                   ) : (
                     <ShieldCheck
@@ -253,7 +249,7 @@ export const Sensors: React.FC = () => {
                             : 'text-aman-white'
                         }`}
                     >
-                      {BMB180Value.temperature}°C
+                      {DHT11Value.temperature}°C
                     </span>
                   </div>
 
@@ -272,7 +268,7 @@ export const Sensors: React.FC = () => {
                     >
                       {isDangerous
                         ? 'CRITICAL OVERHEAT'
-                        : BMB180Value.status}
+                        : 'Safe'}
                     </span>
                   </div>
                 </div>
@@ -283,11 +279,7 @@ export const Sensors: React.FC = () => {
                     Thermal Module
                   </span>
 
-                  <span className="text-[10px] font-mono text-aman-blue/40 break-all">
-                    {new Date(
-                      BMB180Value.timeStamp
-                    ).toLocaleString()}
-                  </span>
+                  
                 </div>
               </>
             )}
@@ -297,4 +289,3 @@ export const Sensors: React.FC = () => {
     </div>
   );
 };
-

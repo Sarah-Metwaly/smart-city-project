@@ -7,6 +7,7 @@ export interface MQ135Data {
   benzene: string;
   aqi: number;
   aqiLevel: string;
+  power: number;
 }
 
 export interface BMP180Data {
@@ -18,6 +19,9 @@ export interface BMP180Data {
 export interface DHT11Data {
   humidity: number;
   temperature: number;
+  power: number;
+  status: string;
+  timeStamp: string;
 }
 
 export interface SensorData {

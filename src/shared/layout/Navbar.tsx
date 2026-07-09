@@ -39,8 +39,8 @@ const Navbar = () => {
   return (
     //UI//
     <nav
-      className={`fixed  w-full bg-transfer border-b z-50 
-    ${isScrolled ? 'bg-linear-to-b from-aman-dark via-aman-black to-aman-dark shadow-lg' : 'bg-transparent '}`}
+      className={`fixed  w-full bg-transfer border-b z-50 bg-linear-to-b from-aman-dark via-aman-black to-aman-dark shadow-lg`}
+
     >
       <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
         {/******* LOGO: Brightens on hover ********/}

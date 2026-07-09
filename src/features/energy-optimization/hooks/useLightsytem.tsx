@@ -1,56 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { useEffect } from 'react';
-
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-
-export interface SensorData {
-  total: number;
-  on: number;
-  off: number;
-  faulty: number;
+export interface LdrReading {
+  sensor_id: string;
+  status: 'ON' | 'OFF' | 'FAULTY';
+  power?: number;
 }
 
-
-//API SERVICE
-const fetchLightState = async (): Promise<SensorData> => {
+const fetchInitialLdrReading = async (): Promise<LdrReading> => {
   const res = await axios.get(`${BASE_URL}/api/v1/ldr/status`);
-  return res.data.data;
+  const list = res.data?.data;
+  const reading = Array.isArray(list) ? list[0] : list;
+  return reading ?? { sensor_id: '', status: 'OFF', power: 0 };
 };
 
-
-// 2.Custom Hook
 export const useLightSystem = () => {
-  // TanStack Query
-  const { data, isLoading, isError } = useQuery<SensorData>({
-    queryKey: ['lightStatus'],
-    queryFn: fetchLightState,
-    staleTime: Infinity, 
+  const { data, isLoading, isError } = useQuery<LdrReading>({
+    queryKey: ['LDRValue'],
+    queryFn: fetchInitialLdrReading,  // seeds the cache once, on mount/refresh
+    staleTime: Infinity,               // never auto-refetch afterward — WS owns updates from here
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 1,
   });
 
+  const isLightsOn = data?.status === 'ON';
+  const isFaulty = data?.status === 'FAULTY';
+  const hasData = !!data;
 
-  useEffect(() => {
-  if (data) {
-  console.log("Current light Data:", data);
-  }
-}, [data]);
-  
-
- 
-  const getPercentage = (value: number | undefined): number => {
-  if (!data || !data.total || data.total === 0) return 0;
-  const Percentage = ((value || 0) / data.total) * 100;
-  return parseFloat(Percentage.toFixed(1));
-};
-
-
- 
-  return {
-    sensorData: data,
-    isLoading,
-    isError,
-    getPercentage
-  };
+  return { reading: data, isLightsOn, isFaulty, hasData, isLoading, isError };
 };
