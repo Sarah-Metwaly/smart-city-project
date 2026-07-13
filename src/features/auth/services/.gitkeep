@@ -1,0 +1,7 @@
+Placeholder for authentication-related services.
+
+Planned future content:
+- login / signup / refresh token
+- role-based access checks
+- JWT validation
+

@@ -1,0 +1,8 @@
+# Placeholder to preserve this directory in Git
+# Domain: Public Safety
+# Planned services:
+#   - weaponDetectionResultHandler.ts
+#   - eventsLogAggregator.ts
+#   - dangerZoneCalculator.ts
+#   - wantedListDatabaseQuery.ts
+#   - crimePercentageAggregator.ts

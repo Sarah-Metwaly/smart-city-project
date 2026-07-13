@@ -1,0 +1,12 @@
+ .../fire-department/components/AirQuality.tsx      |   4 [32m+[m[31m-[m
+ .../components/FireIncidentTable.tsx               |   2 [32m+[m[31m-[m
+ .../fire-department/components/FireliveEvents.tsx  |  68 [32m++[m[31m--[m
+ .../fire-department/components/Sensors.tsx         | 397 [32m+++++++++++++++[m[31m------[m
+ .../police-surveillance/views/LiveEventsView.tsx   |   9 [32m+[m[31m-[m
+ src/pages/FirePage.tsx                             |   4 [32m+[m[31m-[m
+ src/pages/PolicePage.tsx                           |  10 [32m+[m[31m-[m
+ src/shared/ui/atoms/PageNavbar.tsx                 |   4 [32m+[m[31m-[m
+ src/shared/ui/organisms/CameraFeed.tsx             | 272 [32m+++++++++++[m[31m---[m
+ src/shared/ui/organisms/StatCard.tsx               |   9 [32m+[m[31m-[m
+ src/shared/ui/organisms/StatCards.tsx              |   2 [32m+[m[31m-[m
+ 11 files changed, 564 insertions(+), 217 deletions(-)

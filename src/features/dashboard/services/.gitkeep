@@ -1,0 +1,11 @@
+
+Central dashboard aggregation services (overview only).
+
+### Purpose:
+- Aggregate real-time summary data from all features (Last Activities, Sensors, Incidents)
+- Subscribe to global alerts across departments (Police, Fire, Energy, Environment)
+- Fetch quick stats for dashboard widgets (crime %, energy saving, air quality)
+
+### Planned / expected logic:
+- dashboardOverviewService.ts → aggregate Last Activities + state overview
+- globalAlertsSubscriptionService.ts → cross-feature real-time alerts
